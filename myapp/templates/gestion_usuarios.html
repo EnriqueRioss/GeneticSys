@@ -1,0 +1,506 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<head>
+    <title>GESTIÓN USUARIOS | IIG - LUZ</title>
+    <link rel="stylesheet" href="{% static '/styles/adminuser.css' %}">
+</head>
+
+<div class="main-content">
+    <main class="barra-content">
+      <header class="content-header">
+        <div class="breadcrumb">
+          <a href="{% url 'index' %}" class="breadcrumb-item">Inicio</a>
+          <span class="breadcrumb-separator">></span>
+          <span class="breadcrumb-item active">Gestión de Usuarios</span>
+        </div>
+      </header>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="margin: 1rem 0; padding: 1rem; border-radius: 0.5rem; background-color: {% if message.tags == 'success' %}var(--primary-lightblue){% elif message.tags == 'error' %}#f8d7da{% else %}var(--lighter-blue){% endif %}; color: {% if message.tags == 'success' %}var(--primary-darkerblue){% elif message.tags == 'error' %}#721c24{% else %}var(--primary-darkerblue){% endif %};">
+              {{ message }}
+              <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="float: right; background: none; border: none; font-size: 1.5rem; cursor:pointer;">
+                  <span aria-hidden="true">×</span>
+              </button>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+    <div class="users-content">
+        <div class="contenido-header">
+            <div class="header-content">
+                <h1>Gestión de Usuarios</h1>
+                <p>Administración de usuarios, roles y permisos del sistema</p>
+            </div>
+            <div class="header-actions">
+                <button class="btn-primary" id="new-user-btn">
+                <i class="fas fa-user-plus"></i>
+                Nuevo Usuario
+            </button>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3>Total Usuarios</h3>
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h2>{{ total_users }}</h2>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3>Usuarios Activos</h3>
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="stat-content">
+                    <h2>{{ active_users }}</h2>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3>Administradores</h3>
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <div class="stat-content">
+                    <h2>{{ admin_users_count }}</h2>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3>Genetistas</h3>
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <div class="stat-content">
+                    <h2>{{ genetista_users_count }}</h2>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <h3>Lectores</h3>
+                    <i class="fas fa-book-reader"></i>
+                </div>
+                <div class="stat-content">
+                    <h2>{{ lector_users_count }}</h2>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs-container">
+            <div class="tab-nav">
+                <button class="tab-button active" data-tab="users-tab">Usuarios</button>
+                <button class="tab-button" data-tab="roles">Roles y Permisos</button>
+            </div>
+        </div>
+
+        <div class="tabs-content active" id="users-tab">
+            <div class="content-card">
+                <div class="card-header">
+                    <h2>Lista de Usuarios</h2>
+                    <p>Gestiona todos los usuarios del sistema</p>
+                    <form method="GET" action="{% url 'gestion_usuarios' %}">
+                        <div class="table-filters">
+                            <div class="search-input">
+                                <i class="fas fa-search"></i>
+                                <input type="text" placeholder="Buscar por nombre, apellido o email..." name="buscar-usuario" id="buscar-usuario-input" value="{{ search_query }}">
+                            </div>
+                            <select name="role_filter" id="role-filter-select">
+                                <option value="">Filtrar por rol</option>
+                                {% for role_val, role_disp in genetista_roles_for_filter %}
+                                <option value="{{ role_val }}" {% if current_role_filter == role_val %}selected{% endif %}>{{ role_disp }}</option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" class="btn-buscar"><i class="fas fa-search"></i>Buscar</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-content">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Nombre</th>
+                                    <th>Apellido</th>
+                                    <th>Email</th>
+                                    <th>Rol</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for user_obj in users_list %}
+                                <tr>
+                                    <td>{{ user_obj.username }}</td>
+                                    <td>{{ user_obj.first_name|default:"N/A" }}</td>
+                                    <td>{{ user_obj.last_name|default:"N/A" }}</td>
+                                    <td>{{ user_obj.email }}</td>
+                                    <td>
+                                        {% if user_obj.genetistas %}
+                                            <span class="badge default">{{ user_obj.genetistas.get_rol_display }}</span>
+                                        {% else %}
+                                            <span class="badge outline">N/A</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if user_obj.is_active %}
+                                            <span class="badge success">Activo</span>
+                                        {% else %}
+                                            <span class="badge destructive">Inactivo</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="dropdown">
+                                            <button class="btn-icon">
+                                                <i class="fas fa-ellipsis-h"></i>
+                                            </button>
+                                            <div class="dropdown-content">
+                                                <!-- ====== INICIO DE CAMBIO: Botón de editar con data-attributes ====== -->
+                                                <button class="edit-user" 
+                                                    data-user-id="{{ user_obj.id }}"
+                                                    data-username="{{ user_obj.username }}"
+                                                    data-first-name="{{ user_obj.first_name|default:'' }}"
+                                                    data-last-name="{{ user_obj.last_name|default:'' }}"
+                                                    data-email="{{ user_obj.email }}"
+                                                    data-rol="{{ user_obj.genetistas.rol|default:'' }}"
+                                                    data-genetista-id="{{ user_obj.genetistas.associated_genetista_id|default:'' }}">
+                                                    <i class="fas fa-edit"></i> Editar
+                                                </button>
+                                                <!-- ====== FIN DE CAMBIO: Botón de editar con data-attributes ====== -->
+                                                <button class="modificar-pass" data-user-id="{{ user_obj.id }}" data-user-name="{{ user_obj.username }}"><i class="fas fa-key"></i> Reestablecer Contraseña</button>
+                                                
+                                                <form method="POST" action="{% url 'toggle_user_active' user_obj.id %}" class="dropdown-form-action">
+                                                    {% csrf_token %}
+                                                    <button type="submit">
+                                                        <i class="fas fa-toggle-{% if user_obj.is_active %}on{% else %}off{% endif %}"></i> 
+                                                        {% if user_obj.is_active %}Desactivar{% else %}Activar{% endif %}
+                                                    </button>
+                                                </form>
+
+                                            
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" style="text-align: center;">No se encontraron usuarios.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="tabs-content" id="roles">
+            <div class="content-card">
+                <div class="card-header">
+                    <h2>Gestión de Roles y Permisos</h2>
+                    <p>Configura los roles y permisos del sistema</p>
+                </div>
+                <div class="card-content">
+                    <p>La gestión detallada de permisos por rol se configura a nivel de código o a través del panel de administración de Django.</p>
+                    <div class="roles-grid">
+                        <div class="role-card">
+                            <div class="role-header"><h3>Administrador</h3><p>Acceso completo al sistema</p></div>
+                        </div>
+                        <div class="role-card">
+                            <div class="role-header"><h3>Genetista</h3><p>Acceso para gestionar historias clínicas y pacientes.</p></div>
+                        </div>
+                        <div class="role-card">
+                            <div class="role-header"><h3>Lector</h3><p>Acceso de solo lectura a pacientes de genetistas asociados.</p></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </main>
+</div>
+
+<!-- Modal para Crear Nuevo Usuario -->
+<div class="modal" id="newUserModal">
+    <div class="modal-content" style="max-width: 55rem;">
+      <div class="modal-header">
+        <h2>Crear Nuevo Usuario</h2>
+        <button type="button" class="modal-close" id="closeNewUserModalBtn">×</button>
+      </div>
+      <form method="POST" action="{% url 'gestion_usuarios' %}" id="newUserForm">
+        {% csrf_token %}
+        <div class="modal-body">
+            <p>Completa la información para crear un nuevo usuario en el sistema.</p>
+            
+            <div class="form-group">
+                {{ user_creation_form.username.label_tag }}
+                {{ user_creation_form.username }}
+                {% if user_creation_form.username.errors %}<ul class="errorlist">{% for error in user_creation_form.username.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+            <div class="form-group">
+                {{ user_creation_form.first_name.label_tag }}
+                {{ user_creation_form.first_name }}
+                {% if user_creation_form.first_name.errors %}<ul class="errorlist">{% for error in user_creation_form.first_name.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+            <div class="form-group">
+                {{ user_creation_form.last_name.label_tag }}
+                {{ user_creation_form.last_name }}
+                {% if user_creation_form.last_name.errors %}<ul class="errorlist">{% for error in user_creation_form.last_name.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+            <div class="form-group">
+                {{ user_creation_form.email.label_tag }}
+                {{ user_creation_form.email }}
+                {% if user_creation_form.email.errors %}<ul class="errorlist">{% for error in user_creation_form.email.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+            <div class="form-group">
+                {{ user_creation_form.password.label_tag }}
+                {{ user_creation_form.password }}
+                {% if user_creation_form.password.errors %}<ul class="errorlist">{% for error in user_creation_form.password.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+            <div class="form-group">
+                {{ user_creation_form.password_confirm.label_tag }}
+                {{ user_creation_form.password_confirm }}
+                {% if user_creation_form.password_confirm.errors %}<ul class="errorlist">{% for error in user_creation_form.password_confirm.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+            <div class="form-group">
+                {{ user_creation_form.rol.label_tag }}
+                {{ user_creation_form.rol }}
+                {% if user_creation_form.rol.errors %}<ul class="errorlist">{% for error in user_creation_form.rol.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+            <div class="form-group" id="associatedGenetistaGroup" style="display:none;">
+                {{ user_creation_form.associated_genetista.label_tag }}
+                {{ user_creation_form.associated_genetista }}
+                {% if user_creation_form.associated_genetista.help_text %}<p class="help-text">{{ user_creation_form.associated_genetista.help_text }}</p>{% endif %}
+                {% if user_creation_form.associated_genetista.errors %}<ul class="errorlist">{% for error in user_creation_form.associated_genetista.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn-secondary" id="cancelNewUserModalBtn">Cancelar</button>
+            <button type="submit" name="create_user_submit" class="btn-primary">Crear Usuario</button>
+        </div>
+      </form>
+    </div>
+</div>
+
+<!-- ====== INICIO DE CAMBIO: Modal de Edición completamente funcional ====== -->
+<div class="modal" id="editUserModal">
+    <div class="modal-content" style="max-width: 55rem;">
+        <div class="modal-header">
+            <h2><i class="fas fa-user-edit"></i> Editar Usuario</h2>
+            <button type="button" class="modal-close" id="closeEditUserModalBtn">×</button>
+        </div>
+        <!-- El 'action' se establecerá con JavaScript -->
+        <form method="POST" action="" id="editUserForm">
+            {% csrf_token %}
+            <div class="modal-body">
+                <p>Modifica la información del usuario <strong id="edit-username-text"></strong>.</p>
+                
+                <div class="form-group">
+                    <label for="edit_username">Nombre de usuario</label>
+                    <input type="text" name="username" id="edit_username" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_first_name">Nombre</label>
+                    <input type="text" name="first_name" id="edit_first_name" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_last_name">Apellido</label>
+                    <input type="text" name="last_name" id="edit_last_name" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit_email">Email</label>
+                    <input type="email" name="email" id="edit_email" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    {{ user_edit_form.rol.label_tag }}
+                    <!-- Ahora usamos el nuevo formulario de edición. No se necesitan filtros. -->
+                    {{ user_edit_form.rol }}
+                </div>
+                <div class="form-group" id="editAssociatedGenetistaGroup" style="display:none;">
+                    {{ user_edit_form.associated_genetista.label_tag }}
+                    <!-- Lo mismo aquí, usamos el nuevo formulario. -->
+                    {{ user_edit_form.associated_genetista }}
+                    <p class="help-text">{{ user_edit_form.associated_genetista.help_text }}</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="cancelEditUserModalBtn">Cancelar</button>
+                <button type="submit" name="edit_user_submit" class="btn-primary">Guardar Cambios</button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- ====== FIN DE CAMBIO: Modal de Edición ====== -->
+
+<!-- Modal para modificar la contraseña del usuario -->
+<div class="modal" id="modificarPassModal">
+    <div class="modal-content" style="max-width: 50rem;">
+        <div class="modal-header">
+            <h2><i class="fas fa-key"></i> Reestablecer Contraseña</h2>
+            <button type="button" class="modal-close" id="closeModificarPassModalBtn">×</button>
+        </div>
+        <form method="POST" action="" id="modificarPassForm"> 
+            {% csrf_token %}
+            <div class="modal-body">
+                <p id="reset-pass-text">Estás a punto de restablecer la contraseña para un usuario.</p>
+                
+                <div class="form-group">
+                    <label for="id_new_password">Nueva Contraseña</label>
+                    <input type="password" name="new_password" id="id_new_password" class="form-input" required minlength="8">
+                    <p class="help-text">Mínimo 8 caracteres. Se recomienda usar mayúsculas, minúsculas y números.</p>
+                </div>
+                <div class="form-group">
+                    <label for="id_confirm_password">Confirmar Contraseña</label>
+                    <input type="password" name="confirm_password" id="id_confirm_password" class="form-input" required>
+                </div>
+                <div class="aviso-card">
+                    <div class="aviso-header">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <h3>Importante</h3>
+                    </div>
+                    <div class="aviso-content">
+                        <p>Esta acción cambiará la contraseña del usuario inmediatamente. Se intentará enviar una notificación por correo electrónico con la nueva contraseña.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="cancelModificarPassModalBtn">Cancelar</button>
+                <button type="submit" name="modificar_pass_submit" class="btn-primary">Confirmar y Restablecer</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ====== INICIO DE CAMBIO: JavaScript actualizado ====== -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // ---- Lógica de Tabs ----
+    const tabButtons = document.querySelectorAll('.tab-button');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            document.querySelectorAll('.tabs-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(this.getAttribute('data-tab')).classList.add('active');
+        });
+    });
+
+    // ---- Lógica de Alertas ----
+    document.querySelectorAll('.alert .close').forEach(button => {
+        button.addEventListener('click', function() { this.parentElement.style.display = 'none'; });
+    });
+
+    // ---- Lógica de Dropdowns de Acciones ----
+    document.querySelectorAll('.dropdown .btn-icon').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            let content = this.nextElementSibling;
+            // Cerrar otros dropdowns
+            document.querySelectorAll('.dropdown-content').forEach(item => {
+                if (item !== content) item.style.display = 'none';
+            });
+            content.style.display = content.style.display === 'block' ? 'none' : 'block';
+        });
+    });
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.dropdown-content').forEach(content => content.style.display = 'none');
+    });
+
+    // ---- Lógica para el campo condicional de Genetista Asociado ----
+    function setupConditionalField(rolSelector, groupSelector) {
+        const rolSelect = document.querySelector(rolSelector);
+        const associatedGroup = document.querySelector(groupSelector);
+        
+        function toggleField() {
+            if (rolSelect && associatedGroup) {
+                associatedGroup.style.display = rolSelect.value === 'LEC' ? 'block' : 'none';
+            }
+        }
+        
+        if (rolSelect) {
+            rolSelect.addEventListener('change', toggleField);
+            toggleField(); // Llamada inicial
+        }
+        return toggleField; // Devuelve la función para poder llamarla desde fuera
+    }
+
+    // ---- Modal de CREAR Usuario ----
+    const newUserModal = document.getElementById('newUserModal');
+    const toggleCreateGenetistaField = setupConditionalField('#newUserForm #id_rol', '#associatedGenetistaGroup');
+    
+    document.getElementById('new-user-btn')?.addEventListener('click', () => newUserModal.classList.add('active'));
+    document.getElementById('closeNewUserModalBtn')?.addEventListener('click', () => newUserModal.classList.remove('active'));
+    document.getElementById('cancelNewUserModalBtn')?.addEventListener('click', () => newUserModal.classList.remove('active'));
+    newUserModal?.addEventListener('click', e => { if (e.target === newUserModal) newUserModal.classList.remove('active'); });
+
+    // Si hay errores de creación, reabrir el modal
+    const formErrorsExist = {{ form_errors_exist|yesno:"true,false" }};
+    if (formErrorsExist && newUserModal) {
+        newUserModal.classList.add('active');
+        toggleCreateGenetistaField();
+    }
+
+    // ---- Modal de EDITAR Usuario ----
+    const editUserModal = document.getElementById('editUserModal');
+    const editUserForm = document.getElementById('editUserForm');
+    const toggleEditGenetistaField = setupConditionalField('#editUserForm #edit_rol', '#editAssociatedGenetistaGroup');
+
+    document.querySelectorAll('.edit-user').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const data = this.dataset;
+            
+            // Actualizar action del formulario
+            editUserForm.action = `/gestion/usuarios/edit/${data.userId}/`;
+
+            // Poblar campos del formulario
+            document.getElementById('edit-username-text').textContent = data.username;
+            document.getElementById('edit_username').value = data.username;
+            document.getElementById('edit_first_name').value = data.firstName;
+            document.getElementById('edit_last_name').value = data.lastName;
+            document.getElementById('edit_email').value = data.email;
+            document.getElementById('edit_rol').value = data.rol;
+            document.getElementById('edit_associated_genetista').value = data.genetistaId;
+
+            // Asegurarse de que el campo condicional se muestra/oculta correctamente
+            toggleEditGenetistaField();
+            
+            editUserModal.classList.add('active');
+        });
+    });
+    
+    document.getElementById('closeEditUserModalBtn')?.addEventListener('click', () => editUserModal.classList.remove('active'));
+    document.getElementById('cancelEditUserModalBtn')?.addEventListener('click', () => editUserModal.classList.remove('active'));
+    editUserModal?.addEventListener('click', e => { if (e.target === editUserModal) editUserModal.classList.remove('active'); });
+
+
+    // ---- Modal de REESTABLECER Contraseña ----
+    const modifyPassModal = document.getElementById('modificarPassModal');
+    const modifyPassForm = document.getElementById('modificarPassForm');
+    
+    document.querySelectorAll('.modificar-pass').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const userId = this.dataset.userId;
+            const userName = this.dataset.userName;
+            
+            modifyPassForm.action = `/gestion/usuarios/reset-password/${userId}/`;
+            document.getElementById('reset-pass-text').innerHTML = `Estás a punto de restablecer la contraseña para el usuario: <strong>${userName}</strong>`;
+            modifyPassForm.reset();
+            
+            modifyPassModal.classList.add('active');
+        });
+    });
+
+    document.getElementById('closeModificarPassModalBtn')?.addEventListener('click', () => modifyPassModal.classList.remove('active'));
+    document.getElementById('cancelModificarPassModalBtn')?.addEventListener('click', () => modifyPassModal.classList.remove('active'));
+    modifyPassModal?.addEventListener('click', e => { if (e.target === modifyPassModal) modifyPassModal.classList.remove('active'); });
+});
+</script>
+<!-- ====== FIN DE CAMBIO: JavaScript actualizado ====== -->
+
+{% endblock %}

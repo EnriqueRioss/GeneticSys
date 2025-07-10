@@ -1,0 +1,145 @@
+{% extends 'layouts/base2.html' %}
+{% load static %}
+
+{% block form_content %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EXAMEN FÍSICO | IIG - LUZ</title>
+    <link rel="stylesheet" href="{% static '/styles/stylesforms.css' %}">
+</head>
+<body>
+
+<div class="contenedor-formulario">
+    <form method="post" id="examen-fisico-form">
+        {% csrf_token %}
+
+        <div class="form-step active">
+            <div class="step-content-header">
+                <i class="fas fa-stethoscope"></i>
+                <h2>Examen Físico</h2>
+            </div>
+
+            <p class="step-subtitle">Datos del examen físico del paciente</p>
+            <p class="step-subtitle"><strong>Proposito: {{ proposito.proposito_id }}- {{ proposito.nombres }} {{ proposito.apellidos }}</strong></p>
+    
+            {% if editing %}
+                <p class="editing-info"><em>Modo Edición: Actualizando Examen Físico.</em></p>
+            {% endif %}
+    
+        
+            {% if pareja %}
+            <input type="hidden" name="pareja_id" value="{{ pareja.pareja_id }}">
+            {% endif %}
+            <div class="alert alert-danger non-field-errors"></div>
+
+            <div class="section-liner"><h3>Medidas </h3></div><br><br>
+            <div class="form-group-tres">
+                <div class="fifth-width"><label for="{{ form.medida_abrazada.id_for_label }}">Medida Abrazada</label>{{ form.medida_abrazada }}<div class="field-errors" id="error_{{ form.medida_abrazada.id_for_label }}"></div></div>
+                <div class="fifth-width"><label for="{{ form.segmento_inferior.id_for_label }}">Segmento Inferior</label>{{ form.segmento_inferior }}<div class="field-errors" id="error_{{ form.segmento_inferior.id_for_label }}"></div></div>
+                <div class="fifth-width"><label for="{{ form.segmento_superior.id_for_label }}">Segmento Superior</label>{{ form.segmento_superior }}<div class="field-errors" id="error_{{ form.segmento_superior.id_for_label }}"></div></div>
+                <div class="fifth-width"><label for="{{ form.circunferencia_cefalica.id_for_label }}">Circunferencia Cefálica</label>{{ form.circunferencia_cefalica }}<div class="field-errors" id="error_{{ form.circunferencia_cefalica.id_for_label }}"></div></div>
+                <div class="fifth-width"><label for="{{ form.talla.id_for_label }}">Talla</label>{{ form.talla }}<div class="field-errors" id="error_{{ form.talla.id_for_label }}"></div></div>
+            </div>
+
+            <div class="form-group-tres">
+                <div class="fifth-width"><label for="{{ form.distancia_intermamilar.id_for_label }}">Distancia Intermamilar</label>{{ form.distancia_intermamilar }}<div class="field-errors" id="error_{{ form.distancia_intermamilar.id_for_label }}"></div></div>
+                <div class="fifth-width"><label for="{{ form.distancia_interc_interna.id_for_label }}">Distancia Interc. Interna</label>{{ form.distancia_interc_interna }}<div class="field-errors" id="error_{{ form.distancia_interc_interna.id_for_label }}"></div></div>
+                <div class="fifth-width"><label for="{{ form.distancia_interpupilar.id_for_label }}">Distancia Interpupilar</label>{{ form.distancia_interpupilar }}<div class="field-errors" id="error_{{ form.distancia_interpupilar.id_for_label }}"></div></div>
+                <div class="fifth-width"><label for="{{ form.longitud_mano_derecha.id_for_label }}">Longitud Mano Derecha</label>{{ form.longitud_mano_derecha }}<div class="field-errors" id="error_{{ form.longitud_mano_derecha.id_for_label }}"></div></div>
+                <div class="fifth-width"><label for="{{ form.longitud_mano_izquierda.id_for_label }}">Longitud Mano Izquierda</label>{{ form.longitud_mano_izquierda }}<div class="field-errors" id="error_{{ form.longitud_mano_izquierda.id_for_label }}"></div></div>
+            </div>
+
+            <div class="form-group-tres">
+                <div class="fifth-width"><label for="{{ form.peso.id_for_label }}">Peso</label>{{ form.peso }}<div class="field-errors" id="error_{{ form.peso.id_for_label }}"></div></div>
+                <div class="fifth-width"><label for="{{ form.ss_si.id_for_label }}">SS/SI</label>{{ form.ss_si }}<div class="field-errors" id="error_{{ form.ss_si.id_for_label }}"></div></div>
+                <div class="fifth-width"><label for="{{ form.distancia_interc_externa.id_for_label }}">Distancia Interc. Externa</label>{{ form.distancia_interc_externa }}<div class="field-errors" id="error_{{ form.distancia_interc_externa.id_for_label }}"></div></div>
+                <div class="fifth-width"><label for="{{ form.ct.id_for_label }}">CT</label>{{ form.ct }}<div class="field-errors" id="error_{{ form.ct.id_for_label }}"></div></div>
+                <div class="fifth-width"><label for="{{ form.pabellones_auriculares.id_for_label }}">Pabellones Auriculares</label>{{ form.pabellones_auriculares }}<div class="field-errors" id="error_{{ form.pabellones_auriculares.id_for_label }}"></div></div>
+            </div>
+
+            <div class="form-group-medio">
+                <div class="half-width"><label for="{{ form.tension_arterial_sistolica.id_for_label }}">Tensión Arterial Sistólica</label>{{ form.tension_arterial_sistolica }}<div class="field-errors" id="error_{{ form.tension_arterial_sistolica.id_for_label }}"></div></div>
+                <div class="half-width"><label for="{{ form.tension_arterial_diastolica.id_for_label }}">Tensión Arterial Diastólica</label>{{ form.tension_arterial_diastolica }}<div class="field-errors" id="error_{{ form.tension_arterial_diastolica.id_for_label }}"></div></div>
+            </div>
+
+            <div class="section-liner"><h3>Observaciones</h3></div><br><br>
+            <div class="form-group-tres">
+                <div class="third-width">
+                    <label for="{{ form.observaciones_cabeza.id_for_label }}">Observaciones Cabeza</label>{{ form.observaciones_cabeza }}<div class="field-errors" id="error_{{ form.observaciones_cabeza.id_for_label }}"></div>
+                </div>
+                <div class="third-width">
+                    <label for="{{ form.observaciones_cuello.id_for_label }}">Observaciones Cuello</label>{{ form.observaciones_cuello }}<div class="field-errors" id="error_{{ form.observaciones_cuello.id_for_label }}"></div>
+                </div>
+                <div class="third-width">
+                    <label for="{{ form.observaciones_torax.id_for_label }}">Observaciones Tórax</label>{{ form.observaciones_torax }}<div class="field-errors" id="error_{{ form.observaciones_torax.id_for_label }}"></div>
+                </div>
+            </div>
+            
+            <div class="form-group-tres">
+                <div class="third-width">
+                    <label for="{{ form.observaciones_abdomen.id_for_label }}">Observaciones Abdomen</label>{{ form.observaciones_abdomen }}<div class="field-errors" id="error_{{ form.observaciones_abdomen.id_for_label }}"></div>
+                </div>
+                <div class="third-width">
+                    <label for="{{ form.observaciones_genitales.id_for_label }}">Observaciones Genitales</label>{{ form.observaciones_genitales }}<div class="field-errors" id="error_{{ form.observaciones_genitales.id_for_label }}"></div>
+                </div>
+                <div class="third-width">
+                    <label for="{{ form.observaciones_espalda.id_for_label }}">Observaciones Espalda</label>{{ form.observaciones_espalda }}<div class="field-errors" id="error_{{ form.observaciones_espalda.id_for_label }}"></div>
+                </div>
+            </div>
+            
+            <div class="form-group-tres">
+                <div class="third-width">
+                    <label for="{{ form.observaciones_miembros_superiores.id_for_label }}">Observaciones Miembros Superiores</label>{{ form.observaciones_miembros_superiores }}<div class="field-errors" id="error_{{ form.observaciones_miembros_superiores.id_for_label }}"></div>
+                </div>
+                <div class="third-width">
+                    <label for="{{ form.observaciones_miembros_inferiores.id_for_label }}">Observaciones Miembros Inferiores</label>{{ form.observaciones_miembros_inferiores }}<div class="field-errors" id="error_{{ form.observaciones_miembros_inferiores.id_for_label }}"></div>
+                </div>
+                <div class="third-width">
+                    <label for="{{ form.observaciones_piel.id_for_label }}">Observaciones Piel</label>{{ form.observaciones_piel }}<div class="field-errors" id="error_{{ form.observaciones_piel.id_for_label }}"></div>
+                </div>
+            </div>
+            
+            <div class="form-group-tres">
+                <div class="third-width">
+                    <label for="{{ form.observaciones_osteomioarticular.id_for_label }}">Observaciones Osteomioarticular</label>{{ form.observaciones_osteomioarticular }}<div class="field-errors" id="error_{{ form.observaciones_osteomioarticular.id_for_label }}"></div>
+                </div>
+                <div class="third-width">
+                    <label for="{{ form.observaciones_neurologico.id_for_label }}">Observaciones Neurológico</label>{{ form.observaciones_neurologico }}<div class="field-errors" id="error_{{ form.observaciones_neurologico.id_for_label }}"></div>
+                </div>
+                <div class="third-width">
+                    <label for="{{ form.observaciones_pliegues.id_for_label }}">Observaciones Pliegues</label>{{ form.observaciones_pliegues }}<div class="field-errors" id="error_{{ form.observaciones_pliegues.id_for_label }}"></div>
+                </div>
+            </div>
+            
+
+            <div class="form-actions">
+                <button type="submit" name="save_draft" class="btn btn-outline">Guardar Borrador</button>
+                <button type="button" class="btn btn-secondary" onclick="window.history.back()"><i class="fas fa-arrow-left"></i> Anterior</button>
+                <!-- Este botón siempre lleva al siguiente paso lógico (Evaluación Genética) -->
+                <button type="submit" name="save_and_finish" class="btn-primary">
+                    <i class="fas fa-check-double"></i> Guardar y Continuar a Evaluación Genética
+                </button>
+                
+                <!-- Este botón solo aparece si hay otro miembro de la pareja con examen PENDIENTE -->
+                {% if otro_proposito_pendiente %}
+                    <button type="submit" name="save_and_go_to_other" class="btn-secondary">
+                        <i class="fas fa-arrow-right"></i> Guardar e Ir a Examen de {{ otro_proposito_pendiente.nombres }}
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+</div>
+
+<script src="https://kit.fontawesome.com/8058dee255.js" crossorigin="anonymous"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    setupAjaxForm('examen-fisico-form');
+});
+</script>
+</body>
+</html>
+
+{% endblock form_content %}

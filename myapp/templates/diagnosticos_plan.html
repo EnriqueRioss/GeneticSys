@@ -1,0 +1,356 @@
+{% extends 'layouts/base2.html' %}
+{% load static %}
+
+{% block form_content %}
+    <title>{% if is_new_consultation %}Nueva Consulta{% else %}Formulario de Evaluación Genética{% endif %}</title>
+    <link rel="stylesheet" href="{% static '/styles/stylesforms.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+    
+<div class="contenedor-formulario">
+    <form method="post" id="evaluacion-form" novalidate>
+        {% csrf_token %}
+    
+        <div class="form-step active">
+            <div class="step-content-header">
+                <i class="fas fa-notes-medical"></i> <!-- Icono cambiado para ser más genérico -->
+                <h2>{% if is_new_consultation %}Nueva Consulta{% else %}Evaluación Genética{% endif %}</h2>
+            </div>
+
+            <p class="step-subtitle">{% if is_new_consultation %}Añada nuevos diagnósticos y planes de estudio para el paciente.{% else %}Datos del diagnóstico del paciente.{% endif %}</p>
+
+            <p class="historia-info">Nº de Historia Clínica: {{ historia_id }}</p>
+
+            <div id="form-errors-global" class="non-form-errors" style="display:none;"></div>
+
+            <div class="diagnostigo-evaluacion-section">
+        
+                <!-- ===== INICIO DE SECCIÓN CONDICIONAL ===== -->
+                {% if not is_new_consultation %}
+                <div class="form-group">
+                    <div class="field-wrapper">
+                        {{ form.signos_clinicos.label_tag }}
+                        {{ form.signos_clinicos }}
+                        <div class="error-list" id="errors-signos_clinicos">{{ form.signos_clinicos.errors }}</div>
+                    </div>
+                </div>
+                {% endif %}
+                <!-- ===== FIN DE SECCIÓN CONDICIONAL ===== -->
+
+                <fieldset>
+                    <legend>Diagnósticos Presuntivos</legend>
+                    
+                    {{ diagnostico_formset.management_form }}
+                    <div id="diagnostico-non-form-errors" class="error-list">
+                        {{ diagnostico_formset.non_form_errors }}
+                    </div>
+
+                    <div id="diagnostico-form-list">
+                        {% for form in diagnostico_formset %}
+                            <div class="dynamic-form-item" id="diagnostico-form-{{ forloop.counter0 }}">
+                                {{ form.diagnostico_id }} 
+                                {{ form.evaluacion }}
+                                {{ form.orden }}
+
+                                <div class="field-wrapper">
+                                    {{ form.descripcion.label_tag }}
+                                    {{ form.descripcion }}
+                                    <div class="error-list" id="errors-diagnostico-{{ forloop.counter0 }}-descripcion">{{ form.descripcion.errors }}</div>
+                                </div>
+                                
+                                <div style="display: none;">{{ form.DELETE }}</div> 
+                                <button type="button" class="btn btn-danger-soft remove-form-btn" title="Eliminar diagnóstico">
+                                    <i class="fas fa-trash"></i>Eliminar diagnostico
+                                </button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" id="add-diagnostico-btn" class="btn btn-secondary add-form-btn">
+                        <i class="fas fa-plus"></i> Añadir Diagnóstico
+                    </button>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Plan de Estudio</legend>
+
+                    {{ plan_formset.management_form }}
+                    <div id="plan-non-form-errors" class="error-list">
+                        {{ plan_formset.non_form_errors }}
+                    </div>
+
+                    <div id="plan-form-list">
+                        {% for form in plan_formset %}
+                            <div class="dynamic-form-item" id="plan-form-{{ forloop.counter0 }}">
+                                {{ form.plan_id }}
+                                {{ form.evaluacion }}
+                                {{ form.completado }}
+                                {{ form.asesoramiento_evoluciones }}
+
+                                <div class="field-wrapper">
+                                    {{ form.accion.label_tag }}
+                                    {{ form.accion }}
+                                    <div class="error-list" id="errors-plan-{{ forloop.counter0 }}-accion">{{ form.accion.errors }}</div>
+                                </div>
+                                <div class="field-wrapper">
+                                    {{ form.fecha_visita.label_tag }}
+                                    {{ form.fecha_visita }}
+                                    <div class="error-list" id="errors-plan-{{ forloop.counter0 }}-fecha_visita">{{ form.fecha_visita.errors }}</div>
+                                </div>
+
+                                <div style="display: none;">{{ form.DELETE }}</div>
+                                <button type="button" class="btn btn-danger-soft remove-form-btn" title="Eliminar acción del plan">
+                                    <i class="fas fa-trash"></i>Eliminar plan de estudio
+                                </button>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="button" id="add-plan-btn" class="btn btn-secondary add-form-btn">
+                        <i class="fas fa-plus"></i> Añadir Acción del Plan
+                    </button>
+                </fieldset>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="window.history.back()"><i class="fas fa-arrow-left"></i> Anterior</button>
+                <!-- ===== BOTONES CONDICIONALES ===== -->
+                {% if not is_new_consultation %}
+                    <button type="submit" name="save_draft" class="btn-secondary" style="margin-right: 10px;">Guardar Borrador</button>
+                {% endif %}
+                <button type="submit" class="btn btn-primary" id="submit-button">
+                    <i class="fas fa-save"></i> {% if is_new_consultation %}Añadir Consulta{% else %}Guardar Evaluación{% endif %}
+                </button>
+                <!-- =============================== -->
+            </div>
+        </div>
+    </form>
+</div>
+<!-- ================================================================= -->
+<!-- ========= PLANTILLAS JS CORREGIDAS ============================== -->
+<!-- ================================================================= -->
+
+<!-- Plantilla para nuevos formularios de Diagnóstico (invisible) -->
+<div id="empty-diagnostico-form-template" style="display:none;">
+    <div class="dynamic-form-item" id="diagnostico-form-__prefix__">
+        {{ diagnostico_formset.empty_form.diagnostico_id }}
+        {{ diagnostico_formset.empty_form.evaluacion }}
+        {{ diagnostico_formset.empty_form.orden }}
+        <div class="field-wrapper">
+            {{ diagnostico_formset.empty_form.descripcion.label_tag }}
+            {{ diagnostico_formset.empty_form.descripcion }}
+            <div class="error-list" id="errors-diagnostico-__prefix__-descripcion"></div>
+        </div>
+        <button type="button" class="btn btn-danger-soft remove-form-btn" title="Eliminar diagnóstico">
+            <i class="fas fa-trash"></i>Eliminar diagnositico
+        </button>
+    </div>
+</div>
+
+<!-- Plantilla para nuevos formularios de Plan (invisible) -->
+<div id="empty-plan-form-template" style="display:none;">
+    <div class="dynamic-form-item" id="plan-form-__prefix__">
+        {{ plan_formset.empty_form.plan_id }}
+        {{ plan_formset.empty_form.evaluacion }}
+        {{ plan_formset.empty_form.completado }}
+
+        {{ plan_formset.empty_form.asesoramiento_evoluciones }}
+        <div class="field-wrapper">
+            {{ plan_formset.empty_form.accion.label_tag }}
+            {{ plan_formset.empty_form.accion }}
+            <div class="error-list" id="errors-plan-__prefix__-accion"></div>
+        </div>
+        <div class="field-wrapper">
+            {{ plan_formset.empty_form.fecha_visita.label_tag }}
+            {{ plan_formset.empty_form.fecha_visita }}
+            <div class="error-list" id="errors-plan-__prefix__-fecha_visita">
+        <button type="button" class="btn btn-danger-soft remove-form-btn" title="Eliminar acción del plan">
+            <i class="fas fa-trash"></i>Eliminar plan de estudio
+        </button>
+    </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- ========= INICIO DE LAS CORRECCIONES EN LAS PLANTILLAS ========== -->
+<!-- ================================================================= -->
+
+<!-- Plantilla para nuevos formularios de Diagnóstico (invisible) -->
+<div id="empty-diagnostico-form-template" style="display:none;">
+    <div class="dynamic-form-item" id="diagnostico-form-__prefix__">
+        {{ diagnostico_formset.empty_form.id }}
+        <div class="field-wrapper">
+            {{ diagnostico_formset.empty_form.descripcion.label_tag }}
+            {{ diagnostico_formset.empty_form.descripcion }}
+            <div class="error-list" id="errors-diagnostico-__prefix__-descripcion"></div>
+        </div>
+        <button type="button" class="btn btn-danger-soft remove-form-btn" title="Eliminar diagnóstico">
+            <i class="fas fa-trash"></i>
+        </button>
+    </div>
+</div>
+
+<!-- Plantilla para nuevos formularios de Plan (invisible) -->
+<div id="empty-plan-form-template" style="display:none;">
+    <div class="dynamic-form-item" id="plan-form-__prefix__">
+        {{ plan_formset.empty_form.id }}
+        <div class="field-wrapper">
+            {{ plan_formset.empty_form.accion.label_tag }}
+            {{ plan_formset.empty_form.accion }}
+            <!-- También añadir campos ocultos aquí para que los nuevos formularios los tengan -->
+            <div style="display:none;">
+                {{ plan_formset.empty_form.completado }}
+                {{ plan_formset.empty_form.fecha_visita }}
+                {{ plan_formset.empty_form.asesoramiento_evoluciones }}
+            </div>
+            <div class="error-list" id="errors-plan-__prefix__-accion"></div>
+        </div>
+        <button type="button" class="btn btn-danger-soft remove-form-btn" title="Eliminar acción del plan">
+            <i class="fas fa-trash"></i>
+        </button>
+    </div>
+</div>
+
+<!-- =============================================================== -->
+<!-- ========= FIN DE LAS CORRECCIONES EN LAS PLANTILLAS =========== -->
+<!-- =============================================================== -->
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    
+    /**
+     * Gestiona un formset completo: añadir, eliminar y re-etiquetar formularios.
+     * @param {string} prefix - 'diagnostico' o 'plan'.
+     */
+    function setupFormset(prefix) {
+        const formList = document.getElementById(`${prefix}-form-list`);
+        const addBtn = document.getElementById(`add-${prefix}-btn`);
+        const totalFormsInput = document.getElementById(`id_${prefix}-TOTAL_FORMS`);
+        // CORRECCIÓN: Apuntamos a la plantilla con la estructura HTML completa
+        const emptyFormTemplate = document.getElementById(`empty-${prefix}-form-template`);
+        
+        if (!formList || !addBtn || !totalFormsInput || !emptyFormTemplate) {
+            console.error(`Faltan elementos para el formset '${prefix}'.`);
+            return;
+        }
+
+        // --- AÑADIR FORMULARIO ---
+        addBtn.addEventListener('click', () => {
+            const formIndex = parseInt(totalFormsInput.value);
+            // CORRECCIÓN: El HTML ya está estructurado, solo reemplazamos el prefijo.
+            const newFormHtml = emptyFormTemplate.innerHTML.replace(/__prefix__/g, formIndex);
+            
+            // Creamos un nodo temporal para insertar el HTML y luego añadirlo al DOM.
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = newFormHtml;
+            const newFormElement = tempDiv.firstElementChild; // Obtenemos el <div class="dynamic-form-item">
+            
+            formList.appendChild(newFormElement);
+            totalFormsInput.value = formIndex + 1;
+        });
+
+        // --- ELIMINAR FORMULARIO (delegación de eventos) ---
+        formList.addEventListener('click', (e) => {
+            const removeBtn = e.target.closest('.remove-form-btn');
+            if (!removeBtn) return;
+
+            const formItem = removeBtn.closest('.dynamic-form-item');
+            const deleteInput = formItem.querySelector('input[id$="-DELETE"]');
+
+            if (deleteInput) {
+                // Si el formulario ya existe en la BD, lo marcamos para eliminar.
+                deleteInput.checked = true;
+                formItem.style.display = 'none';
+            } else {
+                // Si es un formulario nuevo (no tiene input 'DELETE'), lo eliminamos del DOM.
+                formItem.remove();
+                // Nota: No se decrementa TOTAL_FORMS. Django lo maneja correctamente al ignorar los índices que faltan.
+            }
+        });
+    }
+
+    setupFormset('diagnostico');
+    setupFormset('plan');
+
+    // --- MANEJO DEL ENVÍO CON AJAX ---
+    const form = document.getElementById('evaluacion-form');
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const submitButton = document.getElementById('submit-button');
+        const formData = new FormData(form);
+        const url = form.action;
+
+        // Deshabilitar botón para evitar envíos múltiples
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+
+        // Limpiar errores previos
+        document.querySelectorAll('.error-list').forEach(el => el.innerHTML = '');
+        document.getElementById('form-errors-global').style.display = 'none';
+        
+        fetch(url, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            }
+            if (response.status === 400) {
+                return response.json().then(data => Promise.reject(data));
+            }
+            return Promise.reject({_error: 'Error del servidor. Intente de nuevo más tarde.'});
+        })
+        .then(data => {
+            if (data.success && data.redirect_url) {
+                window.location.href = data.redirect_url;
+            }
+        })
+        .catch(errorData => {
+            // Manejar y mostrar errores de validación
+            if (errorData.errors) {
+                console.log("Errores recibidos:", errorData.errors);
+                for (const [key, value] of Object.entries(errorData.errors)) {
+                    // Adaptamos la búsqueda del div de error para que coincida con la clave del backend
+                    const errorDiv = document.getElementById(`errors-${key}`);
+                    if (errorDiv) {
+                        let errorHtml = '';
+                        value.forEach(err => {
+                            // Django 4+ anida errores en 'message'
+                            errorHtml += `<p>${err.message || err}</p>`;
+                        });
+                        errorDiv.innerHTML = errorHtml;
+                    } else if (key.endsWith('-non-form')) {
+                        const globalFormsetErrors = document.getElementById(`${key}-errors`);
+                         if(globalFormsetErrors){
+                             globalFormsetErrors.innerHTML = `<p>${value}</p>`;
+                         }
+                    } else {
+                        // Errores no asociados a un campo específico
+                        const globalErrors = document.getElementById('form-errors-global');
+                        globalErrors.innerHTML += `<p><strong>${key}:</strong> ${value}</p>`;
+                        globalErrors.style.display = 'block';
+                    }
+                }
+                 // Scroll al primer error
+                const firstError = document.querySelector('.error-list:not(:empty)');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            } else {
+                const globalErrors = document.getElementById('form-errors-global');
+                globalErrors.textContent = errorData._error || 'Ocurrió un error inesperado.';
+                globalErrors.style.display = 'block';
+            }
+        })
+        .finally(() => {
+            // Reactivar el botón
+            submitButton.disabled = false;
+            submitButton.innerHTML = '<i class="fas fa-save"></i> Guardar Evaluación';
+        });
+    });
+});
+</script>
+{% endblock form_content %}

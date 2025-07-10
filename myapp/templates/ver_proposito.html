@@ -1,0 +1,789 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static '/styles/forms.css' %}">
+
+<div class="form-container">
+<div class="paciente-detalle-container">
+    <!-- Encabezado del paciente -->
+    <div class="paciente-header">
+        <div class="paciente-avatar">
+            {% if proposito.foto %}
+                <img src="{{ proposito.foto.url }}" alt="{{ proposito.nombres }}">
+            {% else %}
+                <div class="avatar-placeholder">
+                    <i class="fa-solid fa-user"></i>
+                </div>
+            {% endif %}
+        </div>
+        <div class="paciente-info">
+            <h1>{{ proposito.nombres }} {{ proposito.apellidos }}</h1>
+            <div class="paciente-metadata">
+                <span><strong>Edad:</strong> {{ proposito.edad|default:"--" }} años</span>
+                <span><strong>Cédula:</strong> {{ proposito.identificacion|default:"--" }}</span>
+                <span><strong>Fecha de ingreso:</strong> {{ proposito.historia.fecha_ingreso|date:"d/m/Y"|default:"--" }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pestañas de navegación -->
+    <nav class="paciente-tabs">
+        <ul>
+            <li class="active" data-tab="perfil"><a href="#"><i class="fa-solid fa-user"></i> Perfil</a></li>
+            <li data-tab="genealogia"><a href="#"><i class="fa-solid fa-family-tree"></i> Genealogía</a></li>
+            <li data-tab="historial"><a href="#"><i class="fa-solid fa-file-medical"></i> Historial Médico</a></li>
+            <li data-tab="documentos"><a href="#"><i class="fa-solid fa-file"></i> Documentos</a></li>
+            <li data-tab="examen"><a href="#"><i class="fa-solid fa-clipboard-check"></i> Examen Físico</a></li>
+        </ul>
+    </nav>
+
+    <!-- Contenido de las pestañas -->
+    
+
+        <!-- Puedes añadir más secciones según necesites -->
+    </div>
+    <div class="tab-content">
+        <!-- Pestaña Perfil -->
+        <div id="perfil" class="tab-pane active">
+            <div class="paciente-seccion">
+                <h2>Información Personal</h2>
+                <div class="paciente-datos">
+                    <div>
+                        <p><strong>Fecha de nacimiento:</strong> {{ proposito.fecha_nacimiento|date:"d/m/Y"|default:"--" }}</p>
+                       <p><strong>Lugar de nacimiento:</strong> {{ proposito.lugar_nacimiento|default:"--" }}</p>
+                        <p><strong>Grupo sanguíneo:</strong> {{ proposito.get_grupo_sanguineo_display|default:"--" }}</p>
+                        <p><strong>Factor RH:</strong> {{ proposito.get_factor_rh_display|default:"--" }}</p>
+                    </div>
+                    <div>
+                        <p><strong>Dirección:</strong> {{ proposito.direccion|default:"--" }}</p>
+                        <p><strong>Teléfono:</strong> {{ proposito.telefono|default:"--" }}</p>
+                        <p><strong>Email:</strong> {{ proposito.email|default:"--" }}</p>
+                        <p><strong>Ocupacion:</strong> {{ proposito.ocupacion|default:"--" }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="paciente-seccion">
+                <h2>Notas</h2>
+                <button class="btn btn-secondary" id="add-note-btn">
+                    <i class="fa-solid fa-plus"></i> Agregar Nota
+                </button>
+                <div class="notes-container">
+                    <div class="note-card">
+                        <div class="note-header">
+                            <h4>Control de presión arterial</h4>
+                            <span class="note-date">Jun 15, 2023</span>
+                        </div>
+                        <div class="note-content">
+                            <p>Paciente presenta presión arterial elevada (140/90). Se recomienda dieta baja en sal y seguimiento semanal.</p>
+                        </div>
+                        <div class="note-author">
+                            <span>Dr. María Pérez</span>
+                        </div>
+                    </div>
+                    <div class="note-card">
+                        <div class="note-header">
+                            <h4>Consulta de rutina</h4>
+                            <span class="note-date">May 28, 2023</span>
+                        </div>
+                        <div class="note-content">
+                            <p>Paciente asintomático. Examen físico sin hallazgos relevantes. Próximo control en 3 meses.</p>
+                        </div>
+                        <div class="note-author">
+                            <span>Dr. Carlos Rodríguez</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pestaña Genealogía -->
+        <div id="genealogia" class="tab-pane">
+            <div class="paciente-seccion">
+                <h2>Árbol Genealógico</h2>
+                <div class="family-tree-placeholder">
+                    <img src="{% static 'images/family-tree-placeholder.png' %}" alt="Árbol genealógico" style="max-width: 100%;">
+                    <p class="placeholder-text">Visualización del árbol genealógico del paciente</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pestaña Historial Médico -->
+        <div id="historial" class="tab-pane">
+            <div class="paciente-seccion">
+                <h2>Evoluciones Médicas</h2>
+                <div class="evolution-card">
+                    <div class="evolution-header">
+                        <h4>Consulta de control</h4>
+                        <span class="evolution-date">Jun 10, 2023</span>
+                    </div>
+                    <div class="evolution-content">
+                        <p>Paciente refiere mejoría del dolor abdominal. Continúa con tratamiento indicado. Próximo control en 15 días.</p>
+                    </div>
+                    <div class="evolution-author">
+                        <span>Dr. Luis Martínez</span>
+                    </div>
+                </div>
+                <div class="evolution-card">
+                    <div class="evolution-header">
+                        <h4>Primera consulta</h4>
+                        <span class="evolution-date">May 20, 2023</span>
+                    </div>
+                    <div class="evolution-content">
+                        <p>Paciente refiere dolor abdominal recurrente. Se indican exámenes complementarios y tratamiento sintomático.</p>
+                    </div>
+                    <div class="evolution-author">
+                        <span>Dr. Luis Martínez</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="paciente-seccion">
+                <h2>Resultados de Exámenes</h2>
+                <div class="test-result-card">
+                    <div class="test-header">
+                        <h4>Hematología completa</h4>
+                        <span class="test-date">Jun 5, 2023</span>
+                    </div>
+                    <div class="test-content">
+                        <p>Hemoglobina: 14.2 g/dL (normal), Leucocitos: 6.500/mm3 (normal), Plaquetas: 250.000/mm3 (normal)</p>
+                    </div>
+                    <div class="test-actions">
+                        <a href="#" class="btn btn-sm btn-outline-primary">
+                            <i class="fa-solid fa-download"></i> Descargar
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pestaña Documentos -->
+        <div id="documentos" class="tab-pane">
+            <div class="paciente-seccion">
+                <h2>Documentos del Paciente</h2>
+                <div class="documents-container">
+                    <div class="document-card">
+                        <div class="document-icon">
+                            <i class="fa-solid fa-file-pdf"></i>
+                        </div>
+                        <div class="document-info">
+                            <h4>Examen de sangre</h4>
+                            <span class="document-date">Jun 5, 2023</span>
+                        </div>
+                        <div class="document-actions">
+                            <a href="#" class="btn btn-sm btn-outline-primary">
+                                <i class="fa-solid fa-download"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="document-card">
+                        <div class="document-icon">
+                            <i class="fa-solid fa-file-image"></i>
+                        </div>
+                        <div class="document-info">
+                            <h4>Radiografía de tórax</h4>
+                            <span class="document-date">May 25, 2023</span>
+                        </div>
+                        <div class="document-actions">
+                            <a href="#" class="btn btn-sm btn-outline-primary">
+                                <i class="fa-solid fa-download"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pestaña Examen Físico -->
+        <!-- Pestaña Examen Físico -->
+<div id="examen" class="tab-pane">
+    <div class="paciente-seccion">
+        <h2>Examen Físico</h2>
+        
+        {% if examen_fisico %}
+<!-- Mostrar datos del examen existente -->
+<div class="examen-fisico-view">
+    <div class="examen-header">
+        <span class="examen-date">
+            <i class="fa-solid fa-calendar-day"></i>
+            {{ examen_fisico.fecha_examen|date:"d/m/Y" }}
+        </span>
+        <a href="{% url 'examen_fisico' proposito_id=proposito.proposito_id %}" class="btn btn-sm btn-primary" >
+            <i class="fa-solid fa-pencil"></i> Editar Examen
+        </a>
+    </div>
+    
+    <div class="examen-datos">
+        <!-- Sección de medidas básicas -->
+        <div class="datos-section">
+            <h5><i class="fa-solid fa-ruler-combined"></i> Medidas Básicas</h5>
+            <div class="datos-grid">
+                <div class="dato-item">
+                    <span class="dato-label">Talla:</span>
+                    <span class="dato-value">{{ examen_fisico.talla|default:"--" }} cm</span>
+                </div>
+                <div class="dato-item">
+                    <span class="dato-label">Peso:</span>
+                    <span class="dato-value">{{ examen_fisico.peso|default:"--" }} kg</span>
+                </div>
+                <div class="dato-item">
+                    <span class="dato-label">Tensión Arterial:</span>
+                    <span class="dato-value">
+                        {{ examen_fisico.tension_arterial_sistolica|default:"--" }}/{{ examen_fisico.tension_arterial_diastolica|default:"--" }}
+                    </span>
+                </div>
+                <div class="dato-item">
+                    <span class="dato-label">Circunferencia Cefálica:</span>
+                    <span class="dato-value">{{ examen_fisico.circunferencia_cefalica|default:"--" }} cm</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de medidas antropométricas -->
+        <div class="datos-section">
+            <h5><i class="fa-solid fa-arrows-alt-v"></i> Medidas Antropométricas</h5>
+            <div class="datos-grid">
+                <div class="dato-item">
+                    <span class="dato-label">Medida Abrazada:</span>
+                    <span class="dato-value">{{ examen_fisico.medida_abrazada|default:"--" }} cm</span>
+                </div>
+                <div class="dato-item">
+                    <span class="dato-label">Segmento Superior:</span>
+                    <span class="dato-value">{{ examen_fisico.segmento_superior|default:"--" }} cm</span>
+                </div>
+                <div class="dato-item">
+                    <span class="dato-label">Segmento Inferior:</span>
+                    <span class="dato-value">{{ examen_fisico.segmento_inferior|default:"--" }} cm</span>
+                </div>
+                <div class="dato-item">
+                    <span class="dato-label">SS/SI:</span>
+                    <span class="dato-value">{{ examen_fisico.ss_si|default:"--" }}</span>
+                </div>
+                <div class="dato-item">
+                    <span class="dato-label">CT:</span>
+                    <span class="dato-value">{{ examen_fisico.ct|default:"--" }} cm</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de distancias -->
+        <div class="datos-section">
+            <h5><i class="fa-solid fa-arrows-alt-h"></i> Distancias</h5>
+            <div class="datos-grid">
+                <div class="dato-item">
+                    <span class="dato-label">Distancia Intermamilar:</span>
+                    <span class="dato-value">{{ examen_fisico.distancia_intermamilar|default:"--" }} cm</span>
+                </div>
+                <div class="dato-item">
+                    <span class="dato-label">Distancia Interc. Interna:</span>
+                    <span class="dato-value">{{ examen_fisico.distancia_interc_interna|default:"--" }} cm</span>
+                </div>
+                <div class="dato-item">
+                    <span class="dato-label">Distancia Interpupilar:</span>
+                    <span class="dato-value">{{ examen_fisico.distancia_interpupilar|default:"--" }} cm</span>
+                </div>
+                <div class="dato-item">
+                    <span class="dato-label">Distancia Interc. Externa:</span>
+                    <span class="dato-value">{{ examen_fisico.distancia_interc_externa|default:"--" }} cm</span>
+                </div>
+                <div class="dato-item">
+                    <span class="dato-label">Pabellones Auriculares:</span>
+                    <span class="dato-value">{{ examen_fisico.pabellones_auriculares|default:"--" }} cm</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de longitudes de manos -->
+        <div class="datos-section">
+            <h5><i class="fa-solid fa-hand-paper"></i> Longitudes de Manos</h5>
+            <div class="datos-grid">
+                <div class="dato-item">
+                    <span class="dato-label">Mano Derecha:</span>
+                    <span class="dato-value">{{ examen_fisico.longitud_mano_derecha|default:"--" }} cm</span>
+                </div>
+                <div class="dato-item">
+                    <span class="dato-label">Mano Izquierda:</span>
+                    <span class="dato-value">{{ examen_fisico.longitud_mano_izquierda|default:"--" }} cm</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sección de observaciones -->
+        <div class="datos-section">
+            <h5><i class="fa-solid fa-clipboard-list"></i> Observaciones</h5>
+            
+            {% if examen_fisico.observaciones_cabeza %}
+            <div class="observacion-item">
+                <h6>Cabeza</h6>
+                <p>{{ examen_fisico.observaciones_cabeza }}</p>
+            </div>
+            {% endif %}
+            
+            {% if examen_fisico.observaciones_cuello %}
+            <div class="observacion-item">
+                <h6>Cuello</h6>
+                <p>{{ examen_fisico.observaciones_cuello }}</p>
+            </div>
+            {% endif %}
+            
+            {% if examen_fisico.observaciones_torax %}
+            <div class="observacion-item">
+                <h6>Tórax</h6>
+                <p>{{ examen_fisico.observaciones_torax }}</p>
+            </div>
+            {% endif %}
+            
+            {% if examen_fisico.observaciones_abdomen %}
+            <div class="observacion-item">
+                <h6>Abdomen</h6>
+                <p>{{ examen_fisico.observaciones_abdomen }}</p>
+            </div>
+            {% endif %}
+            
+            {% if examen_fisico.observaciones_genitales %}
+            <div class="observacion-item">
+                <h6>Genitales</h6>
+                <p>{{ examen_fisico.observaciones_genitales }}</p>
+            </div>
+            {% endif %}
+            
+            {% if examen_fisico.observaciones_espalda %}
+            <div class="observacion-item">
+                <h6>Espalda</h6>
+                <p>{{ examen_fisico.observaciones_espalda }}</p>
+            </div>
+            {% endif %}
+            
+            {% if examen_fisico.observaciones_miembros_superiores %}
+            <div class="observacion-item">
+                <h6>Miembros Superiores</h6>
+                <p>{{ examen_fisico.observaciones_miembros_superiores }}</p>
+            </div>
+            {% endif %}
+            
+            {% if examen_fisico.observaciones_miembros_inferiores %}
+            <div class="observacion-item">
+                <h6>Miembros Inferiores</h6>
+                <p>{{ examen_fisico.observaciones_miembros_inferiores }}</p>
+            </div>
+            {% endif %}
+            
+            {% if examen_fisico.observaciones_piel %}
+            <div class="observacion-item">
+                <h6>Piel</h6>
+                <p>{{ examen_fisico.observaciones_piel }}</p>
+            </div>
+            {% endif %}
+            
+            {% if examen_fisico.observaciones_osteomioarticular %}
+            <div class="observacion-item">
+                <h6>Sistema Osteomioarticular</h6>
+                <p>{{ examen_fisico.observaciones_osteomioarticular }}</p>
+            </div>
+            {% endif %}
+            
+            {% if examen_fisico.observaciones_neurologico %}
+            <div class="observacion-item">
+                <h6>Examen Neurológico</h6>
+                <p>{{ examen_fisico.observaciones_neurologico }}</p>
+            </div>
+            {% endif %}
+            
+            {% if examen_fisico.observaciones_pliegues %}
+            <div class="observacion-item">
+                <h6>Pliegues</h6>
+                <p>{{ examen_fisico.observaciones_pliegues }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+          
+            
+        {% else %}
+        <div class="no-examen">
+            <p>No se ha registrado un examen físico para este paciente.</p>
+            <a href="{% url 'examen_fisico' proposito_id=proposito.proposito_id %}" class="btn btn-primary">
+                <i class="fa-solid fa-plus"></i> Agregar Examen Físico
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+    </div>
+</div>
+
+<!-- Modal para agregar nota -->
+<div class="modal" id="addNoteModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Agregar Nota</h5>
+                <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="note-title" class="form-label">Título</label>
+                        <input type="text" class="form-control" id="note-title" name="titulo" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="note-content" class="form-label">Contenido</label>
+                        <textarea class="form-control" id="note-content" name="contenido" rows="5" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Nota</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</div>
+
+
+
+
+<style>
+    /* Estilos generales */
+    .paciente-detalle-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .paciente-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .paciente-avatar {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        overflow: hidden;
+        margin-right: 30px;
+        background-color: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ccc;
+        font-size: 40px;
+    }
+
+    .paciente-info {
+        flex-grow: 1;
+    }
+
+    .paciente-info h1 {
+        margin: 0 0 10px 0;
+        color: #333;
+    }
+
+    .paciente-metadata {
+        display: flex;
+        gap: 20px;
+        color: #666;
+        font-size: 14px;
+    }
+
+    .paciente-actions {
+        margin-left: auto;
+    }
+
+    /* Pestañas */
+    .paciente-tabs {
+        margin-bottom: 20px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    .paciente-tabs ul {
+        display: flex;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .paciente-tabs li {
+        margin-right: 10px;
+    }
+
+    .paciente-tabs li a {
+        display: block;
+        padding: 10px 15px;
+        color: #555;
+        text-decoration: none;
+        border-bottom: 3px solid transparent;
+    }
+
+    .paciente-tabs li.active a {
+        color: #0d6efd;
+        border-bottom-color: #0d6efd;
+    }
+
+    .paciente-tabs li a:hover {
+        color: #0d6efd;
+    }
+
+    /* Contenido de pestañas */
+    .tab-pane {
+        display: none;
+        padding: 15px 0;
+    }
+
+    .tab-pane.active {
+        display: block;
+    }
+
+    /* Secciones */
+    .paciente-seccion {
+        margin-bottom: 30px;
+    }
+
+    .paciente-seccion h2 {
+        color: #444;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+    }
+
+    .paciente-datos {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 15px;
+    }
+
+    .paciente-datos p {
+        margin: 5px 0;
+    }
+
+    /* Tarjetas de notas y evoluciones */
+    .note-card, .evolution-card, .test-result-card, .document-card {
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .note-header, .evolution-header, .test-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+
+    .note-date, .evolution-date, .test-date, .document-date {
+        color: #666;
+        font-size: 0.9em;
+    }
+
+    .note-author, .evolution-author {
+        text-align: right;
+        font-style: italic;
+        color: #666;
+        font-size: 0.9em;
+    }
+
+    /* Botones */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        padding: 8px 15px;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 14px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+        border: none;
+    }
+
+    .btn i {
+        margin-right: 5px;
+    }
+
+    .btn-primary {
+        background-color: #0d6efd;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #0b5ed7;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5c636a;
+    }
+
+    .btn-outline-primary {
+        background-color: transparent;
+        color: #0d6efd;
+        border: 1px solid #0d6efd;
+    }
+
+    .btn-outline-primary:hover {
+        background-color: #0d6efd;
+        color: white;
+    }
+
+    /* Formularios */
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+    }
+
+    textarea.form-control {
+        min-height: 100px;
+    }
+
+    /* Documentos */
+    .documents-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 15px;
+    }
+
+    .document-card {
+        display: flex;
+        align-items: center;
+    }
+
+    .document-icon {
+        font-size: 24px;
+        margin-right: 15px;
+        color: #d32f2f;
+    }
+
+    .document-info {
+        flex-grow: 1;
+    }
+
+    .document-info h4 {
+        margin: 0 0 5px 0;
+    }
+
+    /* Placeholder para árbol genealógico */
+    .family-tree-placeholder {
+        background-color: #f5f5f5;
+        padding: 20px;
+        text-align: center;
+        border-radius: 5px;
+    }
+
+    .placeholder-text {
+        color: #666;
+        font-style: italic;
+    }
+
+    /* Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-dialog {
+        width: 100%;
+        max-width: 600px;
+    }
+
+    .modal-content {
+        background-color: white;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+
+    .modal-header {
+        padding: 15px;
+        background-color: #f5f5f5;
+        border-bottom: 1px solid #ddd;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .modal-body {
+        padding: 15px;
+    }
+
+    .modal-footer {
+        padding: 15px;
+        background-color: #f5f5f5;
+        border-top: 1px solid #ddd;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .btn-close {
+        background: none;
+        border: none;
+        font-size: 1.5rem;
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    $(document).ready(function() {
+        // Manejar el cambio de pestañas
+        $('.paciente-tabs li').click(function() {
+            // Remover clase active de todas las pestañas
+            $('.paciente-tabs li').removeClass('active');
+            // Añadir clase active a la pestaña clickeada
+            $(this).addClass('active');
+            
+            // Ocultar todos los paneles de contenido
+            $('.tab-pane').removeClass('active');
+            // Mostrar el panel correspondiente
+            const tabId = $(this).data('tab');
+            $('#' + tabId).addClass('active');
+        });
+
+        // Manejar el botón para agregar nota
+        $('#add-note-btn').click(function() {
+            $('#addNoteModal').show();
+        });
+
+        // Cerrar modal
+        $('.btn-close, .btn-secondary').click(function() {
+            $('#addNoteModal').hide();
+        });
+
+        // Evitar que el modal se cierre al hacer clic en el contenido
+        $('.modal-content').click(function(e) {
+            e.stopPropagation();
+        });
+
+        // Cerrar modal al hacer clic fuera
+        $('#addNoteModal').click(function() {
+            $(this).hide();
+        });
+    });
+
+  
+</script>
+    {% endblock %}

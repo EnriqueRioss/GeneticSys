@@ -1,0 +1,207 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+/*--------------- GENERAL -------------------------- */
+:root {
+    --primary-darkerblue: #265073;
+    --buttons-blue: #0766AD;
+    --primary-lightblue: #AED3F2;
+    --lighter-blue: #D5E5F2;
+    --second-lighter-blue: #c8e1f5;
+    --background-color: #F3F3F3;
+    --border-gray: #b3b3b3;
+    --liner-gray: #d3d2d2;
+    --button-gray: #e4e4e4;
+}
+
+html {
+    font-size: 62.5%;
+    font-family: "Poppins", serif;
+    overflow-x: hidden;
+    
+}
+
+body{
+    background-color: var(--background-color);
+    overflow: hidden;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.container {
+    max-width: 120rem;
+    margin: 0 auto;
+}
+
+a{
+    text-decoration: none;
+}
+
+li{
+    list-style: none;
+}
+
+
+
+/*--------------- SIDEBAR --------------------*/
+
+.sidebar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 25rem;
+	height: 100vh;
+	background: var(--lighter-blue);
+    color: var(--primary-darkerblue);
+    border-right: 1px solid var(--primary-lightblue);
+    display: flex;
+    flex-direction: column;
+    font-family: "Poppins", serif;
+    overflow-x: hidden;
+
+	/*z-index: 2000;
+	transition: .3s ease;
+	*/
+}
+
+.sidebar-header{
+    padding: 2rem;
+    border-bottom: 1px solid var(--primary-lightblue);
+}
+
+.sidebar-logo{
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.logo-icon{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.5rem;
+    background-color: var(--primary-darkerblue);
+    color: var(--background-color);
+    font-weight: bold;
+}
+
+.logo-text{
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+    font-size: 1.6rem;
+}
+
+.logo-title{
+    font-weight: 600;
+}
+
+.logo-subtitle{
+    font-size: 1.2rem;
+    color: var(--primary-darkerblue);
+}
+
+.user-profile{
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+}
+
+.user-avatar{
+    width: 3rem;
+    height: 3rem;
+    border-radius: 9999px;
+    background-color: var(--background-color);
+    color: var(--primary-darkerblue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.user-info{
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.user-name{
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.user-role{
+    font-size: 1.2rem;
+    color: var(--primary-darkerblue);
+}
+
+.sidebar-nav{
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+.nav-section{
+    margin-bottom: 2rem;
+}
+
+.nav-section-title{
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05rem;
+    color: var(--buttons-blue);
+    margin-bottom: 0.5rem;
+}
+
+.nav-menu{
+    list-style: none;
+}
+
+.nav-item{
+    margin-bottom: 0.25rem;
+}
+
+.nav-link{
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.80rem;
+    border-radius: 0.5rem;
+    color: var(--primary-darkerblue);
+    text-decoration: none;
+    font-size: 1.4rem;
+    transition: background-color 0.2s;
+}
+
+.text{
+    color: var(--primary-darkerblue);
+}
+
+.nav-link:hover{
+    background-color: var(--primary-lightblue);
+    color: var(--primary-darkerblue);
+}
+
+
+.nav-link i{
+    width: 2rem;
+    text-align: center;
+    color: var(--primary-darkerblue);
+}
+
+.nav-item.active .nav-link{
+    background-color: var(--primary-lightblue);
+    color: var(--primary-darkerblue);
+    font-weight: 500;
+}

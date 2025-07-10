@@ -1,0 +1,50 @@
+<!-- flow_completion.html -->
+
+{% extends 'layouts/base2.html' %}
+{% load static %}
+
+{% block form_content %}
+<style>
+    .completion-container {
+        max-width: 600px;
+        margin: 40px auto;
+        padding: 30px;
+        text-align: center;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .completion-container h1 {
+        color: #28a745;
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+    }
+    .completion-container .fas {
+        font-size: 4rem;
+        color: #28a745;
+        margin-bottom: 20px;
+    }
+    .completion-container p {
+        font-size: 1.1rem;
+        color: #333;
+        margin-bottom: 30px;
+    }
+    .completion-container .btn-primary {
+        padding: 10px 25px;
+        font-size: 1.1rem;
+        background-color: #007bff;
+        border-color: #007bff;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+</style>
+
+<div class="completion-container">
+    <i class="fas fa-check-circle"></i>
+    <h1>Proceso Completado</h1>
+    <p>Los datos han sido guardados correctamente en el sistema.</p>
+    <a href="{% url 'index' %}" class="btn-primary">Volver a la Página Principal</a>
+</div>
+
+{% endblock form_content %}

@@ -1,0 +1,218 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<head>
+    <title>REPORTES | IIG - LUZ</title>
+    <link rel="stylesheet" href="{% static '/styles/reports.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        .filter-group select, .filter-group input {
+            width: 100%;
+        }
+        .filter-actions {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-end;
+            padding-top: 1.7rem; 
+        }
+        /* Ocultar filtros específicos por defecto */
+        .specific-filter {
+            display: none;
+        }
+    </style>
+</head>
+
+<div class="main-content">
+    <main class="barra-content">
+        <header class="content-header">
+            <div class="breadcrumb">
+                <a href="{% url 'index' %}" class="breadcrumb-item">Inicio</a>
+                <span class="breadcrumb-separator">></span>
+                <span class="breadcrumb-item active">Reportes</span>
+            </div>
+        </header>
+
+        <div class="reports-content">
+            <div class="contenido-header">
+                <div class="header-content">
+                    <h1>Reportes Genéticos</h1>
+                    <p>Análisis y reportes de historias clínicas genéticas</p>
+                </div>
+                <div class="header-actions">
+                    <button class="btn-outline" id="btn-export-pdf" {% if not search_attempted %}disabled{% endif %}>
+                        <i class="fas fa-download"></i> Exportar PDF
+                    </button>
+                     <button class="btn-outline" id="btn-export-csv" {% if not search_attempted %}disabled{% endif %}>
+                        <i class="fas fa-file-csv"></i> Exportar CSV
+                    </button>
+                    <a href="{% url 'reports_dashboard' %}" class="btn-primary">
+                        <i class="fas fa-file-alt"></i> Nuevo Reporte
+                    </a>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-filter"></i> Filtros de Búsqueda</h2>
+                    <p>Utiliza los filtros para encontrar información específica</p>
+                </div>
+                <div class="card-content">
+                    <form method="GET" action="{% url 'reports_dashboard' %}" id="report-search-form">
+                        <div class="filters-grid">
+                            <!-- MASTER SELECTOR -->
+                            <div class="filter-group">
+                                <label for="{{ form.report_type.id_for_label }}">{{ form.report_type.label }}</label>
+                                {{ form.report_type }}
+                            </div>
+
+                            <!-- FILTROS COMUNES -->
+                            <div class="filter-group">
+                                <label for="{{ form.genetista.id_for_label }}">{{ form.genetista.label }}</label>
+                                {{ form.genetista }}
+                            </div>
+                            <div class="filter-group">
+                                <label for="{{ form.date_range.id_for_label }}">{{ form.date_range.label }}</label>
+                                <div class="date-range-picker">{{ form.date_range }}</div>
+                            </div>
+                            
+                            <!-- FILTROS ESPECÍFICOS -->
+                            <div class="filter-group specific-filter" id="filter-group-histories-range-1">
+                                <label for="{{ form.numero_historia_desde.id_for_label }}">{{ form.numero_historia_desde.label }}</label>
+                                {{ form.numero_historia_desde }}
+                            </div>
+                            <div class="filter-group specific-filter" id="filter-group-histories-range-2">
+                                <label for="{{ form.numero_historia_hasta.id_for_label }}">{{ form.numero_historia_hasta.label }}</label>
+                                {{ form.numero_historia_hasta }}
+                            </div>
+                            <div class="filter-group specific-filter" id="filter-group-histories-status">
+                                <label for="{{ form.estado_historia.id_for_label }}">{{ form.estado_historia.label }}</label>
+                                {{ form.estado_historia }}
+                            </div>
+
+                            <div class="filter-group specific-filter" id="filter-group-patients-search">
+                                <label for="{{ form.buscar_paciente.id_for_label }}">{{ form.buscar_paciente.label }}</label>
+                                <div class="search-input"> <i class="fas fa-search"></i> {{ form.buscar_paciente }} </div>
+                            </div>
+                             <div class="filter-group specific-filter" id="filter-group-patients-status">
+                                <label for="{{ form.estado_paciente.id_for_label }}">{{ form.estado_paciente.label }}</label>
+                                {{ form.estado_paciente }}
+                            </div>
+
+                            <div class="filter-group specific-filter" id="filter-group-consultations-status">
+                                <label for="{{ form.estado_consulta.id_for_label }}">{{ form.estado_consulta.label }}</label>
+                                {{ form.estado_consulta }}
+                            </div>
+
+                            <div class="filter-group specific-filter" id="filter-group-diagnoses-search">
+                                <label for="{{ form.buscar_diagnostico.id_for_label }}">{{ form.buscar_diagnostico.label }}</label>
+                                <div class="search-input"> <i class="fas fa-search"></i> {{ form.buscar_diagnostico }} </div>
+                            </div>
+                            
+                            <div class="filter-actions">
+                                <button type="submit" class="btn-buscar"><i class="fas fa-search"></i> Buscar</button>
+                                <a href="{% url 'reports_dashboard' %}" class="btn-limpiar">Limpiar</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            {% if search_attempted %}
+            <div class="content-card">
+                <div class="card-header">
+                    <h2>Resultados para "{{ report_type_display_name }}"</h2>
+                    <p>{{ results|length }} registro(s) encontrado(s).</p>
+                </div>
+                <div class="card-content">
+                    <div class="table-container">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    {% for header in headers %}
+                                        <th>{{ header }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in results %}
+                                <tr>
+                                    {% for cell in row %}
+                                        <td>{{ cell }}</td>
+                                    {% endfor %}
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="{{ headers|length|default:1 }}" style="text-align:center;">No se encontraron registros.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://npmcdn.com/flatpickr/dist/l10n/es.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        flatpickr("#date-range-flatpickr", { mode: "range", dateFormat: "d/m/Y", locale: "es", allowInput: true });
+
+        const reportTypeSelect = document.getElementById('report-type-select');
+        const filterGroups = {
+            'histories': [
+                document.getElementById('filter-group-histories-range-1'),
+                document.getElementById('filter-group-histories-range-2'),
+                document.getElementById('filter-group-histories-status')
+            ],
+            'patients': [
+                document.getElementById('filter-group-patients-search'),
+                document.getElementById('filter-group-patients-status')
+            ],
+            'consultations': [
+                document.getElementById('filter-group-consultations-status')
+            ],
+            'diagnoses': [
+                document.getElementById('filter-group-diagnoses-search')
+            ]
+        };
+
+        function toggleFilters() {
+            const selectedType = reportTypeSelect.value;
+            // Hide all specific filters first
+            document.querySelectorAll('.specific-filter').forEach(el => el.style.display = 'none');
+            // Show only the ones for the selected report type
+            if (filterGroups[selectedType]) {
+                filterGroups[selectedType].forEach(el => {
+                    if (el) el.style.display = 'flex';
+                });
+            }
+        }
+
+        toggleFilters();
+        reportTypeSelect.addEventListener('change', toggleFilters);
+
+        function setupExportButton(buttonId, exportFormat) {
+            const exportButton = document.getElementById(buttonId);
+            if (exportButton) {
+                exportButton.addEventListener('click', function() {
+                    if(this.hasAttribute('disabled')) return;
+                    const form = document.getElementById('report-search-form');
+                    const params = new URLSearchParams(new FormData(form)).toString();
+                    const exportUrl = `{% url 'export_report_data' 'TEMP_FORMAT' %}?${params}`.replace('TEMP_FORMAT', exportFormat);
+                    window.open(exportUrl, '_blank');
+                });
+            }
+        }
+        setupExportButton('btn-export-pdf', 'pdf');
+        setupExportButton('btn-export-csv', 'csv');
+    });
+</script>
+<script src="https://kit.fontawesome.com/8058dee255.js" crossorigin="anonymous"></script>
+
+{% endblock %}

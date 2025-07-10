@@ -1,0 +1,732 @@
+/* Estilos generales */
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
+    margin: 0;
+    padding: 0;
+}
+
+/* Contenedor del formulario */
+.form-container {
+    background-color: #fff;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 800px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+/* Título del formulario */
+.form-container h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+/* Grupos de campos del formulario */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+
+.table-container {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+.table-container th, .table-container td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+.table-container th {
+    background-color: #f2f2f2;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.form-group textarea {
+    resize: vertical;
+    height: 100px;
+}
+
+/* Campos de ancho medio (para disposiciones en dos columnas) */
+.form-group .half-width {
+    width: 48%;
+    display: inline-block;
+}
+
+.form-group .half-width:first-child {
+    margin-right: 4%;
+}
+
+/* Botones de acción */
+.form-actions {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.form-actions button {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.form-actions button:hover {
+    background-color: #218838;
+}
+
+/* Estilos para tablas (si las usas) */
+.table-container {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+.table-container th,
+.table-container td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.table-container th {
+    background-color: #f2f2f2;
+    color: #333;
+}
+
+/* Clase para ocultar elementos */
+.hidden {
+    display: none;
+}
+
+/* Estilos para campos de archivo */
+.form-group input[type="file"] {
+    padding: 5px;
+    background-color: #f9f9f9;
+    border: 1px solid #ccc;
+}
+
+/* Estilos para campos de fecha */
+.form-group input[type="date"] {
+    padding: 7px;
+}
+
+/* Estilos para campos de selección (select) */
+.form-group select {
+    padding: 7px;
+    background-color: #f9f9f9;
+}
+
+/* Estilos para campos de checkbox y radio */
+.form-group input[type="checkbox"],
+.form-group input[type="radio"] {
+    margin-right: 5px;
+}
+
+/* Estilos para campos numéricos */
+.form-group input[type="number"] {
+    padding: 7px;
+}
+
+/* Estilos para campos de email */
+.form-group input[type="email"] {
+    padding: 7px;
+}
+
+.paciente-detalle-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.paciente-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 20px;
+}
+
+.paciente-header .paciente-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 30px;
+    background: #f5f5f5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.paciente-header .paciente-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.paciente-header .paciente-info h1 {
+    margin: 0 0 10px 0;
+    color: #333;
+}
+
+.paciente-header .paciente-metadata {
+    display: flex;
+    gap: 20px;
+    color: #666;
+    font-size: 14px;
+}
+
+.paciente-seccion {
+    margin-bottom: 30px;
+}
+
+.paciente-seccion h2 {
+    color: #444;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.paciente-datos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 15px;
+}
+
+.paciente-datos p {
+    margin: 5px 0;
+}
+
+
+
+
+
+
+
+
+/* Estilos generales */
+.paciente-detalle-container {
+max-width: 1200px;
+margin: 0 auto;
+padding: 20px;
+background-color: #fff;
+border-radius: 8px;
+box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.paciente-header {
+display: flex;
+align-items: center;
+margin-bottom: 20px;
+padding-bottom: 20px;
+border-bottom: 1px solid #eee;
+}
+
+.paciente-avatar {
+width: 100px;
+height: 100px;
+border-radius: 50%;
+overflow: hidden;
+margin-right: 30px;
+background-color: #f5f5f5;
+display: flex;
+align-items: center;
+justify-content: center;
+color: #ccc;
+font-size: 40px;
+}
+
+.paciente-info {
+flex-grow: 1;
+}
+
+.paciente-info h1 {
+margin: 0 0 10px 0;
+color: #333;
+}
+
+.paciente-metadata {
+display: flex;
+gap: 20px;
+color: #666;
+font-size: 14px;
+}
+
+.paciente-actions {
+margin-left: auto;
+}
+
+/* Pestañas */
+.paciente-tabs {
+margin-bottom: 20px;
+border-bottom: 1px solid #ddd;
+}
+
+.paciente-tabs ul {
+display: flex;
+list-style: none;
+padding: 0;
+margin: 0;
+}
+
+.paciente-tabs li {
+margin-right: 10px;
+}
+
+.paciente-tabs li a {
+display: block;
+padding: 10px 15px;
+color: #555;
+text-decoration: none;
+border-bottom: 3px solid transparent;
+}
+
+.paciente-tabs li.active a {
+color: #0d6efd;
+border-bottom-color: #0d6efd;
+}
+
+.paciente-tabs li a:hover {
+color: #0d6efd;
+}
+
+/* Contenido de pestañas */
+.tab-pane {
+display: none;
+padding: 15px 0;
+}
+
+.tab-pane.active {
+display: block;
+}
+
+/* Secciones */
+.paciente-seccion {
+margin-bottom: 30px;
+}
+
+.paciente-seccion h2 {
+color: #444;
+border-bottom: 1px solid #eee;
+padding-bottom: 10px;
+margin-bottom: 15px;
+}
+
+.paciente-datos {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+gap: 15px;
+}
+
+.paciente-datos p {
+margin: 5px 0;
+}
+
+/* Tarjetas de notas y evoluciones */
+.note-card, .evolution-card, .test-result-card, .document-card {
+background-color: #f9f9f9;
+border-radius: 5px;
+padding: 15px;
+margin-bottom: 15px;
+}
+
+.note-header, .evolution-header, .test-header {
+display: flex;
+justify-content: space-between;
+margin-bottom: 10px;
+}
+
+.note-date, .evolution-date, .test-date, .document-date {
+color: #666;
+font-size: 0.9em;
+}
+
+.note-author, .evolution-author {
+text-align: right;
+font-style: italic;
+color: #666;
+font-size: 0.9em;
+}
+
+/* Botones */
+.btn {
+display: inline-flex;
+align-items: center;
+padding: 8px 15px;
+border-radius: 4px;
+text-decoration: none;
+font-size: 14px;
+cursor: pointer;
+transition: background-color 0.3s;
+border: none;
+}
+
+.btn i {
+margin-right: 5px;
+}
+
+.btn-primary {
+background-color: #0d6efd;
+color: white;
+}
+
+.btn-primary:hover {
+background-color: #0b5ed7;
+}
+
+.btn-secondary {
+background-color: #6c757d;
+color: white;
+}
+
+.btn-secondary:hover {
+background-color: #5c636a;
+}
+
+.btn-outline-primary {
+background-color: transparent;
+color: #0d6efd;
+border: 1px solid #0d6efd;
+}
+
+.btn-outline-primary:hover {
+background-color: #0d6efd;
+color: white;
+}
+
+/* Formularios */
+.form-group {
+margin-bottom: 15px;
+}
+
+.form-control {
+width: 100%;
+padding: 8px 12px;
+border: 1px solid #ddd;
+border-radius: 4px;
+}
+
+textarea.form-control {
+min-height: 100px;
+}
+
+/* Documentos */
+.documents-container {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+gap: 15px;
+}
+
+.document-card {
+display: flex;
+align-items: center;
+}
+
+.document-icon {
+font-size: 24px;
+margin-right: 15px;
+color: #d32f2f;
+}
+
+.document-info {
+flex-grow: 1;
+}
+
+.document-info h4 {
+margin: 0 0 5px 0;
+}
+
+/* Placeholder para árbol genealógico */
+.family-tree-placeholder {
+background-color: #f5f5f5;
+padding: 20px;
+text-align: center;
+border-radius: 5px;
+}
+
+.placeholder-text {
+color: #666;
+font-style: italic;
+}
+
+/* Modal */
+.modal {
+display: none;
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background-color: rgba(0,0,0,0.5);
+z-index: 1000;
+align-items: center;
+justify-content: center;
+}
+
+.modal-dialog {
+width: 100%;
+max-width: 600px;
+}
+
+.modal-content {
+background-color: white;
+border-radius: 5px;
+overflow: hidden;
+}
+
+.modal-header {
+padding: 15px;
+background-color: #f5f5f5;
+border-bottom: 1px solid #ddd;
+display: flex;
+justify-content: space-between;
+align-items: center;
+}
+
+.modal-body {
+padding: 15px;
+}
+
+.modal-footer {
+padding: 15px;
+background-color: #f5f5f5;
+border-top: 1px solid #ddd;
+display: flex;
+justify-content: flex-end;
+}
+
+.btn-close {
+background: none;
+border: none;
+font-size: 1.5rem;
+cursor: pointer;
+}
+
+
+
+
+
+examen-fisico-container {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+.examen-fisico-view {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.examen-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.examen-date {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.examen-datos {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.datos-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.dato-item {
+    min-width: 200px;
+    margin-bottom: 10px;
+}
+
+.dato-label {
+    font-weight: bold;
+    color: #555;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.dato-value {
+    color: #333;
+}
+
+.datos-section {
+    margin-top: 15px;
+}
+
+.datos-section h5 {
+    color: #444;
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #eee;
+}
+
+.datos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.observacion-item {
+    background-color: #f5f5f5;
+    padding: 10px 15px;
+    border-radius: 4px;
+}
+
+.no-examen {
+    text-align: center;
+    padding: 30px;
+    background-color: #f5f5f5;
+    border-radius: 5px;
+}
+
+.no-examen p {
+    margin-bottom: 20px;
+    color: #666;
+}
+
+.form-section {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 5px;
+}
+
+.form-section h4 {
+    margin-top: 0;
+    color: #495057;
+}
+
+.form-actions {
+    margin-top: 20px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+
+
+/* Estilos para la vista de examen físico */
+.examen-fisico-view {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.examen-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.examen-date {
+    color: #666;
+    font-size: 0.9em;
+}
+
+.datos-section {
+    margin-bottom: 25px;
+}
+
+.datos-section h5 {
+    color: #444;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.datos-section h5 i {
+    color: #6c757d;
+}
+
+.datos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 15px;
+}
+
+.dato-item {
+    background-color: #f8f9fa;
+    padding: 10px 15px;
+    border-radius: 5px;
+}
+
+.dato-label {
+    font-weight: bold;
+    color: #495057;
+    font-size: 0.9em;
+    display: block;
+    margin-bottom: 3px;
+}
+
+.dato-value {
+    color: #212529;
+    font-size: 1.1em;
+}
+
+.observacion-item {
+    margin-bottom: 15px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-left: 3px solid #6c757d;
+    border-radius: 0 4px 4px 0;
+}
+
+.observacion-item h6 {
+    margin: 0 0 5px 0;
+    color: #495057;
+}
+
+.observacion-item p {
+    margin: 0;
+    color: #212529;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .datos-grid {
+        grid-template-columns: 1fr;
+    }
+}

@@ -1,0 +1,1094 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+:root {
+    --primary-darkerblue: #265073;
+    --buttons-blue: #0766AD;
+    --primary-lightblue: #AED3F2;
+    --lighter-blue: #D5E5F2;
+    --second-lighter-blue: #c8e1f5;
+    --background-color: #F3F3F3;
+    --border-gray: #b3b3b3;         /* Used in new modal input borders */
+    --liner-gray: #d3d2d2;          /* Used in new modal header/footer borders */
+    --button-gray: #e4e4e4;         /* Used in new modal cancel button */
+    --complement-cian: #009eb3;
+    --complement-blue: #105183;
+
+    /* Added/Ensured for broader compatibility and new styles */
+    --white: #ffffff;
+    --text-color: #212529;          /* For dropdown text */
+    --light-gray: #f8f9fa;          /* For dropdown hover */
+    --medium-gray: #ced4da;         /* For generic modal borders, form inputs */
+    --dark-gray: #343a40;           /* For generic modal close button text */
+    --danger-color: #dc3545;        /* For errors, destructive actions */
+    --success-color: #28a745;       /* For success badges */
+    --warning-color: #ffc107;       /* For warning badges */
+    --advise-color: #deb32f;        /* For advise badges */
+    --advise-background: #f5e6b8d9;
+    --advise-titles: #a47a18;
+    --primary-color: var(--primary-darkerblue); /* For generic form labels, aliased */
+    --secondary-light: #6c757d;     /* For secondary badges */
+    --border-radius: 0.25rem;       /* Generic border radius */
+}
+
+
+html {
+    font-size: 62.5%;
+    font-family: "Poppins", serif;
+    overflow-x: hidden;
+}
+
+
+body{
+    background-color: var(--background-color);
+    overflow: hidden; /* Consider if this is truly needed globally */
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+a{
+    text-decoration: none;
+}
+
+li{
+    list-style: none;
+}
+
+/*------------ MAIN CONTENT -----------*/
+
+.main-content{
+    flex: 1;
+    padding: 2rem;
+}
+
+.barra-content{
+    flex: 1;
+    margin-left: 25rem; /* This implies a fixed sidebar of 25rem width */
+}
+
+.content-header{
+    display: flex;
+    align-items: center;
+    height: 4rem;
+    padding: 0 1rem;
+    border-bottom: 1px solid var(--border-gray);
+}
+
+.breadcrumb{
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    font-size: 1.3rem;
+}
+
+.breadcrumb-item{
+    color: var(--buttons-blue);
+}
+
+.breadcrumb-item.active{
+    color: var(--primary-darkerblue);
+    font-weight: 500;
+}
+
+
+/*-------------- Contenido Header ------------*/
+.users-content {
+  padding-top: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.contenido-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-content{
+    padding-top: 2rem;
+    padding-bottom: 1.5rem;
+    padding-left: 0.5rem;
+}
+
+.header-content h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  /* line-height: 0.5rem; Removed as it might clip text with descenders */
+  color: var(--primary-darkerblue);
+  margin-bottom: 2rem;
+}
+
+.header-content p {
+  color: var(--primary-darkerblue);
+  font-size: 1.3rem;
+}
+
+.header-actions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-primary{ /* General .btn-primary, not specific to modal */
+  display: flex;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  background-color: var(--lighter-blue);
+  border: 1px solid var(--lighter-blue);
+  border-radius: 0.5rem;
+  color: var(--complement-blue);
+  font-size: 1.2rem;
+  font-family: "Poppins", serif;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+button i { /* General icon styling within buttons */
+  font-size: 1.3rem;
+  margin-right: 1rem;
+  width: 2rem;
+  text-align: center;
+}
+
+
+/*---------- Tarjetas ------------*/
+.stats-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card{
+    background-color: var(--background-color);
+    border-radius: 0.5rem;
+    padding: 2.5rem;
+    border: 1px solid var(--border-gray);
+}
+
+.stat-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.stat-header h3{
+    font-size: 1.2rem;
+    color: var(--primary-darkerblue);
+    margin: 0;
+    font-weight: 600;
+}
+
+.stat-header i{
+    color: var(--complement-blue);
+    font-size: 1.4rem;
+}
+
+.stat-content h2{
+    font-size: 2.8rem;
+    color: var(--complement-blue);
+    margin: 0 0 0.5rem 0;
+}
+
+/* ----------- Tabs ------------ */
+.tabs-container {
+    /* If you need specific styling for the container itself */
+}
+
+.tab-nav{
+    display: inline-flex;
+    background-color: var(--lighter-blue);
+    border-radius: 0.5rem;
+    padding: 0.3rem;
+    margin-bottom: 1.5rem;
+}
+
+.tab-button{
+    padding: 1rem 1rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--complement-blue);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.tab-button.active{
+    color: var(--primary-darkerblue);
+    background-color: var(--background-color);
+    border-radius: 0.5rem;
+}
+
+.tabs-content{
+    color: var(--primary-darkerblue);
+    display: none;
+    padding: 0.5rem; /* Consider if this padding is needed if .content-card has padding */
+    animation: fadeIn 0.5s ease;
+    border: 1px solid var(--border-gray);
+    border-radius: 0.5rem;
+}
+
+.tabs-content.active{
+    display: block;
+}
+
+@keyframes fadeIn{
+    from { opacity: 0; transform: translateY(10px) ;}
+    to { opacity: 1; transform: translateY(0);}
+}
+
+
+/*-------- Content Cards --------*/
+.content-card{
+    background-color: var(--background-color); 
+    border-radius: 0.5rem;
+    overflow: hidden; 
+}
+
+.card-header{
+    padding: 2rem;
+}
+
+.card-header h2{
+    font-size: 2rem;
+    margin: 0 0 0.5rem 0;
+    color: var(--primary-darkerblue);
+}
+
+.card-header p{
+    font-size: 1.3rem;
+    color: var(--primary-darkerblue);
+    margin: 0;
+}
+
+.card-content{
+    padding: 2rem;
+}
+
+
+/*-------- Table Filters --------*/
+.table-filters{
+    display: flex;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.search-input{
+    position: relative;
+    flex-grow: 1;
+}
+
+.search-input i{
+    position: absolute;
+    left: 1.2rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--complement-blue);
+    font-size: 1.4rem;
+}
+
+.search-input input{
+    width: 100%;
+    padding: 1rem 1.5rem 1rem 3.5rem;
+    border: 1px solid var(--border-gray);
+    border-radius: 0.5rem;
+    background-color: var(--background-color);
+    font-size: 1.4rem;
+    color: var(--primary-darkerblue);
+}
+
+.search-input input::placeholder {
+    color: var(--border-gray);
+}
+
+.table-filters select{
+    width: 20%;
+    padding: 1rem 1.5rem;
+    border: 1px solid var(--border-gray);
+    border-radius: 0.5rem;
+    background-color: var(--background-color);
+    font-size: 1.4rem;
+    color: var(--primary-darkerblue);
+    cursor: pointer;
+}
+
+.btn-buscar{
+  display: flex;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  background-color: var(--complement-blue);
+  border: 1px solid var(--complement-blue);
+  border-radius: 0.5rem;
+  color: var(--lighter-blue);
+  font-size: 1.2rem;
+  font-family: "Poppins", serif;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+
+/*--------Tabla---------*/
+
+.table-container {
+  position: relative;
+  overflow: visible;
+  margin-bottom: 2rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th{
+    text-align: left;
+    padding: 1rem 1rem;
+    color: var(--primary-darkerblue);
+    font-weight: 600;
+    white-space: nowrap;
+    font-size: 1.4rem;
+    border-bottom: 1px solid var(--border-gray);
+}
+
+.table td{
+    padding: 1rem 1rem;
+    border-bottom: 1px solid var(--border-gray);
+    white-space: nowrap;
+    font-size: 1.4rem;
+    color: var(--primary-darkerblue);
+    vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+
+/* ---------- Badges --------------*/
+.badge {
+  display: inline-block;
+  padding: 0.4em 0.8em; 
+  border-radius: 1.2rem; 
+  font-size: 1.2rem;
+  font-weight: 600;
+  line-height: 1; 
+  text-align: center;
+}
+
+.badge.default {
+  background-color: var(--primary-darkerblue);
+  color: var(--white);
+}
+
+.badge.secondary {
+  background-color: var(--secondary-light);
+  color: var(--white);
+}
+
+.badge.success {
+  background-color: var(--success-color);
+  color: var(--white);
+}
+
+.badge.warning {
+  background-color: var(--warning-color);
+  color: var(--text-color); 
+}
+
+.badge.destructive {
+  background-color: var(--danger-color);
+  color: var(--white);
+}
+
+.badge.outline {
+  background-color: transparent;
+  border: 1px solid var(--medium-gray);
+  color: var(--text-color);
+}
+
+.badge-group {
+  display: flex;
+  gap: 0.5rem; 
+  flex-wrap: wrap;
+}
+
+
+/* ------------ Dropdown ------------- */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+/* Opcional: para evitar que el hover afecte el comportamiento */
+.dropdown:hover .dropdown-content {
+    display: none; /* Anula el hover */
+}
+
+.dropdown.active .dropdown-content {
+    display: block;
+}
+
+.btn-icon { 
+    background: none;
+    border: none;
+    color: var(--primary-darkerblue);
+    padding: 0.5rem;
+    cursor: pointer;
+    font-size: 1.6rem;
+    line-height: 1;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  right: 0;
+  background-color: var(--white);
+  border: 1px solid var(--border-gray);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  min-width: 16rem; 
+  z-index: 1; 
+  border-radius: 0.5rem;
+  bottom: 100%;
+  margin-bottom: 0.5rem;
+}
+
+.dropdown-content.bottom {
+  bottom: auto;
+  top: 100%;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
+}
+
+.dropdown-content button {
+  border: none;
+  background: none;
+  color: var(--primary-darkerblue);
+  padding: 1.2rem 1.6rem;
+  text-decoration: none;
+  display: block;
+  font-size: 1.4rem;
+  transition: background-color 0.3s;
+}
+
+.dropdown-content a:hover {
+  background-color: var(--button-gray);
+}
+
+.dropdown-content a.danger {
+  color: var(--danger-color);
+}
+
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+
+
+.btn-icon:hover {
+    color: var(--buttons-blue);
+}
+
+
+.dropdown-content button,
+.dropdown-content form.dropdown-form-action button { 
+  color: var(--text-color);
+  padding: 1rem 1.5rem; 
+  text-decoration: none;
+  display: block;
+  font-size: 1.4rem; 
+  font-family: "Poppins", serif;
+  transition: background-color 0.2s;
+  background: none; 
+  border: none; 
+  width: 100%; 
+  text-align: left; 
+  cursor: pointer;
+}
+  
+
+.dropdown-content button i,
+.dropdown-content form.dropdown-form-action button i {
+    margin-right: 1rem; 
+    width: 1.8rem; 
+    text-align: center;
+    color: var(--primary-darkerblue); 
+}
+
+
+.dropdown-content button:hover,
+.dropdown-content form.dropdown-form-action button:hover {
+  background-color: var(--light-gray);
+}
+
+.dropdown-content a.danger,
+.dropdown-content form.dropdown-form-action button.danger {
+  color: var(--danger-color);
+}
+.dropdown-content a.danger i,
+.dropdown-content form.dropdown-form-action button.danger i {
+    color: var(--danger-color);
+}
+
+.dropdown:hover .dropdown-content,
+.dropdown.active .dropdown-content { 
+  display: block;
+}
+
+
+
+/* ---------- Estilos para las modales ----------*/
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000; 
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.8);
+  align-items: center;
+  justify-content: center;
+  opacity: 0; 
+  transition: opacity 0.3s ease;
+}
+
+.modal.active {
+  display: flex;
+  opacity: 1;
+}
+
+.modal.active .modal-content {
+    transform: scale(1);
+}
+
+
+.modal-content { 
+  background-color: var(--white);
+  border-radius: 1rem;
+  width: 70%; 
+  max-width: 50rem;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  overflow: hidden; 
+  transform: scale(0.95); 
+  transition: transform 0.3s ease;
+}
+
+.modal-header {
+  padding: 2rem 2.5rem;
+  border-bottom: 1px solid var(--border-gray);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+/* ---- ESPECIFICO PARA #NEWUSERMODAL ----- */
+
+#newUserModal .modal-header h2 { 
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: var(--primary-darkerblue);
+    margin: 0;
+    line-height: 1.3;
+}
+
+#newUserModal .modal-close {
+    background: none;
+    border: none;
+    font-size: 2.6rem;
+    font-weight: 400; 
+    color: var(--primary-darkerblue);
+    opacity: 0.8;
+    padding: 0;
+    line-height: 1;
+}
+
+#newUserModal .modal-close:hover {
+    color: var(--danger-color);
+}
+
+#newUserModal .modal-body {
+    padding: 2rem 2.5rem;
+    max-height: 70vh; 
+    overflow-y: auto;
+}
+
+#newUserModal .modal-body > p:first-of-type {
+    font-size: 1.4rem;
+    color: var(--primary-darkerblue);
+    margin-top: 0;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+#newUserModal .modal-footer { 
+  padding: 1.5rem 2rem;
+  border-top: 1px solid var(--border-gray);
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  background-color: var(--white);
+}
+
+#newUserModal .form-group { 
+    margin-bottom: 1.8rem;
+}
+
+#newUserModal .form-group label { 
+    display: block;
+    margin-bottom: 0.8rem;
+    font-weight: 600; 
+    font-size: 1.4rem;
+    color: var(--primary-darkerblue);
+}
+
+#newUserModal .form-group input[type="text"],
+#newUserModal .form-group input[type="email"],
+#newUserModal .form-group input[type="password"],
+#newUserModal .form-group select { 
+    width: 100%;
+    padding: 0.9rem 1.2rem;
+    border: 1px solid var(--border-gray);
+    border-radius: 0.5rem;
+    font-size: 1.4rem;
+    font-family: "Poppins", serif;
+    background-color: var(--white);
+    color: var(--primary-darkerblue);
+    box-sizing: border-box; 
+}
+
+
+#newUserModal .form-group input[type="text"]::placeholder,
+#newUserModal .form-group input[type="email"]::placeholder,
+#newUserModal .form-group input[type="password"]::placeholder {
+    color: var(--border-gray);
+}
+
+
+#newUserModal .form-group input[type="text"]:focus,
+#newUserModal .form-group input[type="email"]:focus,
+#newUserModal .form-group input[type="password"]:focus,
+#newUserModal .form-group select:focus {
+    border: 2px solid;
+    border-color: var(--success-color);
+    outline: none;
+}
+
+#newUserForm .modal-footer button[name="create_user_submit"].btn-primary {
+    background-color: var(--primary-darkerblue);
+    color: var(--lighter-blue);
+    padding: 0.9rem 2rem;
+    border-radius: 0.5rem;
+    border: none;
+    font-family: "Poppins", serif;
+    font-size: 1.4rem ;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    line-height: normal;
+}
+
+#newUserForm .modal-footer button[name="create_user_submit"].btn-primary:hover {
+    background-color: var(--lighter-blue);
+    color: var(--primary-darkerblue)
+}
+
+#newUserForm .modal-footer button#cancelNewUserModalBtn.btn-secondary {
+    background-color: var(--white);
+    color: var(--primary-darkerblue);
+    border: 1px solid var(--primary-darkerblue);
+    padding: 0.9rem 2rem;
+    border-radius: 0.5rem;
+    font-family: "Poppins", serif;
+    font-size: 1.4rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    line-height: normal;
+}
+
+#newUserForm .modal-footer button#cancelNewUserModalBtn.btn-secondary:hover {
+    background-color: var(--second-lighter-blue);
+    border-color: var(--second-lighter-blue);
+    color: var(--primary-darkerblue);
+}
+
+
+
+
+/*-------------- ESPECIFICO PARA #EDITUSERMODAL -------------*/
+#editUserModal .modal-header h2 { 
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: var(--primary-darkerblue);
+    margin: 0;
+    line-height: 1.3;
+}
+
+#editUserModal .modal-header i{ 
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-darkerblue);
+    margin-right: 1rem;
+    line-height: 1.2;
+}
+#editUserModal .modal-close {
+    background: none;
+    border: none;
+    font-size: 2.6rem;
+    font-weight: 400; 
+    color: var(--primary-darkerblue);
+    opacity: 0.8;
+    padding: 0;
+    line-height: 1;
+}
+
+#editUserModal .modal-close:hover {
+    color: var(--danger-color);
+}
+
+#editUserModal .modal-body {
+    padding: 2rem 2.5rem;
+    max-height: 70vh; 
+    overflow-y: auto;
+}
+
+#editUserModal .modal-body > p:first-of-type {
+    font-size: 1.4rem;
+    color: var(--primary-darkerblue);
+    margin-top: 0;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+#editUserModal .modal-footer { 
+  padding: 1.5rem 2rem;
+  border-top: 1px solid var(--border-gray);
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  background-color: var(--white);
+}
+
+#editUserModal .form-group { 
+    margin-bottom: 1.8rem;
+}
+
+#editUserModal .form-group label { 
+    display: block;
+    margin-bottom: 0.8rem;
+    font-weight: 600; 
+    font-size: 1.4rem;
+    color: var(--primary-darkerblue);
+}
+
+#editUserModal .form-group input[type="text"],
+#editUserModal .form-group input[type="email"],
+#editUserModal .form-group select { 
+    width: 100%;
+    padding: 0.9rem 1.2rem;
+    border: 1px solid var(--border-gray);
+    border-radius: 0.5rem;
+    font-size: 1.4rem;
+    font-family: "Poppins", serif;
+    background-color: var(--white);
+    color: var(--primary-darkerblue);
+    box-sizing: border-box; 
+}
+#editUserModal .form-group input[type="text"]::placeholder,
+#editUserModal .form-group input[type="email"]::placeholder{
+    color: var(--border-gray);
+    
+}
+
+#editUserModal .form-group input[type="text"]:focus,
+#editUserModal .form-group input[type="email"]:focus,
+#editUserModal .form-group select:focus {
+    border: 2px solid;
+    border-color: var(--success-color);
+    outline: none;
+}
+
+#editUserForm .modal-footer button[name="edit_user_submit"].btn-primary {
+    background-color: var(--primary-darkerblue);
+    color: var(--lighter-blue);
+    padding: 0.9rem 2rem;
+    border-radius: 0.5rem;
+    border: none;
+    font-family: "Poppins", serif;
+    font-size: 1.4rem ;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    line-height: normal;
+}
+
+#editUserForm .modal-footer button[name="edit_user_submit"].btn-primary:hover {
+    background-color: var(--lighter-blue);
+    color: var(--primary-darkerblue)
+}
+
+#editUserForm .modal-footer button#cancelEditUserModalBtn.btn-secondary {
+    background-color: var(--white);
+    color: var(--primary-darkerblue);
+    border: 1px solid var(--primary-darkerblue);
+    padding: 0.9rem 2rem;
+    border-radius: 0.5rem;
+    font-family: "Poppins", serif;
+    font-size: 1.4rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    line-height: normal;
+}
+
+#editUserForm .modal-footer button#cancelEditUserModalBtn.btn-secondary:hover {
+    background-color: var(--second-lighter-blue);
+    border-color: var(--second-lighter-blue);
+    color: var(--primary-darkerblue);
+}
+
+
+
+
+/*---------- ESPECIFICAR PARA #MODIFYPASSMODAL --------*/
+
+#modificarPassModal .modal-header h2 { 
+    font-size: 2.2rem;
+    font-weight: 600;
+    color: var(--primary-darkerblue);
+    margin: 0;
+    line-height: 1.3;
+}
+
+#modificarPassModal .modal-header i{ 
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--primary-darkerblue);
+    margin-right: 1rem;
+    line-height: 1.2;
+}
+
+#modificarPassModal .modal-close {
+    background: none;
+    border: none;
+    font-size: 2.6rem;
+    font-weight: 400; 
+    color: var(--primary-darkerblue);
+    opacity: 0.8;
+    padding: 0;
+    line-height: 1;
+}
+
+#modificarPassModal .modal-close:hover {
+    color: var(--danger-color);
+}
+
+#modificarPassModal .modal-body {
+    padding: 2rem 2.5rem;
+    max-height: 70vh; 
+    overflow-y: auto;
+}
+
+#modificarPassModal .modal-body > p:first-of-type {
+    font-size: 1.4rem;
+    color: var(--primary-darkerblue);
+    margin-top: 0;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+#modificarPassModal .modal-footer { 
+  padding: 1.5rem 2rem;
+  border-top: 1px solid var(--border-gray);
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  background-color: var(--white);
+}
+
+#modificarPassModal .form-group { 
+    margin-bottom: 1.8rem;
+}
+
+#modificarPassModal .form-group label { 
+    display: block;
+    margin-bottom: 0.8rem;
+    font-weight: 600; 
+    font-size: 1.4rem;
+    color: var(--primary-darkerblue);
+}
+
+#modificarPassModal .form-group p {
+    font-size: 1.2rem;
+    color: var(--dark-gray);
+}
+
+
+#modificarPassModal .form-group input[type="password"] {
+    width: 100%;
+    padding: 0.9rem 1.2rem;
+    border: 1px solid var(--border-gray);
+    border-radius: 0.5rem;
+    font-size: 1.4rem;
+    font-family: "Poppins", serif;
+    background-color: var(--white);
+    color: var(--primary-darkerblue);
+    box-sizing: border-box; 
+}
+
+#modificarPassModal .form-group input[type="password"]::placeholder{
+    color: var(--border-gray);
+    
+}
+
+#modificarPassModal .form-group input[type="password"]:focus {
+    border: 2px solid;
+    border-color: var(--success-color);
+    outline: none;
+}
+
+#modificarPassForm .modal-footer button[name="modificar_pass_submit"].btn-primary {
+    background-color: var(--primary-darkerblue);
+    color: var(--lighter-blue);
+    padding: 0.9rem 2rem;
+    border-radius: 0.5rem;
+    border: none;
+    font-family: "Poppins", serif;
+    font-size: 1.4rem ;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    line-height: normal;
+}
+
+#modificarPassForm .modal-footer button[name="modificar_pass_submit"].btn-primary:hover {
+    background-color: var(--lighter-blue);
+    color: var(--primary-darkerblue)
+}
+
+#modificarPassForm .modal-footer button#cancelModificarPassModalBtn.btn-secondary {
+    background-color: var(--white);
+    color: var(--primary-darkerblue);
+    border: 1px solid var(--primary-darkerblue);
+    padding: 0.9rem 2rem;
+    border-radius: 0.5rem;
+    font-family: "Poppins", serif;
+    font-size: 1.4rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+    line-height: normal;
+}
+
+
+#modificarPassForm .modal-footer button#cancelModificarPassBtn.btn-secondary:hover {
+    background-color: var(--second-lighter-blue);
+    border-color: var(--second-lighter-blue);
+    color: var(--primary-darkerblue);
+}
+
+
+.aviso-card{
+    background-color: var(--advise-background);
+    border-radius: 0.5rem;
+    padding: 2rem;
+    border: 1px solid var(--advise-color);
+}
+
+.aviso-header{
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.aviso-header h3{
+    font-size: 1.4rem;
+    color: var(--advise-titles);
+    margin: 0;
+    font-weight: 600;
+}
+
+.aviso-header i{
+    color: var(--advise-titles);
+    margin-right: 1.5rem;
+    font-size: 1.4rem;
+}
+
+.aviso-content p{
+    font-size: 1.3rem;
+    color: var(--advise-titles);
+    margin: 0 0 0.5rem 0;
+}
+
+
+/* -------------------- MENSAJES DE ALERTA PARA EL HTML----------------- */
+.alert {
+    margin: 1rem 0;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    position: relative;
+}
+.alert .close {
+    float: right;
+    background: none;
+    border: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+    color: inherit; 
+    opacity: 0.7;
+}
+.alert .close:hover {
+    opacity: 1;
+}
+
+
+/* Specific alert types (example, can be expanded) */
+.alert.alert-success {
+    background-color: var(--primary-lightblue);
+    color: var(--primary-darkerblue);
+    /* border: 1px solid darken(var(--primary-lightblue), 10%); */
+}
+.alert.alert-error {
+    background-color: #f8d7da; /* Example error bg */
+    color: #721c24; /* Example error text */
+    /* border: 1px solid darken(#f8d7da, 10%); */
+}
+
+/* Roles Grid (from your HTML structure for Roles y Permisos tab) */
+.roles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+.role-card {
+    background-color: var(--white);
+    border: 1px solid var(--liner-gray);
+    border-radius: 0.5rem;
+    padding: 2rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.role-header h3 {
+    font-size: 1.6rem;
+    color: var(--primary-darkerblue);
+    margin: 0 0 0.5rem 0;
+}
+
+.role-header p {
+    font-size: 1.3rem;
+    color: var(--text-color);
+    line-height: 1.6;
+    margin: 0;
+}

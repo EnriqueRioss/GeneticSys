@@ -1,0 +1,279 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+/*--------------- GENERAL -------------------------- */
+:root {
+    --primary-darkerblue: #265073;
+    --buttons-blue: #0766AD;
+    --primary-lightblue: #AED3F2;
+    --lighter-blue: #D5E5F2;
+    --second-lighter-blue: #c8e1f5;
+    --background-color: #F3F3F3;
+    --border-gray: #b3b3b3;
+    --liner-gray: #d3d2d2;
+    --button-gray: #e4e4e4;
+}
+
+html {
+    font-size: 62.5%;
+    font-family: "Poppins", serif;
+    overflow-x: hidden;
+}
+
+body{
+    background-color: var(--background-color);
+    overflow: hidden;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.container {
+    max-width: 120rem;
+    margin: 0 auto;
+}
+
+a{
+    text-decoration: none;
+}
+
+li{
+    list-style: none;
+}
+
+/*--------------- SIDEBAR --------------------*/
+
+#sidebar {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 30rem;
+	height: 100%;
+	background: var(--primary-darkerblue);
+	z-index: 2000;
+	font-family: "Poppins", serif;
+	transition: .3s ease;
+	overflow-x: hidden;
+	scrollbar-width: none;
+}
+
+#sidebar .menu-top {
+	width: 100%;
+	margin-top: 25px;
+}
+
+#sidebar .menu-top li {
+	height: 50px;
+	background: transparent;
+	margin-left: 20px;
+	border-radius: 15px 15px 15px 15px;
+	padding: 4px;
+}
+
+#sidebar .menu-top li a {
+	width: 90%;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	border-radius: 15px;
+	font-size: 16px;
+    background-color: var(--primary-darkerblue);
+	color: var(--background-color);
+    margin-left: 5px;
+	white-space: nowrap;
+	overflow-x: hidden;
+}
+
+#sidebar .menu-top li a:hover{
+    background-color: var(--background-color);
+    color: var(--primary-darkerblue);
+}
+
+#sidebar li a .fa-solid {
+	min-width: calc(60px  - ((4px + 6px) * 2));
+	display: flex;
+	justify-content: center;
+}
+
+.buttom{
+    width: 90%;
+	height: 100%;
+    align-items: center;
+    white-space: nowrap;
+	overflow-x: hidden;
+}
+
+.buttom a{
+    margin-left: 30px;
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    background-color: var(--background-color);
+    color: var(--primary-darkerblue);
+    font-weight:400;
+    padding: 6px;
+    border-radius: 15px;
+    height: 40px;
+    text-align: center;
+}
+
+.buttom .text{
+    margin-left: 65px;
+}
+
+.buttom a:hover{
+    background-color: var(--lighter-blue);
+    color: var(--primary-darkerblue);
+}
+
+.search-form {
+    margin-top: 15px;
+    margin-left: 2.8rem;
+	position: relative;
+	display: flex;
+	align-items: center;
+	border: 2px solid var(--background-color);
+	border-radius: 1.5rem;
+	background-color: var(--background-color);
+	height: 4.4rem;
+	overflow: hidden;
+	width: 81%;
+}
+
+.search-form input {
+	outline: none;
+	font-family: inherit;
+    background-color: transparent;
+	border: none;
+	width: 30rem;
+	font-size: 1.4rem;
+	padding: 0 2rem;
+	color: var(--primary-darkerblue) ;
+	cursor: pointer;
+    margin-left: 1rem;
+}
+
+.search-form .fa-solid {
+    min-width: calc(60px  - ((8px + 10px) * 2));
+    position: absolute;
+    left: 10px; 
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--primary-darkerblue);
+}
+
+.content {
+    margin-left: 300px;
+    padding: 20px;
+    width: calc(100% - 300px);
+}
+
+.pacientes-container {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-top: 15px;
+    padding: 0 10px;
+}
+
+.paciente-card {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    margin-bottom: 10px;
+    background: var(--background-color);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.3s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.paciente-card:hover {
+    background: var(--lighter-blue);
+}
+
+.paciente-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 15px;
+    background: var(--button-gray);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary-darkerblue);
+}
+
+.paciente-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.paciente-info {
+    flex: 1;
+}
+
+.paciente-nombre {
+    margin: 0 0 5px 0;
+    font-size: 15px;
+    color: var(--primary-darkerblue);
+    font-weight: 600;
+}
+
+.paciente-detalle {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--border-gray);
+    margin-bottom: 5px;
+}
+
+.paciente-direccion {
+    font-size: 12px;
+    color: var(--border-gray);
+}
+
+.no-pacientes {
+    text-align: center;
+    padding: 20px;
+    color: var(--border-gray);
+}
+
+.no-pacientes i {
+    font-size: 24px;
+    margin-bottom: 10px;
+    color: var(--border-gray);
+}
+
+.paciente-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.paciente-link:hover {
+    text-decoration: none;
+}
+
+/* Scrollbar styling */
+.pacientes-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.pacientes-container::-webkit-scrollbar-track {
+    background: var(--button-gray);
+    border-radius: 10px;
+}
+
+.pacientes-container::-webkit-scrollbar-thumb {
+    background: var(--primary-darkerblue);
+    border-radius: 10px;
+}
+
+.pacientes-container::-webkit-scrollbar-thumb:hover {
+    background: var(--buttons-blue);
+}

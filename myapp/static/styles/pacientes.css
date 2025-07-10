@@ -1,0 +1,1051 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
+:root {
+    --primary-darkerblue: #265073;
+    --buttons-blue: #0766AD;
+    --primary-lightblue: #AED3F2;
+    --lighter-blue: #D5E5F2;
+    --second-lighter-blue: #c8e1f5;
+    --background-color: #F3F3F3;
+    --border-gray: #b3b3b3;
+    --liner-gray: #d3d2d2;
+    --button-gray: #e4e4e4;
+    --complement-cian: #009eb3;
+    --complement-blue: #105183;
+
+    --white: #ffffff;
+    --text-color: #212529;          /* For dropdown text */
+    --light-gray: #f8f9fa;          /* For dropdown hover */
+    --medium-gray: #86888b;         /* For generic modal borders, form inputs */
+    --dark-gray: #343a40;           /* For generic modal close button text */
+    --danger-color: #dc3545;        /* For errors, destructive actions */
+    --success-color: #28a745;       /* For success badges */
+    --warning-color: #ffc107;
+}
+
+
+html {
+    font-size: 62.5%;
+    font-family: "Poppins", serif;
+    overflow-x: hidden;   
+}
+
+
+body{
+    background-color: var(--background-color);
+    overflow: hidden;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+a{
+    text-decoration: none;
+}
+
+li{
+    list-style: none;
+}
+
+
+
+/* Layout */
+.app-container {
+  display: flex;
+  min-height: 100vh;
+  margin-left: 25rem;
+}
+
+.main-content {
+  flex: 1;
+  padding: 2rem;
+}
+
+.content-header{
+    display: flex;
+    align-items: center;
+    height: 4rem;
+    padding: 0 1rem;
+    border-bottom: 1px solid var(--border-gray);
+}
+
+.breadcrumb{
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    font-size: 1.3rem;
+}
+
+.breadcrumb-item{
+    color: var(--buttons-blue);
+}
+
+.breadcrumb-item.active{
+    color: var(--primary-darkerblue);
+    font-weight: 500;
+}
+
+
+
+
+/* -------------PACIENTES---------*/
+.patients-content {
+  padding-top: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.contenido-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-content{
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+    padding-left: 0.5rem;
+}
+
+.header-content h1 {
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 0.5rem;
+  color: var(--primary-darkerblue);
+  margin-bottom: 2rem;
+}
+
+.header-content p {
+  color: var(--primary-darkerblue);
+  font-size: 1.3rem;
+}
+
+.btn-outline{
+  display: flex;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  background-color: var(--lighter-blue);
+  border: 1px solid var(--lighter-blue);
+  border-radius: 0.5rem;
+  color: var(--complement-blue);
+  font-size: 1.2rem;
+  font-family: "Poppins", serif;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+button i {
+  font-size: 1.3rem;
+  margin-right: 1rem;
+  width: 2rem;
+  text-align: center;
+}
+
+/*-------------Tarjetas de estadisticas-------------*/
+
+.stats-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2.5rem;
+    margin-bottom: 3rem;
+}
+
+.stat-card{
+    background-color: var(--background-color);
+    border-radius: 0.5rem;
+    padding: 2.5rem;
+    border: 1px solid var(--border-gray);
+}
+
+.stat-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.stat-header h3{
+    font-size: 1.2rem;
+    color: var(--primary-darkerblue);
+    margin: 0;
+    font-weight: 600;
+}
+
+.stat-header i{
+    color: var(--complement-blue);
+    font-size: 1.4rem;
+}
+
+.stat-content h2{
+    font-size: 2.8rem;
+    color: var(--complement-blue);
+    margin: 0 0 0.5rem 0;
+}
+
+/* ------------ Tarjeta de filtros --------------- */
+.content-card {
+  background-color: var(--background-color);
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-gray);
+  overflow: hidden;
+  padding: 1.5rem;
+}
+
+.tarjeta-header {
+  padding: 0.5rem;
+}
+
+.content-card {
+  font-size: 1.3rem;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  color: var(--primary-darkerblue);
+}
+
+.card-header h2 {
+  margin-bottom: 0.5rem;
+}
+
+.card-header p {
+  margin-bottom: 2rem;
+}
+
+.filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.25rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.filter-group label {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: var(--primary-darkerblue);
+}
+
+.search-input {
+  position: relative;
+  margin-top: 0.02rem;
+}
+
+.search-input i {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted-foreground);
+  font-size: 1.3rem;
+}
+
+.search-input input {
+  width: 100%;
+  padding: 0.5rem 0.75rem 0.5rem 3rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-gray);
+  background-color: var(--background-color);
+  color: var(--primary-darkerblue);
+  font-size: 1.3rem;
+  font-family: "Poppins", serif;
+}
+
+.filter-group select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-gray);
+  background-color: var(--background-color);
+  color: var(--primary-darkerblue);
+  font-size: 1.3rem;
+  font-family: "Poppins", serif;
+}
+
+.filter-actions {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-end;
+  
+}
+
+.btn-buscar{
+  display: flex;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  background-color: var(--complement-blue);
+  border: 1px solid var(--complement-blue);
+  border-radius: 0.5rem;
+  color: var(--lighter-blue);
+  font-size: 1.2rem;
+  font-family: "Poppins", serif;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-limpiar{
+  display: flex;
+  align-items: center;
+  padding: 0.85rem 1rem;
+  background-color: var(--lighter-blue);
+  border: 1px solid var(--lighter-blue);
+  border-radius: 0.5rem;
+  color: var(--complement-blue);
+  font-size: 1.2rem;
+  font-family: "Poppins", serif;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+a i{
+   font-size: 1.3rem;
+  margin-right: 1rem;
+  width: 2rem;
+  text-align: center; 
+}
+
+
+.table-container {
+  overflow-x: auto;
+}
+
+.patients-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+.patients-table th {
+  text-align: left;
+  padding: 1rem 1rem;
+  background-color: var(--background-color);
+  color: var(--primary-darkerblue);
+  font-weight: 600;
+  white-space: nowrap;
+  font-size: 1.4rem;
+  border-bottom: 1px solid var(--border-gray);
+}
+
+.patients-table td {
+  padding: 1rem 1rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+  font-size: 1.4rem;
+  border-bottom: 1px solid var(--border-gray);
+}
+
+.patients-table tr:last-child td {
+  border-bottom: none;
+}
+
+.patients-table tr:hover {
+  background-color: var(--background-color);
+}
+
+
+
+/* -------- Info del paciente ------------------ */
+.patient-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.patient-avatar {
+  position: relative;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.patient-avatar.large {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatar-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--muted);
+  color: var(--foreground);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.patient-name {
+  font-weight: 500;
+  font-size: 1.35rem;
+}
+
+.patient-id {
+  font-size: 1.25rem;
+  color: var(--buttons-blue);
+}
+
+
+
+/* ------------ Contacto -----------------*/
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 1.2rem;
+}
+
+.contact-item.muted {
+  color: var(--muted-foreground);
+}
+
+.contact-icon {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 1rem;
+  font-size: 0.55rem;
+  border-radius: 1.5rem;
+  border: 1px solid var(--medium-gray);
+  background-color: none;
+  font-size: 1.2rem;
+  color: var(--medium-gray);
+  margin-bottom: 0.5rem ;
+  font-weight: 500;
+}
+
+.badge-active {
+  background-color: var(--success-color);
+  color: var(--white);
+  border-color: var(--success-color);
+  font-size: 1.2rem;
+}
+
+.badge-secondary {
+  background-color: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+.badge-danger {
+  background-color: var(--danger-color);
+  color: var(--background-color);
+  border-color: var(--danger-color);
+}
+
+.history-badges {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+
+/* ----------- Modal ------------*/
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.modal.active{
+  display: flex;
+  opacity: 1;
+}
+
+.modal.active .modal-content {
+    transform: scale(1);
+}
+
+.modal-content {
+  background-color: var(--white);
+  border-radius: 1rem;
+  width: 90%;
+  max-width: 95rem;
+  max-height: 80vh;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  overflow-y: auto;
+  scrollbar-gutter: stable; /* Reserva espacio para el scrollbar, evitando el salto */
+  transition: scale(0.95);
+  transition: transform 0.3s ease;
+}
+
+.modal-header {
+  padding: 2.5rem 2rem 1rem 3.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+
+#verPacienteModal .modal-close{
+    position: absolute;
+    top: 1.5rem;
+    right: 2rem;
+    background: none;
+    border: none;
+    font-size: 2.6rem;
+    font-weight: 400; 
+    color: var(--primary-darkerblue);
+    opacity: 0.8;
+    padding: 0;
+    line-height: 1;
+}
+
+.modal h2{
+    font-size: 1.95rem;
+    font-weight: 600;
+    color: var(--primary-darkerblue);
+    margin: 0;
+    line-height: 1.3;
+}
+
+.modal p{
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--border-gray);
+    margin-top: 0.3rem;
+    line-height: 1.5;
+}
+
+.patient-modal-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+
+/* ----------- Modal Tabs ------------*/
+.modal-tabs{
+  padding: 1rem 3.5rem 2rem 3.5rem;
+}
+
+.tabs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background-color: var(--lighter-blue);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.tab-btn {
+  padding: 0.8rem 8rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--complement-blue);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.tab-btn.active {
+  color: var(--primary-darkerblue);
+  background-color: var(--white);
+  border-radius: 0.5rem;
+}
+
+.tab-content {
+  color: var(--primary-darkerblue);
+  display: none;
+  animation: fadeIn 0.5s ease;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+@keyframes fadeIn{
+    from { opacity: 0; transform: translateY(10px) ;}
+    to { opacity: 1; transform: translateY(0);}
+}
+
+.action-buttons .btn-ver, .btn-editar {
+  padding: 0.5rem;
+  border: 1px solid var(--border-gray);
+  background-color: var(--background-color);
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.btn-ver i, .btn-editar i{
+  margin: 0;
+} 
+
+
+/* Grid de información */
+.info-grid {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  margin-bottom: 1rem;
+}
+
+.info-card{
+  border: 2px solid var(--lighter-blue);
+  border-radius: 0.8rem;
+}
+
+.info-card .card-header {
+  padding: 2rem 2rem 0 2rem;  
+}
+
+.card-content{
+  padding: 2rem 0;
+}
+
+.info-card .card-title {
+  font-size: 1.75rem;
+}
+
+.info-item  {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0.5rem 0;
+}
+
+.info-item i {
+  font-size: 1.5rem;
+  margin-left: 2rem;
+  color: var(--primary-darkerblue);
+}
+
+.info-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 2rem;
+}
+
+.info-label {
+  font-size: 1.3rem;
+  color: var(--primary-darkerblue);
+  font-weight: 500;
+}
+
+.info-text{
+  font-size: 1.3rem;
+  color: var(--primary-darkerblue);
+}
+
+
+
+/*------------ PESTAÑA DE HISTORIA CLINICA ----------*/
+.tab-content-header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2.4rem;
+}
+
+.tab-main-title{
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--primary-darkerblue);
+  margin: 0;
+}
+
+
+.btn-primary{
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  background-color: var(--lighter-blue);
+  color: var(--primary-darkerblue);
+  border: none;
+  border-radius: 0.5rem;
+  padding: 1rem 1.6rem;
+  font-size: 1.3rem;
+  font-weight: 500;
+  font-family: "Poppins", serif;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover{
+  background-color: var(--primary-darkerblue);
+  color: var(--background-color);
+}
+
+.btn-icon{
+  font-size: 1.6rem;
+  color: var(--primary-darkerblue);
+}
+
+
+        /*----- LISTA DE CONSULTAS DEL PACIENTE -----*/
+.history-list{
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+}
+
+.history-card{
+  position: relative;
+  background-color: var(--white);
+  border: 1px solid var(--lighter-blue);
+  border-radius: 1rem;
+  padding: 2.4rem;
+  overflow: hidden;
+}
+
+.history-card .view-content{
+  display: block;
+}
+
+.history-card .editable-content{
+  display: none;
+}
+
+.history-card .historia-card-header{
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.history-id{
+  font-family: "Poppins", serif;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--dark-gray);
+  background-color: var(--white);
+  padding: 0.4rem 0.8rem;
+  border-radius: 9999px;
+  border: 1px solid var(--dark-gray);
+}
+
+      /* ------ Badges de estado ------- */
+.history-card .badge {
+  padding: 0.4rem 0.8rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 9999px;
+}
+
+.badge.status-completed {
+  background-color: var(--buttons-blue);
+  border: none;
+  color: var(--background-color);
+}
+
+.badge.status-review {
+  background-color: var(--background-color);
+  color: var(--complement-blue);
+  border: 1px solid var(--complement-blue);
+}
+
+
+      /* ---- Títulos y metadata ---- */
+.history-title {
+  font-size: 1.125rem; /* 18px */
+  font-weight: 600;
+  color: var(--primary-darkerblue);
+  margin: 0 0 0.4rem 0;
+}
+
+.history-subtitle {
+  font-size: 0.9rem;
+  color: var(--medium-gray);
+  margin: 0 0 1.6rem 0;
+}
+
+.history-meta {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  margin-bottom: 1.6rem;
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 1.2rem;
+  color: var(--primary-darkerblue);
+}
+
+.meta-icon {
+  font-size: 1.6rem;
+  color: var(--primary-darkerblue);
+}
+
+      /* ---- Tags o etiquetas inferiores ----- */
+.history-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+}
+
+.tag {
+  background-color: var(--background-color);
+  color: var(--buttons-blue);
+  padding: 0.6rem 1.2rem;
+  border-radius: 0.8rem;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+      /*----- Botón de acción de la tarjeta -----*/
+.card-actions.view-actions{
+  position: absolute;
+  top: 2.4rem;
+  right: 2.4rem;
+  display: flex;
+  gap: 0.8rem;
+}
+
+.action-btn{
+  background-color: var(--white);
+  border: 1px solid var(--dark-gray);
+  border-radius: 0.8rem;
+  width: 3.6rem;
+  height: 3.6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--dark-gray);
+  transition: all 0.2s;
+}
+
+.action-btn:hover{
+  background-color: var(--button-gray);
+  border-color: var(--border-gray);
+  color: var(--dark-gray);
+}
+
+.action-btn i{
+  font-size: 1.3rem;
+  margin-left: 0.8rem;
+}
+
+      /*----- ESTADO DE EDICIÓN -----*/
+.history-card.is-editing .view-content{
+  display: none;
+}
+
+.history-card.is-editing .editable-content{
+  display: block;
+}
+
+      /*---- ESTILOS PARA EL FORMULARIO DE EDICION DE CONSULTA ----*/
+
+.editable-content h4{
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+}
+
+.edit-form .form-group{
+  margin-bottom: 1.6rem
+}
+
+.form-group h1{
+  font-size: 1rem;
+  color: var(--primary-darkerblue);
+}
+
+.form-group label{
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.6rem;
+  font-size: 1rem;
+}
+
+.form-group input, textarea{
+  width: 100%;
+  padding: 1rem;
+  border: 1px solid var(--border-gray);
+  border-radius: 0.8rem;
+  font-size: 1rem;
+}
+
+.card-actions.edit-actions{
+  display: flex;
+  justify-content: flex-end;
+  gap: 1.2rem;
+  margin-top: 2.4rem;
+}
+
+.btn{
+  padding: 1rem 2rem;
+  border-radius: 0.8rem;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary{
+  background-color: var(--primary-darkerblue);
+  color: var(--background-color);
+}
+
+.btn-secondary{
+  background-color: var(--lighter-blue);
+  color: var(--primary-darkerblue);
+}
+
+
+
+/*------------PESTAÑA DE DIAGNOSTICOS Y PRUEBAS---------------*/
+
+
+/* Grid principal de dos columnas */
+.analysis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+  gap: 2.4rem;
+}
+
+
+        /*-----Estilo base de las tarjetas de análisis-----*/
+.analysis-card {
+  background-color: var(--white);
+  border: 2px solid var(--lighter-blue); 
+  border-radius: 1rem;
+  padding: 2.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.analysis-card-header {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.analysis-card-header i{
+ font-size: 1.6rem;
+}
+
+.analysis-card-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--primary-darkerblue);
+  margin: 0;
+}
+
+
+        /*----------Contenedor para la lista de ítems de análisis----------*/
+.analysis-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+
+.analysis-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1rem;
+  border-radius: 1rem;
+  font-size: 1.35rem; 
+  color: var(--dark-gray);
+}
+
+/*Examenes*/
+.analysis-card.pending .analysis-item {
+  background-color: #fffbeb;
+}
+
+/*Diagnosticos*/
+.analysis-card.completed .analysis-item {
+  background-color: #ebebeb; 
+}
+
+.analysis-name {
+  font-weight: 500;
+}
+
+
+      /* ----------Estilo para las badges de estado----------- */
+.analysis-item .badge {
+  padding: 0.4rem 1.2rem;
+  border-radius: 9999px; 
+  font-size: 1rem; 
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.badge.status-pending,
+.badge.status-in-progress {
+  background-color: #fef3c7; 
+  color: #92400e; 
+  border: 1px solid #fde68a;
+}
+
+.badge.status-completed {
+  background-color: #1f2937; /* Gris oscuro */
+  color: #ffffff;
+}
+
+
+.badge.status-discard{
+  background-color: transparent;
+  color: #1f2937;
+}
+
+
+    
+
+/* Responsive */
+@media (max-width: 768px) {
+  .stats-grid, .filters-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .content-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .patients-table {
+    display: block;
+    overflow-x: auto;
+  }
+}

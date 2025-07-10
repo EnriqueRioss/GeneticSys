@@ -1,0 +1,13 @@
+env/
+.env
+.env/
+venv/
+.venv/
+*.env/
+env-jose/
+.env-jose/
+__pycache__/
+
+*.pyc
+*.pyo
+*.pyd

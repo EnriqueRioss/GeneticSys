@@ -1,0 +1,172 @@
+{% extends 'layouts/base2.html' %}
+{% load static %}
+
+{%block form_content%}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ANTECEDENTES PERSONALES</title>
+    <link rel="stylesheet" href= "{% static '/styles/stylesforms.css' %}">
+</head>
+<body>
+
+<div class="contenedor-formulario">
+    <form method="post" id="antecedentes-personales-form">
+        {% csrf_token %}
+
+        <div class="form-step active">
+            <div class="step-content-header">
+                <i class="fas fa-file-medical"></i>
+                <h2>Antecedentes Personales y Desarrollo</h2>
+            </div>
+
+            <p class="step-subtitle">Datos basicos del paciente</p>
+
+            <p class="historia-info">Nº de Historia Clínica: {{ historia.numero_historia }}</p>
+            {% if editing %}
+                <p class="editing-info"><em>Modo Edición: Actualizando datos del propósito.</em></p>
+            {% endif %}
+
+
+            <div class="alert alert-danger non-field-errors"></div>
+
+
+
+            <div class="form-section">
+                <div class="section-header" onclick="toggleSection('prenatales')">
+                    <h3>1. Antecedentes prenatales y obstetricos</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div id="prenatales-content" class="section-content">
+                    <div class="form-group-tres">
+                        <div class="third-width"><label for="{{ form.fur.id_for_label }}">FUR (Fecha de Última Regla)</label>{{ form.fur }}<div class="field-errors" id="error_{{ form.fur.id_for_label }}"></div></div>
+                        <div class="third-width"><label for="{{ form.controles_prenatales.id_for_label }}">Controles Prenatales</label>{{ form.controles_prenatales }}<div class="field-errors" id="error_{{ form.controles_prenatales.id_for_label }}"></div></div>
+                        <div class="third-width"><label for="{{ form.edad_gestacional.id_for_label }}">Edad Gestacional</label>{{ form.edad_gestacional }}<div class="field-errors" id="error_{{ form.edad_gestacional.id_for_label }}"></div></div>
+                    </div>
+                    <div class="form-group-tres">
+                        <div class="third-width"><label for="{{ form.numero_partos.id_for_label }}">Número de Partos</label>{{ form.numero_partos }}<div class="field-errors" id="error_{{ form.numero_partos.id_for_label }}"></div></div>
+                        <div class="third-width"><label for="{{ form.numero_gestas.id_for_label }}">Número de Gestas</label>{{ form.numero_gestas }}<div class="field-errors" id="error_{{ form.numero_gestas.id_for_label }}"></div></div>
+                        <div class="third-width"><label for="{{ form.numero_cesareas.id_for_label }}">Número de Cesáreas</label>{{ form.numero_cesareas }}<div class="field-errors" id="error_{{ form.numero_cesareas.id_for_label }}"></div></div>
+                    </div>
+                    <div class="form-group-tres">
+                        <div class="third-width"><label for="{{ form.numero_abortos.id_for_label }}">Número de Abortos</label>{{ form.numero_abortos }}<div class="field-errors" id="error_{{ form.numero_abortos.id_for_label }}"></div></div>
+                        <div class="third-width"><label for="{{ form.numero_mortinatos.id_for_label }}">Número de Mortinatos</label>{{ form.numero_mortinatos }}<div class="field-errors" id="error_{{ form.numero_mortinatos.id_for_label }}"></div></div>
+                        <div class="third-width"><label for="{{ form.numero_malformaciones.id_for_label }}">Número de Malformaciones</label>{{ form.numero_malformaciones }}<div class="field-errors" id="error_{{ form.numero_malformaciones.id_for_label }}"></div></div>
+                    </div>
+                    <div class="form-group"><label for="{{ form.complicaciones_embarazo.id_for_label }}">Complicaciones del Embarazo</label>{{ form.complicaciones_embarazo }}<div class="field-errors" id="error_{{ form.complicaciones_embarazo.id_for_label }}"></div></div>
+                    <div class="form-group"><label for="{{ form.exposicion_teratogenos.id_for_label }}">Exposición a Teratógenos</label>{{ form.exposicion_teratogenos }}<div class="field-errors" id="error_{{ form.exposicion_teratogenos.id_for_label }}"></div></div>
+                    <div class="form-group"><label for="{{ form.descripcion_exposicion.id_for_label }}">Descripción de la Exposición</label>{{ form.descripcion_exposicion }}<div class="field-errors" id="error_{{ form.descripcion_exposicion.id_for_label }}"></div></div>
+                    <div class="form-group"><label for="{{ form.enfermedades_maternas.id_for_label }}">Enfermedades Maternas</label>{{ form.enfermedades_maternas }}<div class="field-errors" id="error_{{ form.enfermedades_maternas.id_for_label }}"></div></div>
+                    <div class="form-group"><label for="{{ form.complicaciones_parto.id_for_label }}">Complicaciones del Parto</label>{{ form.complicaciones_parto }}<div class="field-errors" id="error_{{ form.complicaciones_parto.id_for_label }}"></div></div>
+                    <div class="form-group"><label for="{{ form.otros_antecedentes.id_for_label }}">Otros Antecedentes</label>{{ form.otros_antecedentes }}<div class="field-errors" id="error_{{ form.otros_antecedentes.id_for_label }}"></div></div>
+                    <div class="form-group"><label for="{{ form.observaciones.id_for_label }}">Observaciones</label>{{ form.observaciones }}<div class="field-errors" id="error_{{ form.observaciones.id_for_label }}"></div></div>
+                </div>
+            </div>
+            <div class="form-section">
+                <div class="section-header" onclick="toggleSection('neonatal')">
+                    <h3>2. Periodo Neonatal</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div id="neonatal-content" class="section-content">
+                    <div class="form-group-tres">
+                        <div class="third-width"><label for="{{ form.peso_nacer.id_for_label }}">Peso al Nacer (kg)</label>{{ form.peso_nacer }}<div class="field-errors" id="error_{{ form.peso_nacer.id_for_label }}"></div></div>
+                        <div class="third-width"><label for="{{ form.talla_nacer.id_for_label }}">Talla al Nacer (cm)</label>{{ form.talla_nacer }}<div class="field-errors" id="error_{{ form.talla_nacer.id_for_label }}"></div></div>
+                        <div class="third-width"><label for="{{ form.circunferencia_cefalica.id_for_label }}">Circunferencia Cefálica (cm)</label>{{ form.circunferencia_cefalica }}<div class="field-errors" id="error_{{ form.circunferencia_cefalica.id_for_label }}"></div></div>
+                    </div>
+                    <div class="form-group"><h3>Complicaciones</h3><br><br></div>
+                    <div class="form-group-tres">
+                        <div class="third-width"><label for="{{ form.cianosis.id_for_label }}">Cianosis</label>{{ form.cianosis }}<div class="field-errors" id="error_{{ form.cianosis.id_for_label }}"></div></div>
+                        <div class="third-width"><label for="{{ form.ictericia.id_for_label }}">Ictericia</label>{{ form.ictericia }}<div class="field-errors" id="error_{{ form.ictericia.id_for_label }}"></div></div>
+                        <div class="third-width"><label for="{{ form.hemorragia.id_for_label }}">Hemorragia</label>{{ form.hemorragia }}<div class="field-errors" id="error_{{ form.hemorragia.id_for_label }}"></div></div>
+                    </div>
+                    <div class="form-group-tres">
+                        <div class="third-width"><label for="{{ form.infecciones.id_for_label }}">Infecciones</label>{{ form.infecciones }}<div class="field-errors" id="error_{{ form.infecciones.id_for_label }}"></div></div>
+                        <div class="third-width"><label for="{{ form.convulsiones.id_for_label }}">Convulsiones</label>{{ form.convulsiones }}<div class="field-errors" id="error_{{ form.convulsiones.id_for_label }}"></div></div>
+                        <div class="third-width"><label for="{{ form.vomitos.id_for_label }}">Vómitos</label>{{ form.vomitos }}<div class="field-errors" id="error_{{ form.vomitos.id_for_label }}"></div></div>
+                    </div>
+                    <div class="form-group"><label for="{{ form.observacion_complicaciones.id_for_label }}">Observaciones de Complicaciones</label>{{ form.observacion_complicaciones }}<div class="field-errors" id="error_{{ form.observacion_complicaciones.id_for_label }}"></div></div>
+                    <div class="form-group"><label for="{{ form.otros_complicaciones.id_for_label }}">Otras Complicaciones</label>{{ form.otros_complicaciones }}<div class="field-errors" id="error_{{ form.otros_complicaciones.id_for_label }}"></div></div>
+                </div>
+            </div>
+            <div class="form-section">
+                <div class="section-header" onclick="toggleSection('alimentacion')">
+                    <h3>3. Alimentación y Evolución</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div id="alimentacion-content" class="section-content">
+                    <div class="form-group"><label for="{{ form.tipo_alimentacion.id_for_label }}">Tipo de Alimentación</label>{{ form.tipo_alimentacion }}<div class="field-errors" id="error_{{ form.tipo_alimentacion.id_for_label }}"></div></div>
+                    <div class="form-group"><label for="{{ form.observaciones_alimentacion.id_for_label }}">Observaciones de Alimentación</label>{{ form.observaciones_alimentacion }}<div class="field-errors" id="error_{{ form.observaciones_alimentacion.id_for_label }}"></div></div>
+                    <div class="form-group"><label for="{{ form.evolucion.id_for_label }}">Evolución</label>{{ form.evolucion }}<div class="field-errors" id="error_{{ form.evolucion.id_for_label }}"></div></div>
+                </div>
+            </div>
+            <div class="form-section">
+                <div class="section-header"  onclick="toggleSection('psicomotor')">
+                    <h3>4. Desarrollo Psicomotor</h3>
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+                <div id="psicomotor-content" class="section-content">
+                    <div class="form-group">
+                        <table class="table-container">
+                            <thead><tr><th>Desarrollo Psicomotor</th><th>VH (Valor Habitual)</th><th>PCTE</th></tr></thead>
+                            <tbody>
+                                <tr><td>Sostener Cabeza</td><td>1er Mes</td><td>{{ form.sostener_cabeza }}<div class="field-errors" id="error_{{ form.sostener_cabeza.id_for_label }}"></div></td></tr>
+                                <tr><td>Sonrisa Social</td><td>2do Mes</td><td>{{ form.sonrisa_social }}<div class="field-errors" id="error_{{ form.sonrisa_social.id_for_label }}"></div></td></tr>
+                                <tr><td>Sentarse</td><td>6to Mes</td><td>{{ form.sentarse }}<div class="field-errors" id="error_{{ form.sentarse.id_for_label }}"></div></td></tr>
+                                <tr><td>Gatear</td><td>9no Mes</td><td>{{ form.gatear }}<div class="field-errors" id="error_{{ form.gatear.id_for_label }}"></div></td></tr>
+                                <tr><td>Pararse</td><td>11vo Mes</td><td>{{ form.pararse }}<div class="field-errors" id="error_{{ form.pararse.id_for_label }}"></div></td></tr>
+                                <tr><td>Caminar</td><td>12vo Mes</td><td>{{ form.caminar }}<div class="field-errors" id="error_{{ form.caminar.id_for_label }}"></div></td></tr>
+                                <tr><td>Primeras Palabras</td><td>12vo Mes</td><td>{{ form.primeras_palabras }}<div class="field-errors" id="error_{{ form.primeras_palabras.id_for_label }}"></div></td></tr>
+                                <tr><td>Primeros Dientes</td><td>6to Mes</td><td>{{ form.primeros_dientes }}<div class="field-errors" id="error_{{ form.primeros_dientes.id_for_label }}"></div></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="form-group"><label for="{{ form.progreso_escuela.id_for_label }}">Progreso en la Escuela</label>{{ form.progreso_escuela }}<div class="field-errors" id="error_{{ form.progreso_escuela.id_for_label }}"></div></div>
+                    <div class="form-group"><label for="{{ form.progreso_peso.id_for_label }}">Progreso en Peso</label>{{ form.progreso_peso }}<div class="field-errors" id="error_{{ form.progreso_peso.id_for_label }}"></div></div>
+                    <div class="form-group"><label for="{{ form.progreso_talla.id_for_label }}">Progreso en Talla</label>{{ form.progreso_talla }}<div class="field-errors" id="error_{{ form.progreso_talla.id_for_label }}"></div></div>
+                    <div class="form-group"><label for="{{ form.observaciones_habitos_psicologicos.id_for_label }}">Observaciones de Habitos Psicologicos</label>{{ form.observaciones_habitos_psicologicos }}<div class="field-errors" id="error_{{ form.observaciones_habitos_psicologicos.id_for_label }}"></div></div>
+                </div>
+            </div><br><br>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="window.history.back()">Anterior</button>
+            <button type="submit" name="save_draft" class="btn btn-outline">Guardar Borrador</button>
+            <button type="submit" class="btn btn-primary" id="nextBtn">Siguiente</button>
+                <!--<button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">Finalizar y Guardar</button>-->
+        </div>
+    </form>
+</div>
+</body>
+<script src="https://kit.fontawesome.com/8058dee255.js" crossorigin="anonymous"></script>
+
+<script>
+    let openSection = 'prenatales'; // Default open section
+    function toggleSection(sectionId) {
+        const content = document.getElementById(`${sectionId}-content`);
+        if (openSection && openSection !== sectionId) {
+            const currentContent = document.getElementById(`${openSection}-content`);
+            if (currentContent) currentContent.classList.remove('active');
+        }
+        if (content) {
+            if (content.classList.contains('active')) {
+                content.classList.remove('active');
+                openSection = null;
+            } else {
+                content.classList.add('active');
+                openSection = sectionId;
+            }
+        }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        const initialSectionContent = document.getElementById(`${openSection}-content`);
+        if (initialSectionContent) {
+            initialSectionContent.classList.add('active');
+        }
+        setupAjaxForm('antecedentes-personales-form');
+    });
+</script>
+
+{% endblock form_content %}

@@ -1,0 +1,141 @@
+{% extends 'layouts/base2.html' %}
+{% load static %}
+
+{% block form_content %}
+
+<head>
+    <title>Autorización</title>
+    <link rel="stylesheet" href="{% static '/styles/stylesforms.css' %}">
+</head>
+
+<div class="contenedor-formulario">
+    <!-- El ID es importante para el script AJAX -->
+    <form id="autorizacion-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {% for ctx in autorizacion_contexts %}
+        <div class="form-step active">
+            <div class="step-content-header">
+                <i class="fas fa-file-signature"></i>
+                <h2>Autorización para: {{ ctx.proposito.nombres }} {{ ctx.proposito.apellidos }}</h2>
+            </div>
+
+            <p class="step-subtitle">Datos de la autorización para el Paciente o su Representante.</p>
+
+            <p class="autorizacion-text">El suscrito paciente o representante del mismo Sr. o Sra.: 
+                Autorizo a él o los médicos del Instituto de Investigaciones Genéticas de L.U.Z
+                a efectuar todo examen físico y de laboratorio, fotografías y/o videos clínicos, 
+                imagenes diagnósticas, terapéuticas, estudios anatomopatológicos incluyendo necropsia
+                en caso de muerte, y diversas técnicas de diagnositico prenatal que se consideren pertinentes
+                para el diagnositico y tratamiento del mismo. Así mismo, autorizo a que la información, resultados
+                de examenes complementarios, fotografías y/o videos obtenidos durante el estudio del paciente,
+                siempre y cuando no se mencione su nombre, pueden ser divulgados por medios audiovisuales
+                y/o publicaciones escritas con fines estrictamente académicas o científicos. 
+            </p>
+
+            <!-- Contenedor para errores no asociados a un campo específico -->
+            <div class="alert alert-danger non-field-errors" data-prefix="{{ ctx.form.prefix }}"></div>
+
+            <div class="form-group-tres">
+                <div class="third-width">
+                    <label for="{{ ctx.form.autorizacion_examenes.id_for_label }}">{{ ctx.form.autorizacion_examenes.label }}</label>
+                    {{ ctx.form.autorizacion_examenes }}
+                    <div class="error-message" data-field-name="{{ ctx.form.prefix }}-autorizacion_examenes"></div>
+                </div>
+                <div class="third-width">
+                    <label for="{{ ctx.form.archivo_autorizacion.id_for_label }}">{{ ctx.form.archivo_autorizacion.label }}</label>
+                    {{ ctx.form.archivo_autorizacion }}
+                     <div class="error-message" data-field-name="{{ ctx.form.prefix }}-archivo_autorizacion"></div>
+                </div>
+                <div class="third-width">
+                    {% if ctx.is_minor %}
+                        <label for="{{ ctx.form.representante_selector.id_for_label }}">{{ ctx.form.representante_selector.label }}</label>
+                        {{ ctx.form.representante_selector }}
+                        <div class="error-message" data-field-name="{{ ctx.form.prefix }}-representante_selector"></div>
+                    {% else %}
+                        <label>Representante o Paciente</label>
+                        <p class="form-static-info"><strong>{{ ctx.proposito.nombres }} {{ ctx.proposito.apellidos }}</strong> (Mayor de edad)</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="window.history.back()">Anterior</button>
+            <button type="submit" class="btn-primary">Finalizar y Guardar Historia Clínica</button>
+        </div>
+    </form>
+</div>
+
+<!-- Script AJAX para el envío asíncrono -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('autorizacion-form');
+
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        // Limpiar errores previos
+        document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+        document.querySelectorAll('.alert-danger.non-field-errors').forEach(el => {
+            el.textContent = '';
+            el.style.display = 'none';
+        });
+
+        const formData = new FormData(form);
+        const submitButton = form.querySelector('button[type="submit"]');
+        const originalButtonText = submitButton.innerHTML;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        submitButton.disabled = true;
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                // No se necesita 'X-CSRFToken', FormData ya lo incluye si el input está en el form.
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Redirigir a la URL de éxito proporcionada por la vista
+                window.location.href = data.redirect_url;
+            } else {
+                // Mostrar errores de validación
+                Object.keys(data.errors).forEach(key => {
+                    const errorMessages = data.errors[key].map(e => e.message || e).join(' ');
+                    const fieldErrorElement = document.querySelector(`.error-message[data-field-name="${key}"]`);
+                    
+                    if (fieldErrorElement) {
+                        fieldErrorElement.textContent = errorMessages;
+                    } else {
+                        // Errores no asociados a un campo (non-field-errors)
+                        // Necesitamos encontrar el contenedor de errores correcto usando el prefijo
+                        const prefix = key.split('-')[0];
+                        const nonFieldErrorsContainer = document.querySelector(`.alert-danger.non-field-errors[data-prefix="${prefix}"]`);
+                        if (nonFieldErrorsContainer) {
+                             nonFieldErrorsContainer.textContent += errorMessages + ' ';
+                             nonFieldErrorsContainer.style.display = 'block';
+                        }
+                    }
+                });
+                // Mensaje genérico de error si hay errores
+                alert("Hubo errores en el formulario. Por favor, revíselos.");
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Ocurrió un error de red. Por favor, intente de nuevo.');
+        })
+        .finally(() => {
+            // Restaurar el botón
+            submitButton.innerHTML = originalButtonText;
+            submitButton.disabled = false;
+        });
+    });
+});
+</script>
+
+{% endblock form_content %}

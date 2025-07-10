@@ -1,0 +1,188 @@
+{% extends 'layouts/base2.html' %}
+{% load static %}
+
+{% block form_content %}
+<link rel="stylesheet" href="{% static '/styles/forms.css' %}">
+
+
+
+
+    {% if errors %}
+    <div class="alert alert-danger">
+        <strong>Errores:</strong>
+        <ul>
+            {% for field, error_list in errors.items %}
+                <li>{{ field }}: {{ error_list }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+    
+    <form method="post" action="{% url 'examen_fisico' proposito.proposito_id %}">
+        {% csrf_token %}
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label for="medida_abrazada">Medida Abrazada</label>
+                {{ form.medida_abrazada }}
+            </div>
+            <div class="form-group col-md-4">
+                <label for="segmento_inferior">Segmento Inferior</label>
+                {{ form.segmento_inferior }}
+            </div>
+            <div class="form-group col-md-4">
+                <label for="segmento_superior">Segmento Superior</label>
+                {{ form.segmento_superior }}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-3">
+                <label for="circunferencia_cefalica">Circunferencia Cefálica</label>
+                {{ form.circunferencia_cefalica }}
+            </div>
+            <div class="form-group col-md-3">
+                <label for="talla">Talla (cm)</label>
+                {{ form.talla }}
+            </div>
+            <div class="form-group col-md-3">
+                <label for="peso">Peso (kg)</label>
+                {{ form.peso }}
+            </div>
+            <div class="form-group col-md-3">
+                <label for="ss_si">SS/SI</label>
+                {{ form.ss_si }}
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group col-md-4">
+                <label for="tension_arterial_sistolica">Tensión Arterial Sistólica</label>
+                {{ form.tension_arterial_sistolica }}
+            </div>
+            <div class="form-group col-md-4">
+                <label for="tension_arterial_diastolica">Tensión Arterial Diastólica</label>
+                {{ form.tension_arterial_diastolica }}
+            </div>
+            <div class="form-group col-md-4">
+                <label for="ct">CT</label>
+                {{ form.ct }}
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h4>Distancias</h4>
+            <div class="form-row">
+                <div class="form-group col-md-4">
+                    <label for="distancia_intermamilar">Distancia Intermamilar</label>
+                    {{ form.distancia_intermamilar }}
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="distancia_interc_interna">Distancia Interc. Interna</label>
+                    {{ form.distancia_interc_interna }}
+                </div>
+                <div class="form-group col-md-4">
+                    <label for="distancia_interpupilar">Distancia Interpupilar</label>
+                    {{ form.distancia_interpupilar }}
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="distancia_interc_externa">Distancia Interc. Externa</label>
+                    {{ form.distancia_interc_externa }}
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="pabellones_auriculares">Pabellones Auriculares</label>
+                    {{ form.pabellones_auriculares }}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h4>Longitudes de Manos</h4>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="longitud_mano_derecha">Longitud Mano Derecha</label>
+                    {{ form.longitud_mano_derecha }}
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="longitud_mano_izquierda">Longitud Mano Izquierda</label>
+                    {{ form.longitud_mano_izquierda }}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h4>Observaciones</h4>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="observaciones_cabeza">Cabeza</label>
+                    {{ form.observaciones_cabeza }}
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="observaciones_cuello">Cuello</label>
+                    {{ form.observaciones_cuello }}
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="observaciones_torax">Tórax</label>
+                    {{ form.observaciones_torax }}
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="observaciones_abdomen">Abdomen</label>
+                    {{ form.observaciones_abdomen }}
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="observaciones_genitales">Genitales</label>
+                    {{ form.observaciones_genitales }}
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="observaciones_espalda">Espalda</label>
+                    {{ form.observaciones_espalda }}
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="observaciones_miembros_superiores">Miembros Superiores</label>
+                    {{ form.observaciones_miembros_superiores }}
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="observaciones_miembros_inferiores">Miembros Inferiores</label>
+                    {{ form.observaciones_miembros_inferiores }}
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="observaciones_piel">Piel</label>
+                    {{ form.observaciones_piel }}
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="observaciones_osteomioarticular">Osteomioarticular</label>
+                    {{ form.observaciones_osteomioarticular }}
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="observaciones_neurologico">Neurológico</label>
+                    {{ form.observaciones_neurologico }}
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="observaciones_pliegues">Pliegues</label>
+                    {{ form.observaciones_pliegues }}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fa-solid fa-save"></i> {% if editing %}Actualizar{% else %}Guardar{% endif %} Examen
+            </button>
+            <a href="{% url 'examen_fisico' proposito.proposito_id %}" class="btn btn-secondary">
+                <i class="fa-solid fa-times"></i> Cancelar
+            </a>
+        </div>
+    </form>
+
+{% endblock form_content %}

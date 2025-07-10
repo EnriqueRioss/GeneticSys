@@ -1,0 +1,201 @@
+/* --- General y Tipografía --- */
+
+        /* --- Contenedor Principal del Formulario --- */
+        .form-container {
+            max-width: 950px;
+            margin: 20px auto;
+            padding: 40px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            border: 1px solid #dee2e6;
+        }
+
+        .error-list {
+            color: #dc3545;
+            font-size: 0.875em;
+            margin-top: 5px;
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .form-group .error-list {
+            margin-top: 0.25rem;
+            margin-bottom: 1rem;
+        }
+        .error-list p {
+            margin: 0;
+        }
+        .non-form-errors {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header-info {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 1rem;
+        }
+        
+        .historia-info {
+            font-weight: 500;
+            background-color: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        /* --- Grupos de Campos (Fieldsets) --- */
+        fieldset {
+            border: 1px solid #dbe2e9;
+            padding: 25px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            background-color: #fdfdff;
+        }
+
+        legend {
+            width: auto;
+            padding: 0 15px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #34495e;
+            border-bottom: none;
+            margin-bottom: 20px;
+        }
+
+        /* --- Estilos para cada sub-formulario (Diagnóstico, Plan) --- */
+        .dynamic-form-item {
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            background-color: #ffffff;
+            position: relative;
+            transition: box-shadow 0.2s ease-in-out;
+        }
+        .dynamic-form-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        /* --- Estilos de etiquetas y campos de entrada --- */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        .field-wrapper label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        .field-wrapper input[type="text"],
+        .field-wrapper textarea,
+        .form-control { /* Aseguramos que la clase de Django también sea estilizada */
+            width: 100%;
+            padding: 12px 15px;
+            font-size: 1rem;
+            color: #495057;
+            background-color: #fff;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .field-wrapper textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .field-wrapper input[type="text"]:focus,
+        .field-wrapper textarea:focus,
+        .form-control:focus {
+            outline: none;
+            border-color: #80bdff;
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+        }
+
+        /* --- Estilos de Botones --- */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            text-align: center;
+            vertical-align: middle;
+            cursor: pointer;
+            user-select: none;
+            border: 1px solid transparent;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 6px;
+            transition: all 0.2s ease-in-out;
+        }
+        
+        .btn i {
+            margin-right: 8px;
+        }
+
+        .btn-primary {
+            color: #fff;
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0069d9;
+            border-color: #0062cc;
+        }
+
+        .btn-secondary {
+            color: #fff;
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #545b62;
+        }
+
+        .btn-danger-soft {
+            color: #dc3545;
+            background-color: #f8d7da;
+            border-color: transparent;
+            font-size: 0.875rem;
+            padding: 5px 10px;
+        }
+        .btn-danger-soft:hover {
+            color: #fff;
+            background-color: #dc3545;
+        }
+
+        .remove-form-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+        }
+        
+        .add-form-btn {
+            margin-top: 10px;
+        }
+
+        .form-actions {
+            text-align: right;
+            margin-top: 40px;
+            border-top: 1px solid #e9ecef;
+            padding-top: 25px;
+        }

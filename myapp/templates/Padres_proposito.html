@@ -1,0 +1,111 @@
+{% extends 'layouts/base2.html' %}
+{% load static %}
+
+{%block form_content%}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PADRES PROPÓSITO</title>
+    <link rel="stylesheet" href="{% static '/styles/stylesforms.css' %}">
+</head>
+
+
+<div class="contenedor-formulario">
+    <form method="post" enctype="multipart/form-data" id="padres-proposito-form">
+        {% csrf_token %}
+
+        <div class="form-step active">
+            <div class="step-content-header">
+                <i class="fas fa-user"></i>
+                <h2>Padres del Proposito</h2>
+            </div>
+
+            <p class="step-subtitle">Datos basicos de los padres del paciente</p>
+
+            <p class="historia-info">Nº de Historia Clínica: {{ historia.numero_historia }}</p>
+            {% if editing %}
+                <p class="editing-info"><em>Modo Edición: Actualizando datos del propósito.</em></p>
+            {% endif %}
+
+
+            <div class="alert alert-danger non-field-errors"></div>
+
+
+            <div class="section-liner"><h3>Padre</h3></div><br><br>
+            <div id="informacion-padre-section">
+                <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.padre_nombres.id_for_label }}">Nombres</label>{{ form.padre_nombres }}<div class="field-errors" id="error_{{ form.padre_nombres.id_for_label }}"></div></div>
+                    <div class="half-width"><label for="{{ form.padre_apellidos.id_for_label }}">Apellidos</label>{{ form.padre_apellidos }}<div class="field-errors" id="error_{{ form.padre_apellidos.id_for_label }}"></div></div>
+                </div>
+                <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.padre_escolaridad.id_for_label }}">Escolaridad</label>{{ form.padre_escolaridad }}<div class="field-errors" id="error_{{ form.padre_escolaridad.id_for_label }}"></div></div>
+                    <div class="half-width"><label for="{{ form.padre_ocupacion.id_for_label }}">Ocupación</label>{{ form.padre_ocupacion }}<div class="field-errors" id="error_{{ form.padre_ocupacion.id_for_label }}"></div></div>
+                </div>
+                <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.padre_lugar_nacimiento.id_for_label }}">Lugar de Nacimiento</label>{{ form.padre_lugar_nacimiento }}<div class="field-errors" id="error_{{ form.padre_lugar_nacimiento.id_for_label }}"></div></div>
+                    <div class="half-width"><label for="{{ form.padre_fecha_nacimiento.id_for_label }}">Fecha de Nacimiento</label>{{ form.padre_fecha_nacimiento }}<div class="field-errors" id="error_{{ form.padre_fecha_nacimiento.id_for_label }}"></div></div>
+                </div>
+                <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.padre_edad.id_for_label }}">Edad</label>{{ form.padre_edad }}<div class="field-errors" id="error_{{ form.padre_edad.id_for_label }}"></div></div>
+                    <div class="half-width"><label for="{{ form.padre_identificacion.id_for_label }}">Identificación</label>{{ form.padre_identificacion }}<div class="field-errors" id="error_{{ form.padre_identificacion.id_for_label }}"></div></div>
+                </div>
+                <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.padre_grupo_sanguineo.id_for_label }}">Grupo Sanguíneo</label>{{ form.padre_grupo_sanguineo }}<div class="field-errors" id="error_{{ form.padre_grupo_sanguineo.id_for_label }}"></div></div>
+                    <div class="half-width"><label for="{{ form.padre_factor_rh.id_for_label }}">Factor RH</label>{{ form.padre_factor_rh }}<div class="field-errors" id="error_{{ form.padre_factor_rh.id_for_label }}"></div></div>
+                </div>
+                <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.padre_telefono.id_for_label }}">Teléfono</label>{{ form.padre_telefono }}<div class="field-errors" id="error_{{ form.padre_telefono.id_for_label }}"></div></div>
+                    <div class="half-width"><label for="{{ form.padre_email.id_for_label }}">Email</label>{{ form.padre_email }}<div class="field-errors" id="error_{{ form.padre_email.id_for_label }}"></div></div>
+                </div>
+                <div class="form-group"><label for="{{ form.padre_direccion.id_for_label }}">Dirección</label>{{ form.padre_direccion }}<div class="field-errors" id="error_{{ form.padre_direccion.id_for_label }}"></div></div>
+            </div>
+            <br><br><br><br>
+            <div class="section-liner"><h3>Madre</h3></div><br><br>
+            <div id="informacion-madre-section">
+                <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.madre_nombres.id_for_label }}">Nombres</label>{{ form.madre_nombres }}<div class="field-errors" id="error_{{ form.madre_nombres.id_for_label }}"></div></div>
+                    <div class="half-width"><label for="{{ form.madre_apellidos.id_for_label }}">Apellidos</label>{{ form.madre_apellidos }}<div class="field-errors" id="error_{{ form.madre_apellidos.id_for_label }}"></div></div>
+                </div>
+                <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.madre_escolaridad.id_for_label }}">Escolaridad</label>{{ form.madre_escolaridad }}<div class="field-errors" id="error_{{ form.madre_escolaridad.id_for_label }}"></div></div>
+                    <div class="half-width"><label for="{{ form.madre_ocupacion.id_for_label }}">Ocupación</label>{{ form.madre_ocupacion }}<div class="field-errors" id="error_{{ form.madre_ocupacion.id_for_label }}"></div></div>
+                </div>
+                <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.madre_lugar_nacimiento.id_for_label }}">Lugar de Nacimiento</label>{{ form.madre_lugar_nacimiento }}<div class="field-errors" id="error_{{ form.madre_lugar_nacimiento.id_for_label }}"></div></div>
+                    <div class="half-width"><label for="{{ form.madre_fecha_nacimiento.id_for_label }}">Fecha de Nacimiento</label>{{ form.madre_fecha_nacimiento }}<div class="field-errors" id="error_{{ form.madre_fecha_nacimiento.id_for_label }}"></div></div>
+                </div>
+                <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.madre_edad.id_for_label }}">Edad</label>{{ form.madre_edad }}<div class="field-errors" id="error_{{ form.madre_edad.id_for_label }}"></div></div>
+                    <div class="half-width"><label for="{{ form.madre_identificacion.id_for_label }}">Identificación</label>{{ form.madre_identificacion }}<div class="field-errors" id="error_{{ form.madre_identificacion.id_for_label }}"></div></div>
+                </div>
+                <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.madre_grupo_sanguineo.id_for_label }}">Grupo Sanguíneo</label>{{ form.madre_grupo_sanguineo }}<div class="field-errors" id="error_{{ form.madre_grupo_sanguineo.id_for_label }}"></div></div>
+                    <div class="half-width"><label for="{{ form.madre_factor_rh.id_for_label }}">Factor RH</label>{{ form.madre_factor_rh }}<div class="field-errors" id="error_{{ form.madre_factor_rh.id_for_label }}"></div></div>
+                </div>
+                <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.madre_telefono.id_for_label }}">Teléfono</label>{{ form.madre_telefono }}<div class="field-errors" id="error_{{ form.madre_telefono.id_for_label }}"></div></div>
+                    <div class="half-width"><label for="{{ form.madre_email.id_for_label }}">Email</label>{{ form.madre_email }}<div class="field-errors" id="error_{{ form.madre_email.id_for_label }}"></div></div>
+                </div>
+                <div class="form-group"><label for="{{ form.madre_direccion.id_for_label }}">Dirección</label>{{ form.madre_direccion }}<div class="field-errors" id="error_{{ form.madre_direccion.id_for_label }}"></div></div>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="window.history.back()">Anterior</button>
+            <button type="submit" name="save_draft" class="btn btn-outline">Guardar Borrador</button>
+            <button type="submit" class="btn btn-primary" id="nextBtn">Siguiente</button>
+                <!--<button type="submit" class="btn btn-primary" id="submitBtn" style="display: none;">Finalizar y Guardar</button>-->
+        </div>
+    </form>
+</div>
+
+<script src="https://kit.fontawesome.com/8058dee255.js" crossorigin="anonymous"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    setupAjaxForm('padres-proposito-form');
+});
+</script>
+
+{% endblock %}

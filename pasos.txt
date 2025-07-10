@@ -1,0 +1,26 @@
+
+Solo la primera vez:
+
+1. Descargar Git    
+
+3.Clonas el proyecto usando: https://github.com/EnriqueRioss/django.git
+
+4. entras al visual studio y abres una terminal normal luego vas y creas el entorno virtual (python -m venv env) y lo activas(.\env\Scripts\activate)
+luego instalas las librerias necesarias usando -m pip install -r requirements.txt
+
+5. luego haces las migraciones python manage.py migrate 
+
+Apartir de aqui ya tendras el proyecto funcionando
+
+Cada vez que entres y salgas del software:
+
+Cuando entres al software en una terminal de git bash (buscala en visual studio en el "+" ): git pull origin main
+despues en la terminal normal donde corres el proyecto hace lo mismo de siempre: python manage.py migrate y luego python manage.py runserver
+
+Cuando salgas del software (si hiciste algun cambio)
+
+git add .
+
+git commit -m "describes los cambios que hiciste"
+
+git push origin main (aqui subes los cambios que hiciste)

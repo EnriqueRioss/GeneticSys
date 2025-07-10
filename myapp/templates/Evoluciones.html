@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Evoluciones</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .form-container {
+            background-color: #fff;
+            padding: 20px;
+            margin: 20px auto;
+            max-width: 800px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-container h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .form-group textarea {
+            resize: vertical;
+            height: 100px;
+        }
+        .form-group .half-width {
+            width: 48%;
+            display: inline-block;
+        }
+        .form-group .half-width:first-child {
+            margin-right: 4%;
+        }
+        .form-actions {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .form-actions button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .form-actions button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>Evolución del Desarrollo</h2>
+        <form>
+            
+            <div class="form-group">
+                <label for="fecha">Fecha</label>
+                <input type="date" id="fecha" name="fecha">
+            </div>
+            <div class="form-group">
+                <label for="historial_enfermedades">Historial de Enfermedades</label>
+                <textarea id="historial_enfermedades" name="historial_enfermedades"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="hospitalizaciones">Hospitalizaciones</label>
+                <textarea id="hospitalizaciones" name="hospitalizaciones"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="cirugias">Cirugías</label>
+                <textarea id="cirugias" name="cirugias"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="convulsiones">Convulsiones</label>
+                <textarea id="convulsiones" name="convulsiones"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="otros_antecedentes">Otros Antecedentes</label>
+                <textarea id="otros_antecedentes" name="otros_antecedentes"></textarea>
+            </div>
+            <div class="form-group">
+                <label for="resultados_examenes">Resultados de Exámenes</label>
+                <input type="file" id="resultados_examenes" name="resultados_examenes">
+            </div>
+            <div class="form-actions">
+                <button type="submit">Guardar</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

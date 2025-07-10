@@ -1,0 +1,1 @@
+Como configirar un servicio de interner por dhcp por mickrotik

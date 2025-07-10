@@ -1,0 +1,13 @@
+<script>
+    // Este script previene que se creen múltiples entradas en el historial del navegador
+    // para la misma página de formulario cuando ocurren errores de validación repetidos.
+    // Utiliza history.replaceState() para "sobrescribir" la entrada de historial actual
+    // con la misma URL, colapsando de manera efectiva las entradas repetidas.
+    (function() {
+        if (window.history && window.history.replaceState) {
+            // El estado y el título no son críticos aquí, pero la URL sí.
+            // Reemplazamos la entrada actual por sí misma.
+            window.history.replaceState(null, document.title, window.location.href);
+        }
+    })();
+</script>

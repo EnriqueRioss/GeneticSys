@@ -1,0 +1,880 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<head>
+  <title>Gestión de Pacientes</title>
+  <link rel="stylesheet" href="{% static '/styles/pacientes.css' %}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <style>
+    /* Estilo para resaltar y agrupar visualmente a las parejas */
+    .patients-table tbody tr.pareja-row {
+      background-color: #f0f8ff; /* Light Alice Blue */
+    }
+    /* Añade un borde sutil para separar una pareja de la siguiente fila */
+    .patients-table tbody tr.pareja-row:last-of-type {
+       border-bottom: 2px solid #aed6f1;
+    }
+    .spinner {
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        border-left-color: #09f;
+        animation: spin 1s ease infinite;
+        margin: 20px auto;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .file-delete-list {
+        list-style-type: none;
+        padding: 0;
+    }
+    .file-delete-list li {
+        display: flex;
+        align-items: center;
+        margin-bottom: 5px;
+    }
+    /* Estilos nuevos */
+    .btn-destructive {
+        background-color: #dc3545;
+        color: white;
+        border: 1px solid #dc3545;
+    }
+    .btn-destructive:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+    }
+    .tarjeta-header .header-actions {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
+    }
+
+
+    .analysis-list {
+        padding: 0 15px 15px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px; 
+    }
+
+    .analysis-item {
+        background-color: #f0f2f5; 
+        border-radius: 6px;
+        padding: 10px 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .analysis-item .analysis-name {
+        color: #333;
+        font-weight: 500;
+    }
+
+
+    .analysis-card.final-diagnosis-view {
+        background-color: #fffbeb;
+        border: 1px solid #fdd835;
+        border-radius: 8px;
+    }
+
+    .final-diagnosis-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        gap: 1rem;
+    }
+
+    .final-diagnosis-content p {
+        flex-grow: 1;
+        margin: 0;
+    }
+
+    .final-diagnosis-content .btn-editar {
+        flex-shrink: 0;
+        background-color: transparent;
+        border: 1px solid #c0c0c0;
+        color: #555;
+        cursor: pointer;
+        padding: 5px 10px;
+        border-radius: 6px;
+        line-height: 1;
+    }
+    .final-diagnosis-content .btn-editar:hover {
+        background-color: #e0e0e0;
+        color: #000;
+    }
+
+
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+    
+    <div class="main-content">
+        {% csrf_token %}
+        <main class="barra-content">
+            <header class="content-header">
+                <div class="breadcrumb">
+                    <a href="{% url 'index' %}" class="breadcrumb-item">Inicio</a>
+                    <span class="breadcrumb-separator">></span>
+                    <span class="breadcrumb-item active">Pacientes</span>
+                </div>
+            </header>
+
+            <div class="patients-content">
+                <!-- Header -->
+                <div class="contenido-header">
+                    <div class="header-content">
+                        <h1>Gestión de Pacientes</h1>
+                        <p>Administra pacientes e historias clínicas genéticas</p>
+                    </div>
+                   <a href="{% url 'historia_crear' %}" class="btn-outline">
+                        <i class="fas fa-user-plus" class="btn-icon"></i>
+                        Nuevo Paciente
+                    </a>
+                </div>
+
+                <!-- Tarjetas de estadísticas -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <h3>Total Pacientes</h3>
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h2>{{ total_pacientes|default:"0" }}</h2>
+                            <p class="card-description">+{{ nuevos_pacientes_mes|default:"0" }} nuevos este mes</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <h3>En Seguimiento</h3>
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h2>{{ pacientes_seguimiento|default:"0" }}</h2>
+                            <p>Pacientes con planes activos</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <h3>Pacientes Cerrados</h3>
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h2>{{ pacientes_cerrados|default:"0" }}</h2>
+                            <p>{{ porcentaje_cerrados|floatformat:1 }}% del total</p>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <h3>Pacientes Inactivos</h3>
+                             <i class="fas fa-user-slash"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h2>{{ pacientes_inactivos|default:"0" }}</h2>
+                            <p>Pacientes en archivo</p>
+                        </div>
+                    </div>
+
+
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <h3>Análisis Pendientes</h3>
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <h2>{{ analisis_pendientes_count|default:"0" }}</h2>
+                            <p>Requieren atención</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Filtros -->
+                <div class="content-card">
+                    <div class="tarjeta-header">
+                        <h3><i class="fas fa-filter"></i>Filtros de Búsqueda</h3>
+                    </div>
+                    <form method="get" action="{% url 'gestion_pacientes' %}">
+                        <div class="card-content">
+                            <div class="filters-grid">
+                                <div class="filter-group">
+                                    <label for="{{ form.buscar_paciente.id_for_label }}">{{ form.buscar_paciente.label }}</label>
+                                    <div class="search-input">
+                                        <i class="fas fa-search"></i>
+                                        {{ form.buscar_paciente }}
+                                    </div>
+                                </div>
+                                
+                                <div class="filter-group">
+                                    <label for="{{ form.estado.id_for_label }}">{{ form.estado.label }}</label>
+                                    <div class="state-select">
+                                        {{ form.estado }}
+                                    </div>
+                                </div>
+                                
+                                <div class="filter-group">
+                                    <label for="{{ form.genetista.id_for_label }}">{{ form.genetista.label }}</label>
+                                    <div class="genetista-select">
+                                        {{ form.genetista }}
+                                    </div>
+                                </div>
+                                <div class="filter-actions">
+                                    <button type="submit" class="btn-buscar">
+                                        <i class="fas fa-search"></i>
+                                        Buscar
+                                    </button>
+                                    <a href="{% url 'gestion_pacientes' %}" class="btn-limpiar" id="btn-limpiar-filters">Limpiar</a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tabla de pacientes -->
+                <div class="content-card">
+                    <div class="card-header">
+                        <h3>Lista de Pacientes</h3>
+                        <p>{{ pacientes_count }} paciente{{ pacientes_count|pluralize }} encontrado{{ pacientes_count|pluralize }}</p>
+                    </div>
+                    <div class="card-content">
+                        <div class="table-container">
+                            <table class="patients-table">
+                                <thead>
+                                    <tr>
+                                        <th class="inactivate-checkbox-header" style="display: none; width: 30px;">
+                                            <input type="checkbox" id="select-all-checkbox" title="Seleccionar todos">
+                                        </th>
+                                        <th>Paciente</th>
+                                        <th>Edad</th>
+                                        <th>Contacto</th>
+                                        <th>Genetista</th>
+                                        <th>Última Visita</th>
+                                        <th>Estado</th>
+                                        <th>Historia ID / Pendientes
+                                        </th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for proposito in pacientes_list %}
+                                    <tr class="{% if proposito.is_in_couple %}pareja-row{% endif %}"
+                                    data-proposito-id="{{ proposito.proposito_id }}"
+                                        data-nombre="{{ proposito.nombres }} {{ proposito.apellidos }}"
+                                        data-identificacion="{{ proposito.identificacion }}"
+                                        data-foto-url="{% if proposito.foto %}{{ proposito.foto.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}"
+                                        data-edad="{{ proposito.edad|default_if_none:'N/A' }}"
+                                        data-telefono="{{ proposito.telefono|default_if_none:'N/A' }}"
+                                        data-email="{{ proposito.email|default_if_none:'N/A' }}"
+                                        data-direccion="{{ proposito.direccion|default_if_none:'N/A' }}"
+                                        data-genetista="{{ proposito.historia.genetista.user.get_full_name|default:'N/A' }}"
+                                        data-estado-display="{{ proposito.get_estado_display }}"
+                                        data-estado-slug="{{ proposito.estado|slugify }}"
+                                        data-ultima-visita="{{ proposito.historia.fecha_ingreso|date:'Y-m-d' }}"
+                                        data-avatar-fallback="{{ proposito.nombres|first|upper }}{{ proposito.apellidos|first|upper }}"
+                                        >
+                                        <td class="inactivate-checkbox-cell" style="display: none;">
+                                            <input type="checkbox" class="paciente-checkbox" value="{{ proposito.proposito_id }}">
+                                        </td>
+                                        <td>
+                                            <div class="patient-info">
+                                                <div class="patient-avatar">
+                                                     {% if proposito.foto %}
+                                                        <img src="{{ proposito.foto.url }}" alt="Avatar" class="avatar-img">
+                                                    {% else %}
+                                                        <span class="avatar-fallback">{{ proposito.nombres|first|upper }}{{ proposito.apellidos|first|upper }}</span>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="patient-details">
+                                                    <div class="patient-name">{{ proposito.nombres }} {{ proposito.apellidos }}</div>
+                                                    <div class="patient-id">ID: {{ proposito.identificacion }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>{{ proposito.edad|default_if_none:"N/A" }} años</td>
+                                        <td>
+                                            <div class="contact-info">
+                                                {% if proposito.telefono %}
+                                                <div class="contact-item">
+                                                    <i class="fas fa-phone contact-icon"></i>
+                                                    {{ proposito.telefono }}
+                                                </div>
+                                                {% endif %}
+                                                {% if proposito.email %}
+                                                <div class="contact-item muted">
+                                                    <i class="fas fa-envelope contact-icon"></i>
+                                                    {{ proposito.email }}
+                                                </div>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>{{ proposito.historia.genetista.user.get_full_name|default:"N/A" }}</td>
+                                        <td>{{ proposito.historia.fecha_ingreso|date:"Y-m-d" }}</td>
+                                        <td>
+                                            <span class="badge badge-{{ proposito.estado|slugify }}">{{ proposito.get_estado_display }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="history-badges">
+                                                {% if proposito.historia %}
+                                                    <span class="badge">HC {{ proposito.historia.numero_historia }}</span>
+                                                {% endif %}
+                                                {% if proposito.plan_estudio_pendiente_count > 0 %}
+                                                    <span class="badge badge-danger">{{ proposito.plan_estudio_pendiente_count }} pendiente{{ proposito.plan_estudio_pendiente_count|pluralize }}</span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="action-buttons">
+                                                {% if proposito.estado != 'inactivo' %}
+                                                    <button type="button" class="btn-ver">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                    
+                                                    {% if proposito.is_in_couple %}
+                                                        <button type="button" class="btn-editar" onclick="window.location.href='{% url 'pareja_crear' historia_id=proposito.historia.historia_id %}?from_gestion=true'">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                    {% else %}
+                                                         <button type="button" class="btn-editar" onclick="window.location.href='{% url 'paciente_crear' historia_id=proposito.historia.historia_id %}?from_gestion=true'">
+                                                            <i class="fas fa-edit"></i>
+                                                        </button>
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="badge badge-inactivo" style="padding: 8px 12px; font-weight: bold;">Inactivo</span>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="9" style="text-align: center; padding: 20px;">No se encontraron pacientes que coincidan con los filtros.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>   
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+  <!-- Modal de detalle de paciente -->
+<div class="modal" id="verPacienteModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="patient-modal-title">
+                <div class="patient-avatar large" id="modal-avatar">
+                    <img src="" alt="" class="avatar-img" id="modal-avatar-img">
+                    <span class="avatar-fallback" id="modal-avatar-fallback"></span>
+                </div>
+                <div>
+                    <h2 class="patient-name" id="modal-patient-name"></h2>
+                    <p class="patient-id muted" id="modal-patient-id"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-tabs">
+            <div class="tabs-header">
+                <button class="tab-btn active" data-tab="personal-info">Información Personal</button>
+                <button class="tab-btn" data-tab="medical-record">Historia Clínica</button>
+                <button class="tab-btn" data-tab="tests">Análisis y Pruebas</button>
+            </div>
+
+            <div class="tab-content active" id="personal-info">
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="card-header">
+                            <h3 class="card-title">Datos Personales</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="info-item">
+                                <i class="fas fa-calendar"></i>
+                                <span class="info-text" id="modal-info-edad"></span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-phone"></i>
+                                <span class="info-text" id="modal-info-telefono"></span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-envelope"></i>
+                                <span class="info-text" id="modal-info-email"></span>
+                            </div>
+                            <div class="info-item">
+                                <i class="fas fa-map-pin"></i>
+                                <span class="info-text" id="modal-info-direccion"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-card">
+                        <div class="card-header">
+                            <h3 class="card-title">Información Médica</h3>
+                        </div>
+                        <div class="card-content">
+                            <div class="info-row">
+                                <span class="info-label">Genetista asignado:</span>
+                                <span class="badge" id="modal-info-genetista"></span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Estado:</span>
+                                <span class="badge" id="modal-info-estado"></span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Última visita:</span>
+                                <span class="info-text" id="modal-info-ultima-visita"></span>
+                            </div>
+                            <div class="info-row">
+                                <span class="info-label">Evoluciones:</span>
+                                <span class="badge">2</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+             <!-- Tab: Historia Clínica -->
+             <div class="tab-content" id="medical-record">
+                <div class="tab-content-header">
+                    <h3 class="tab-main-title">Historia Clínica Genética</h3>
+                    <a href="#" id="btn-nueva-consulta" class="btn-primary" style="display: none;">
+                        <i class="fas fa-plus" class="btn-icon"></i>
+                        Nueva Consulta
+                    </a>
+                </div>
+                <div class="history-list" id="history-list-container">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+
+         
+            <div class="tab-content" id="tests">
+                <div class="tab-content-header">
+                    <h3 class="tab-main-title">Diagnósticos</h3>
+                    <a href="#" id="btn-nuevo-diagnostico" class="btn-primary" style="display: none;">
+                        <i class="fas fa-plus" class="btn-icon"></i>
+                        Nuevo Diagnóstico
+                    </a>
+                </div>
+            
+                <!-- Contenedor para Diagnósticos Presuntivos -->
+                <div class="analysis-card" id="diagnosticos-presuntivos-card">
+                    <div class="analysis-card-header">
+                        <i class="fas fa-notes-medical" class="analysis-card-icon"></i>
+                        <h4 class="analysis-card-title">Diagnósticos Presuntivos</h4>
+                    </div>
+                    <div class="analysis-list" id="diagnosticos-presuntivos-list">
+                     
+                    </div>
+                </div>
+            
+              
+                <div id="diagnostico-final-container" data-evaluacion-id="" style="margin-top: 20px;">
+               
+                    <div id="diagnostico-final-view" class="analysis-card final-diagnosis-view" style="display: none;">
+                        <div class="analysis-card-header">
+                            <i class="fas fa-gavel" class="analysis-card-icon"></i>
+                            <h4 class="analysis-card-title">Diagnóstico Final y Conclusiones</h4>
+                        </div>
+                        <div class="final-diagnosis-content">
+                            <p class="history-subtitle" id="diagnostico-final-text" style="white-space: pre-wrap;"></p>
+                            <button class="btn-editar" id="btn-edit-diagnostico-final" title="Editar Diagnóstico Final">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Formulario para editar/añadir el diagnóstico final -->
+                    <div id="diagnostico-final-edit" class="analysis-card" style="display: none;">
+                         <div class="analysis-card-header">
+                            <i class="fas fa-gavel" class="analysis-card-icon"></i>
+                            <h4 class="analysis-card-title">Añadir/Editar Diagnóstico Final</h4>
+                        </div>
+                        <div class="form-group" style="padding: 15px;">
+                            <textarea id="diagnostico-final-textarea" rows="4" placeholder="Ingrese el diagnóstico final o las conclusiones de la evaluación..."></textarea>
+                        </div>
+                        <div class="card-actions edit-actions" style="justify-content: flex-end; padding: 0 15px 15px;">
+                            <button type="button" class="btn btn-secondary" id="btn-cancel-diagnostico-final">Cancelar</button>
+                            <button type="button" class="btn btn-primary" id="btn-save-diagnostico-final">Guardar Diagnóstico</button>
+                        </div>
+                    </div>
+                </div>
+            
+               
+                <div class="add-final-diagnosis-container" style="text-align: center; margin-top: 20px;">
+                    <button class="btn-outline" id="btn-add-diagnostico-final" style="display: none;">
+                        <i class="fas fa-plus"></i> Añadir Diagnóstico Final
+                    </button>
+                </div>
+            </div>
+            
+
+        </div>
+
+        <button type="button" class="modal-close" id="closeVerPacienteModalBtn">×</button>
+      
+    </div>
+</div>
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const verPacienteModal = document.getElementById('verPacienteModal');
+        const tableBody = document.querySelector('.patients-table tbody');
+        const closeVerPacienteModalBtn = document.getElementById('closeVerPacienteModalBtn');
+        const historyListContainer = document.getElementById('history-list-container');
+        const getCSRFToken = () => document.querySelector('[name=csrfmiddlewaretoken]').value;
+        const nuevaConsultaBtn = document.getElementById('btn-nueva-consulta');
+        const nuevoDiagnosticoBtn = document.getElementById('btn-nuevo-diagnostico');
+
+        function closeModal() {
+            if (verPacienteModal) {
+                verPacienteModal.classList.remove('active');
+                verPacienteModal.removeAttribute('data-current-proposito-id');
+            }
+            historyListContainer.innerHTML = '<div class="spinner"></div>';
+        }
+
+        if (tableBody) {
+            tableBody.addEventListener('click', function(e) {
+                const viewButton = e.target.closest('.btn-ver');
+                if (viewButton) {
+                    const row = viewButton.closest('tr');
+                    if (row) {
+                        document.getElementById('modal-patient-name').textContent = row.dataset.nombre;
+                        document.getElementById('modal-patient-id').textContent = 'ID: ' + row.dataset.identificacion;
+                        const avatarImg = document.getElementById('modal-avatar-img');
+                        const avatarFallback = document.getElementById('modal-avatar-fallback');
+                        if (row.dataset.fotoUrl && !row.dataset.fotoUrl.endsWith('default_avatar.png')) {
+                            avatarImg.src = row.dataset.fotoUrl; avatarImg.style.display = 'block'; avatarFallback.style.display = 'none';
+                        } else {
+                            avatarFallback.textContent = row.dataset.avatarFallback; avatarImg.style.display = 'none'; avatarFallback.style.display = 'flex';
+                        }
+                        document.getElementById('modal-info-edad').textContent = 'Edad: ' + row.dataset.edad + ' años';
+                        document.getElementById('modal-info-telefono').textContent = row.dataset.telefono;
+                        document.getElementById('modal-info-email').textContent = row.dataset.email;
+                        document.getElementById('modal-info-direccion').textContent = row.dataset.direccion;
+                        document.getElementById('modal-info-genetista').textContent = row.dataset.genetista;
+                        document.getElementById('modal-info-ultima-visita').textContent = row.dataset.ultimaVisita;
+                        const estadoBadge = document.getElementById('modal-info-estado');
+                        estadoBadge.textContent = row.dataset.estadoDisplay;
+                        estadoBadge.className = 'badge badge-' + row.dataset.estadoSlug;
+
+                        const propositoId = row.dataset.propositoId;
+                        verPacienteModal.dataset.currentPropositoId = propositoId;
+
+                        loadHistoriaClinica(propositoId);
+
+                        verPacienteModal.classList.add('active');
+                    }
+                }
+            });
+        }
+
+        if (closeVerPacienteModalBtn) closeVerPacienteModalBtn.addEventListener('click', closeModal);
+        if (verPacienteModal) verPacienteModal.addEventListener('click', e => { if (e.target === verPacienteModal) closeModal(); });
+
+        verPacienteModal.querySelectorAll('.modal .tab-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                verPacienteModal.querySelectorAll('.modal .tab-btn').forEach(btn => btn.classList.remove('active'));
+                this.classList.add('active');
+                verPacienteModal.querySelectorAll('.modal .tab-content').forEach(content => content.classList.remove('active'));
+                const tabId = this.getAttribute('data-tab');
+                verPacienteModal.querySelector('#' + tabId).classList.add('active');
+            });
+        });
+
+        function loadHistoriaClinica(propositoId) {
+            historyListContainer.innerHTML = '<div class="spinner"></div>';
+            
+            // Resetear botones
+            nuevaConsultaBtn.style.display = 'none';
+            nuevaConsultaBtn.href = '#';
+            nuevoDiagnosticoBtn.style.display = 'none';
+            nuevoDiagnosticoBtn.href = '#';
+
+            const presuntivosList = document.getElementById('diagnosticos-presuntivos-list');
+            const finalContainer = document.getElementById('diagnostico-final-container');
+            const finalView = document.getElementById('diagnostico-final-view');
+            const finalEdit = document.getElementById('diagnostico-final-edit');
+            const finalAddBtn = document.getElementById('btn-add-diagnostico-final');
+
+            presuntivosList.innerHTML = '';
+            finalView.style.display = 'none';
+            finalEdit.style.display = 'none';
+            finalAddBtn.style.display = 'none';
+            finalContainer.dataset.evaluacionId = '';
+
+            fetch(`/ajax/get-historia-clinica/${propositoId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    historyListContainer.innerHTML = '';
+                    if (data.evaluacion_id) {
+                        const urlNuevaConsulta = `/evaluacion/${data.evaluacion_id}/nueva-consulta/`;
+                        nuevaConsultaBtn.href = urlNuevaConsulta;
+                        nuevaConsultaBtn.style.display = 'inline-flex';
+                        nuevoDiagnosticoBtn.href = urlNuevaConsulta;
+                        nuevoDiagnosticoBtn.style.display = 'inline-flex';
+                    }
+                    if (data.planes_de_estudio.length > 0) {
+                        data.planes_de_estudio.forEach(plan => {
+                            const cardHtml = createPlanEstudioCard(plan);
+                            historyListContainer.insertAdjacentHTML('beforeend', cardHtml);
+                        });
+                    } else {
+                        historyListContainer.innerHTML = '<p style="text-align:center; color: #777;">No hay planes de estudio registrados para este paciente.</p>';
+                    }
+
+                    if (data.evaluacion_id) {
+                        finalContainer.dataset.evaluacionId = data.evaluacion_id;
+
+                        if (data.diagnosticos_presuntivos && data.diagnosticos_presuntivos.length > 0) {
+                            data.diagnosticos_presuntivos.forEach(desc => {
+                                const item = document.createElement('div');
+                                item.className = 'analysis-item';
+                                item.innerHTML = `<span class="analysis-name">${desc}</span>`;
+                                presuntivosList.appendChild(item);
+                            });
+                        } else {
+                            presuntivosList.innerHTML = '<div class="analysis-item"><span class="analysis-name muted">Sin diagnósticos presuntivos registrados.</span></div>';
+                        }
+
+                        if (data.diagnostico_final) {
+                            document.getElementById('diagnostico-final-text').innerText = data.diagnostico_final;
+                            document.getElementById('diagnostico-final-textarea').value = data.diagnostico_final;
+                            finalView.style.display = 'block';
+                            finalEdit.style.display = 'none';
+                            finalAddBtn.style.display = 'none';
+                        } else {
+                            finalView.style.display = 'none';
+                            finalEdit.style.display = 'none';
+                            finalAddBtn.style.display = 'block';
+                        }
+                    } else {
+                         presuntivosList.innerHTML = '<div class="analysis-item"><span class="analysis-name muted">Aún no se ha iniciado una evaluación genética.</span></div>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching historia clinica:', error);
+                    historyListContainer.innerHTML = '<p style="text-align:center; color: red;">Error al cargar el historial.</p>';
+                    presuntivosList.innerHTML = '<p style="text-align:center; color: red;">Error al cargar los diagnósticos.</p>';
+                });
+        }
+
+        function createPlanEstudioCard(plan) {
+            const statusClass = plan.completado ? 'status-completed' : 'status-pending';
+            const statusText = plan.completado ? 'Completado' : 'Pendiente';
+            const fechaVisita = plan.fecha_visita ? new Date(plan.fecha_visita + 'T00:00:00').toLocaleDateString('es-ES') : 'N/A';
+            
+            let archivosHtml = plan.archivos.map(archivo => `<a href="${archivo.url}" target="_blank" class="tag">${archivo.nombre}</a>`).join('');
+            if (!archivosHtml) archivosHtml = '<span class="tag tag-muted">Sin archivos</span>';
+
+            let archivosEliminarHtml = plan.archivos.map(archivo => `
+                <li>
+                    <label>
+                        <input type="checkbox" name="archivos_a_eliminar" value="${archivo.id}">
+                        ${archivo.nombre}
+                    </label>
+                </li>
+            `).join('');
+
+            return `
+                <div class="history-card" data-plan-id="${plan.id}">
+                    <div class="view-content">
+                        <div class="card-main-content">
+                            <div class="historia-card-header">
+                                <span class="badge history-id">${plan.tipo_consulta}</span>
+                                <span class="badge ${statusClass}">${statusText}</span>
+                            </div>
+                            <div class="card-body">
+                                <h4 class="history-title">Plan de Estudio:</h4>
+                                <p class="history-subtitle">${plan.accion}</p>
+                                <h4 class="history-title" style="margin-top: 10px;">Resultados:</h4>
+                                <p class="history-subtitle">${plan.asesoramiento_evoluciones || 'Sin resultados registrados.'}</p>
+                                <div class="history-meta">
+                                    <div class="meta-item"><i class="fas fa-calendar"></i><span>${fechaVisita}</span></div>
+                                    <div class="meta-item"><i class="fas fa-user"></i><span>${plan.genetista_nombre}</span></div>
+                                </div>
+                            </div>
+                            <div class="history-tags">${archivosHtml}</div>
+                        </div>
+                        <div class="card-actions view-actions">
+                            <button class="action-btn js-edit-btn" title="Editar"><i class="fas fa-edit"></i></button>
+                        </div>
+                    </div>
+                    <div class="editable-content">
+                        <h4>Editando: ${plan.tipo_consulta}</h4>
+                        <form class="edit-form" action="/ajax/edit-plan-estudio/${plan.id}/" method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="${getCSRFToken()}">
+                            <div class="form-group">
+                                <label for="accion_${plan.id}">Acción a Realizar</label>
+                                <textarea name="accion" id="accion_${plan.id}" rows="3">${plan.accion}</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="evoluciones_${plan.id}">Asesoramiento y Evoluciones (Resultados)</label>
+                                <textarea name="asesoramiento_evoluciones" id="evoluciones_${plan.id}" rows="3">${plan.asesoramiento_evoluciones}</textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="fecha_visita_${plan.id}">Fecha de Próxima Visita</label>
+                                <input type="date" name="fecha_visita" id="fecha_visita_${plan.id}" value="${plan.fecha_visita || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label>
+                                    <input type="checkbox" name="completado" ${plan.completado ? 'checked' : ''}>
+                                    Marcar como Completado
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label for="archivos_nuevos_${plan.id}">Añadir nuevos archivos</label>
+                                <input type="file" name="archivos_nuevos" id="archivos_nuevos_${plan.id}" multiple>
+                            </div>
+                            ${plan.archivos.length > 0 ? `
+                            <div class="form-group">
+                                <label>Eliminar archivos existentes</label>
+                                <ul class="file-delete-list">${archivosEliminarHtml}</ul>
+                            </div>
+                            ` : ''}
+                            <div class="card-actions edit-actions">
+                                <button type="button" class="btn btn-secondary js-cancel-btn">Cancelar</button>
+                                <button type="submit" class="btn btn-primary js-save-btn">Guardar Cambios</button>
+                            </div>
+                            <div class="form-errors" style="color: red; margin-top: 10px;"></div>
+                        </form>
+                    </div>
+                </div>`;
+        }
+
+        historyListContainer.addEventListener('click', function(e) {
+            const card = e.target.closest('.history-card');
+            if (!card) return;
+
+            if (e.target.closest('.js-edit-btn')) { card.classList.add('is-editing'); }
+            if (e.target.closest('.js-cancel-btn')) { card.classList.remove('is-editing'); card.querySelector('.form-errors').innerHTML = ''; }
+
+            if (e.target.closest('.js-save-btn')) {
+                e.preventDefault();
+                const form = card.querySelector('form');
+                const formData = new FormData(form);
+                const saveButton = e.target.closest('.js-save-btn');
+                const originalButtonText = saveButton.innerHTML;
+                saveButton.innerHTML = 'Guardando...';
+                saveButton.disabled = true;
+
+                fetch(form.action, { method: 'POST', body: formData, headers: { 'X-CSRFToken': getCSRFToken() } })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        card.classList.remove('is-editing');
+                        const propositoId = verPacienteModal.dataset.currentPropositoId;
+                        loadHistoriaClinica(propositoId);
+                    } else {
+                        const errorContainer = card.querySelector('.form-errors');
+                        let errorHtml = '<strong>Por favor, corrija los siguientes errores:</strong><ul>';
+                        const errors = JSON.parse(data.errors);
+                        for (const field in errors) {
+                            errors[field].forEach(error => { errorHtml += `<li>${field}: ${error.message}</li>`; });
+                        }
+                        errorHtml += '</ul>';
+                        errorContainer.innerHTML = errorHtml;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error submitting form:', error);
+                    card.querySelector('.form-errors').innerHTML = 'Ocurrió un error de red. Inténtelo de nuevo.';
+                })
+                .finally(() => {
+                    saveButton.innerHTML = originalButtonText;
+                    saveButton.disabled = false;
+                });
+            }
+        });
+
+        const btnAddFinal = document.getElementById('btn-add-diagnostico-final');
+        const btnEditFinal = document.getElementById('btn-edit-diagnostico-final');
+        const btnCancelFinal = document.getElementById('btn-cancel-diagnostico-final');
+        const btnSaveFinal = document.getElementById('btn-save-diagnostico-final');
+        const finalViewDiv = document.getElementById('diagnostico-final-view');
+        const finalEditDiv = document.getElementById('diagnostico-final-edit');
+        const finalContainerDiv = document.getElementById('diagnostico-final-container');
+        const finalTextArea = document.getElementById('diagnostico-final-textarea');
+
+        btnAddFinal.addEventListener('click', () => {
+            finalTextArea.value = '';
+            btnAddFinal.style.display = 'none';
+            finalEditDiv.style.display = 'block';
+        });
+
+        btnEditFinal.addEventListener('click', () => {
+            finalViewDiv.style.display = 'none';
+            finalEditDiv.style.display = 'block';
+            finalTextArea.value = document.getElementById('diagnostico-final-text').innerText;
+        });
+
+        btnCancelFinal.addEventListener('click', () => {
+            finalEditDiv.style.display = 'none';
+            if (document.getElementById('diagnostico-final-text').innerText) {
+                finalViewDiv.style.display = 'block';
+            } else {
+                btnAddFinal.style.display = 'block';
+            }
+        });
+
+        btnSaveFinal.addEventListener('click', () => {
+            const evaluacionId = finalContainerDiv.dataset.evaluacionId;
+            if (!evaluacionId) {
+                alert('Error: No se encontró el ID de la evaluación.');
+                return;
+            }
+
+            const diagnosticoTexto = finalTextArea.value;
+            const originalButtonText = btnSaveFinal.innerHTML;
+            btnSaveFinal.innerHTML = 'Guardando...';
+            btnSaveFinal.disabled = true;
+
+            fetch(`/ajax/evaluacion/${evaluacionId}/guardar-diagnostico-final/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCSRFToken()
+                },
+                body: JSON.stringify({ diagnostico_final: diagnosticoTexto })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('diagnostico-final-text').innerText = diagnosticoTexto;
+                    finalEditDiv.style.display = 'none';
+                    if(diagnosticoTexto) {
+                        finalViewDiv.style.display = 'block';
+                    } else {
+                        finalViewDiv.style.display = 'none';
+                        btnAddFinal.style.display = 'block';
+                    }
+                } else {
+                    alert('Error al guardar: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ocurrió un error de red.');
+            })
+            .finally(() => {
+                btnSaveFinal.innerHTML = originalButtonText;
+                btnSaveFinal.disabled = false;
+            });
+        });
+       
+    });
+</script>
+    
+{% endblock %}

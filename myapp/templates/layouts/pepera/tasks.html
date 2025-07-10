@@ -1,0 +1,40 @@
+{% extends 'layouts/base.html' %}
+
+{% load static %}
+
+{%block content%}
+<head>  
+
+
+    <link rel="stylesheet" href= "{% static '/styles/forms.css' %}">
+</head>
+    <h1>tasks</h1>
+
+    {%for task in tasks %}
+
+    <div>
+
+        <h1>{% if task.done == False %} ⏲ {%else %} ✅ {%endif%} {{task.title}}</h1>
+        {% if task.done == False %}
+        <p>tarea pendiente</p>
+        {%else%}
+        <p>Tarea realizada</p>
+        {% endif %}
+
+        
+        
+
+        <h2>{{task.description}}</h2>
+
+        <p>Project: {{task.project}}</p>
+    
+        <button>
+            Delete
+        </button>
+        <button>
+            ✅ Done
+        </button>
+    </div>
+
+    {% endfor %}
+{% endblock %}

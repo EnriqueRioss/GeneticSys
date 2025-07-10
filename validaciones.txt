@@ -1,0 +1,747 @@
+1. forms.LoginForm (Formulario de Inicio de Sesión)
+* username:
+* Requerido (implícito por Django).
+* Longitud máxima de 150 caracteres.
+* Elimina espacios en blanco al inicio y al final.
+* password:
+* Requerido (implícito por Django).
+* Elimina espacios en blanco al inicio y al final.
+2. forms.ExtendedUserCreationForm (Formulario de Registro Extendido)
+* username:
+* Requerido.
+* Validaciones estándar de Django para nombres de usuario (caracteres permitidos, unicidad).
+* first_name:
+* Requerido.
+* Longitud máxima de 30 caracteres.
+* Elimina espacios en blanco al inicio y al final.
+* last_name:
+* Requerido.
+* Longitud máxima de 30 caracteres.
+* Elimina espacios en blanco al inicio y al final.
+* email:
+* Requerido.
+* Debe ser una dirección de correo electrónico válida.
+* Longitud máxima de 254 caracteres.
+* Elimina espacios en blanco al inicio y al final (por defecto en EmailField).
+* password1 / password2:
+* Validaciones estándar de Django para contraseñas (longitud mínima, complejidad si está configurada, deben coincidir).
+3. forms.HistoriasForm (Formulario de Creación/Edición de Historias Clínicas)
+* numero_historia:
+* Requerido.
+* Debe ser un número entero.
+* Debe ser un valor positivo (mayor que 0).
+* Debe ser único en la base de datos (controlado por el modelo HistoriasClinicas).
+* motivo_tipo_consulta:
+* Requerido.
+* Debe ser una de las opciones predefinidas.
+* cursante_postgrado, medico, especialidad, centro_referencia:
+* Opcionales.
+* Longitud máxima definida en el modelo.
+* Eliminan espacios en blanco al inicio y al final si se ingresa texto.
+4. forms.PadresPropositoForm (Formulario de Información de Padres del Propósito)
+* General (para ambos, padre y madre):
+* nombres, apellidos:
+* Requeridos.
+* Longitud máxima de 100 caracteres.
+* Eliminan espacios en blanco al inicio y al final.
+* escolaridad, ocupacion, lugar_nacimiento, identificacion, telefono, direccion:
+* Opcionales.
+* Longitud máxima según el modelo.
+* Eliminan espacios en blanco al inicio y al final.
+* fecha_nacimiento:
+* Opcional.
+* Debe ser una fecha válida.
+* No puede ser una fecha futura.
+* edad:
+* Opcional.
+* Debe ser un número entero.
+* Debe estar en un rango plausible (0-120 años).
+* grupo_sanguineo, factor_rh:
+* Opcionales.
+* Deben ser una de las opciones predefinidas.
+* email:
+* Opcional.
+* Debe ser una dirección de correo electrónico válida si se ingresa.
+* Validación a nivel de formulario (clean):
+* La identificación del padre y de la madre no pueden ser iguales si ambas se proporcionan.
+5. forms.PropositosForm (Formulario de Creación/Edición de Propósitos/Pacientes)
+* nombres, apellidos:
+* Requeridos.
+* Longitud máxima de 100 caracteres.
+* Eliminan espacios en blanco al inicio y al final.
+* lugar_nacimiento, escolaridad, ocupacion, direccion, telefono:
+* Opcionales.
+* Longitud máxima según el modelo.
+* Eliminan espacios en blanco al inicio y al final.
+* edad:
+* Opcional.
+* Debe ser un número entero.
+* Debe estar en un rango plausible (0-120 años).
+* fecha_nacimiento:
+* Opcional.
+* Debe ser una fecha válida.
+* No puede ser una fecha futura.
+* identificacion:
+* Requerida.
+* Longitud máxima de 20 caracteres.
+* Elimina espacios en blanco al inicio y al final.
+* Debe ser única en la base de datos (controlado por el modelo y reforzado en clean_identificacion del formulario para creación/edición).
+* email:
+* Opcional.
+* Debe ser una dirección de correo electrónico válida si se ingresa.
+* grupo_sanguineo, factor_rh:
+* Opcionales.
+* Deben ser una de las opciones predefinidas.
+* foto:
+* Opcional.
+* Debe ser un archivo de imagen válido si se sube.
+6. forms.ParejaPropositosForm (Formulario de Creación/Edición de Parejas)
+* General (para ambos cónyuges, _1 y _2):
+* Campos individuales (nombres, apellidos, lugar_nacimiento, fecha_nacimiento, escolaridad, ocupacion, edad, identificacion, direccion, telefono, email, grupo_sanguineo, factor_rh, foto) tienen las mismas validaciones que los campos correspondientes en PropositosForm.
+* identificacion_1, identificacion_2: Son explícitamente requeridas en sus métodos clean_.
+* Validación a nivel de formulario (clean):
+* Las identificaciones de los dos cónyuges deben ser diferentes.
+7. forms.AntecedentesDesarrolloNeonatalForm (Formulario Combinado)
+* Parte AntecedentesPersonales:
+* fur:
+* Opcional.
+* Debe ser una fecha válida.
+* No puede ser una fecha futura.
+* edad_gestacional:
+* Opcional.
+* Debe ser un número entero.
+* Debe estar en un rango plausible (ej. 18-45 semanas).
+* controles_prenatales: Opcional, cadena de texto.
+* numero_partos, numero_gestas, numero_cesareas, numero_abortos, numero_mortinatos, numero_malformaciones:
+* Opcionales.
+* Deben ser números enteros.
+* No pueden ser negativos.
+* complicaciones_embarazo, descripcion_exposicion, enfermedades_maternas, complicaciones_parto, otros_antecedentes, observaciones:
+* Opcionales, campos de texto.
+* exposicion_teratogenos:
+* Opcional.
+* Debe ser una de las opciones predefinidas.
+* Parte DesarrolloPsicomotor:
+* Todos los campos (sostener_cabeza, sonrisa_social, etc.) son opcionales, cadenas de texto para describir la edad o etapa.
+* Parte PeriodoNeonatal:
+* peso_nacer, talla_nacer, circunferencia_cefalica:
+* Opcionales.
+* Deben ser números decimales.
+* Deben estar en rangos plausibles (ej. peso > 0 y < 10 kg).
+* cianosis, ictericia, hemorragia, infecciones, convulsiones, vomitos: Opcionales, cadenas de texto.
+* observacion_complicaciones, otros_complicaciones, observaciones_alimentacion, evolucion, observaciones_habitos_psicologicos: Opcionales, campos de texto.
+* tipo_alimentacion:
+* Opcional.
+* Debe ser una de las opciones predefinidas.
+* Validación a nivel de formulario (clean):
+* Si se selecciona exposicion_teratogenos, se debe proporcionar descripcion_exposicion.
+* Validaciones de consistencia obstétrica:
+* numero_partos no puede ser mayor que numero_gestas.
+* numero_cesareas no puede ser mayor que numero_partos.
+8. forms.AntecedentesPreconcepcionalesForm (Formulario de Antecedentes Preconcepcionales)
+* antecedentes_padre, antecedentes_madre, estado_salud_padre, estado_salud_madre:
+* Opcionales, campos de texto.
+* fecha_union_pareja:
+* Opcional.
+* Debe ser una fecha válida.
+* No puede ser una fecha futura.
+* consanguinidad:
+* Opcional.
+* Debe ser 'Sí' o 'No' si se selecciona.
+* grado_consanguinidad:
+* Opcional, cadena de texto.
+* Validación a nivel de formulario (clean):
+* Si consanguinidad es 'Sí', entonces grado_consanguinidad es requerido.
+* Si consanguinidad es 'No', grado_consanguinidad se limpia (se borra su contenido si se había ingresado).
+9. forms.ExamenFisicoForm (Formulario de Examen Físico - ModelForm)
+* General: La mayoría de los campos son numéricos decimales y opcionales.
+* medida_abrazada, segmento_inferior, segmento_superior, circunferencia_cefalica, talla, peso, tension_arterial_sistolica, tension_arterial_diastolica:
+* Si se ingresan, deben ser valores positivos (o dentro de un rango mínimo/máximo especificado, ej. peso > 0.1 kg, TA sistólica > 10).
+* Valores máximos plausibles (ej. talla < 300cm).
+* Todos los campos observaciones_*:
+* Opcionales, campos de texto.
+* proposito: Requerido (manejado en la vista y el save del formulario).
+* fecha_examen: Se asigna automáticamente (manejado en el save del formulario o por auto_now_add del modelo).
+10. forms.SignosClinicosForm (Formulario de Signos Clínicos - ModelForm)
+* signos_clinicos:
+* Opcional (según blank=True, null=True en el modelo EvaluacionGenetica).
+* Campo de texto para descripción libre.
+11. forms.DiagnosticoPresuntivoForm (Formulario para Formset de Diagnósticos)
+* descripcion:
+* Cadena de texto.
+* Se vuelve requerida si el formulario dentro del formset ha cambiado (lógica en la vista al procesar el formset).
+* orden:
+* Opcional (default 0).
+* Debe ser un número entero.
+* No puede ser negativo.
+12. forms.PlanEstudioForm (Formulario para Formset de Plan de Estudio)
+* accion:
+* Cadena de texto.
+* Se vuelve requerida si el formulario dentro del formset ha cambiado.
+* fecha_limite:
+* Opcional.
+* Debe ser una fecha válida.
+* No puede ser una fecha pasada si el plan no está marcado como completado.
+* completado:
+* Opcional, booleano (checkbox).
+
+
+
+
+
+
+faltantes:
+edad y fecha de naciemiento (preferiblemente eliminar edad)
+duplicidad de identificaciones
+fechas en plan de estudio en el pasado 
+
+
+
+    <!-- ===== INICIO DEL CAMBIO ===== -->
+    <!--
+    {% if user_obj.id != request.user.id %}
+    <form method="POST" action="{% url 'delete_user_admin' user_obj.id %}" class="dropdown-form-action" onsubmit="return confirm('¿Está seguro de que desea eliminar este usuario ({{ user_obj.username }})? Esta acción no se puede deshacer.');">
+        {% csrf_token %}
+        <button type="submit" class="danger">
+            <i class="fas fa-trash"></i> Eliminar
+        </button>
+    </form>
+    {% endif %}
+    -->
+    <!-- ===== FIN DEL CAMBIO ===== -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    {% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<head>
+    <title>HISTORIAS CLÍNICAS | IIG - LUZ</title>
+    <link rel="stylesheet" href="{% static '/styles/verhistorias.css' %}">
+
+    <style>
+        /* Estilos para el modal de confirmación de archivado */
+        .modal-archive {
+            display: none;
+            position: fixed;
+            z-index: 1050;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-archive.active { display: flex; }
+        .modal-archive .modal-content {
+            background-color: #fefefe;
+            padding: 25px 30px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 500px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .modal-archive .modal-header h3 {
+            margin-top: 0;
+            font-size: 1.5rem;
+            color: #d32f2f; /* Rojo de advertencia */
+        }
+        .modal-archive .modal-body p {
+            margin-bottom: 20px;
+        }
+        .modal-archive .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .modal-archive .form-group {
+            margin-bottom: 15px;
+        }
+        .modal-archive .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .modal-archive .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+        }
+        .modal-archive .help-text {
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        /* --- Estilos para el modal de detalles (sin cambios) --- */
+        .modal.active { display: flex; }
+        .modal-content { max-width: 800px; }
+        .spinner {
+            border: 4px solid rgba(0,0,0,0.1); width: 36px; height: 36px;
+            border-radius: 50%; border-left-color: #0d6efd;
+            animation: spin 1s linear infinite; margin: 40px auto;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        #modal-body-content { min-height: 200px; }
+    </style>
+</head>
+
+<div class="main-content">
+    <main class="barra-content">
+        <header class="content-header">
+            <div class="breadcrumb">
+                <a href="{% url 'index' %}" class="breadcrumb-item">Inicio</a>
+                <span class="breadcrumb-separator">></span>
+                <span class="breadcrumb-item active">Historias Clínicas</span>
+            </div>
+        </header>
+
+        <div class="historias-content">
+            <!-- Header (sin cambios) -->
+            <div class="contenido-header">
+                <div class="header-content">
+                    <h1>Historias Clínicas Genéticas</h1>
+                    <p>Gestiona y consulta todas las historias clínicas del sistema</p>
+                </div>
+                <div class="header-actions">
+                    {% if request.user.genetistas.rol != 'LEC' %}
+                    <a href="{% url 'historia_crear' %}" class="btn-primary">
+                        <i class="fas fa-file-alt"></i>
+                        Nueva Historia
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Filtros (sin cambios) -->
+            <div class="content-card">
+                 <div class="card-header">
+                    <h2><i class="fas fa-filter"></i> Filtros de Búsqueda</h2>
+                    <p>Utiliza los filtros para encontrar información específica</p>
+                </div>
+                <form method="GET" action="{% url 'ver_historias' %}" id="report-search-form">
+                    <div class="card-content">
+                        <div class="filters-grid">
+                            <div class="filter-group">
+                                <label for="buscar_historia">Buscar Historia</label>
+                                <div class="search-input">
+                                    <i class="fas fa-search"></i>
+                                    <input type="text" name="buscar_historia" id="buscar_historia" placeholder="N° historia, nombre paciente..." value="{{ request.GET.buscar_historia }}">
+                                </div>
+                            </div>
+                            <div class="filter-group">
+                                <label for="estado_historia">Estado</label>
+                                <select name="estado_historia" id="estado_historia">
+                                    <option value="todos" {% if not request.GET.estado_historia or request.GET.estado_historia == 'todos' %}selected{% endif %}>Todos los estados</option>
+                                    {% for value, display in estado_choices %}
+                                        <option value="{{ value }}" {% if request.GET.estado_historia == value %}selected{% endif %}>{{ display }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label for="genetista">Genetista</label>
+                                {% if request.user.genetistas.rol == 'ADM' or request.user.is_superuser %}
+                                <div class="genetista-select">
+                                    <select name="genetista" id="genetista">
+                                        <option value="todos" {% if not request.GET.genetista or request.GET.genetista == 'todos' %}selected{% endif %}>Todos los genetistas</option>
+                                        {% for g in genetistas_list %}
+                                            <option value="{{ g.pk }}" {% if request.GET.genetista == g.pk|stringformat:"s" %}selected{% endif %}>
+                                                {{ g.user.get_full_name|default:g.user.username }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                {% else %}
+                                    {% with target_genetista=request.user.genetistas.associated_genetista|default:request.user.genetistas %}
+                                    <div class="genetista-select">
+                                        <select disabled>
+                                            <option selected>
+                                                {{ target_genetista.user.get_full_name|default:target_genetista.user.username }}
+                                            </option>
+                                        </select>
+                                    </div>
+                                    {% endwith %}
+                                {% endif %}
+                            </div>
+                            <div class="filter-group">
+                                <label for="motivo_consulta">Motivo de Consulta</label>
+                                <select name="motivo_consulta" id="motivo_consulta">
+                                    <option value="todos" {% if not request.GET.motivo_consulta or request.GET.motivo_consulta == 'todos' %}selected{% endif %}>Todos los motivos</option>
+                                    {% for value, display in motivo_choices %}
+                                        <option value="{{ value }}" {% if request.GET.motivo_consulta == value %}selected{% endif %}>{{ display }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="filter-actions">
+                                <button type="submit" class="btn-buscar"><i class="fas fa-search"></i> Buscar</button>
+                                <a href="{% url 'ver_historias' %}" class="btn-limpiar" id="btn-limpiar-filters">Limpiar</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Tabla de Resultados (sin cambios) -->
+            <div class="content-card">
+                <div class="card-header">
+                    <h2>Resultados de Búsqueda</h2>
+                    <p>{{ historias_list.count }} registro{{ historias_list.count|pluralize }} encontrado{{ historias_list.count|pluralize }}.</p>
+                </div>
+                <div class="card-content">
+                    <div class="table-container">
+                        <table class="historia-table">
+                            <thead>
+                                <tr>
+                                    <th>N° Historia</th>
+                                    <th>Paciente(s)</th>
+                                    <th>Motivo</th>
+                                    <th>Estado</th>
+                                    <th>Genetista</th>
+                                    <th>Fecha</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for historia in historias_list %}
+                                <tr class="{% if historia.estado == 'archivada' %}archived-row{% endif %}">
+                                    <td>HC-{{ historia.numero_historia }}</td>
+                                    <td>{{ historia.get_paciente_display }}</td>
+                                    <td>{{ historia.get_motivo_tipo_consulta_display }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if historia.estado == 'finalizada' %}default
+                                            {% elif historia.estado == 'borrador' %}secondary
+                                            {% elif historia.estado == 'archivada' %}archived{% endif %}">
+                                            {{ historia.get_estado_display }}
+                                        </span>
+                                    </td>
+                                    <td>{{ historia.genetista.user.get_full_name|default:"N/A" }}</td>
+                                    <td>{{ historia.fecha_ingreso|date:"d/m/Y" }}</td>
+                                    <td>
+                                        {% if request.user.genetistas.rol != 'LEC' %}
+                                            <div class="dropdown">
+                                                <button class="btn-icon"><i class="fas fa-ellipsis-h"></i></button>
+                                                <div class="dropdown-content">
+                                                    {% if historia.estado == 'archivada' %}
+                                                        <a href="#" class="ver-historia" data-historia-id="{{ historia.pk }}"><i class="fas fa-eye"></i> Ver Detalles</a>
+                                                        <a href="{% url 'historia_pdf' historia.pk %}" target="_blank" class="info"><i class="fas fa-file-pdf"></i> Generar PDF</a>
+                                                        {% if request.user.genetistas.rol == 'ADM' or request.user.is_superuser %}
+                                                            <a href="#" class="unarchive-btn success" data-unarchive-url="{% url 'historia_unarchive' historia.pk %}"><i class="fas fa-box-open"></i> Desarchivar</a>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <a href="{% url 'historia_editar' historia.pk %}" class="editar-historia"><i class="fas fa-edit"></i> Editar</a>
+                                                        <a href="#" class="ver-historia" data-historia-id="{{ historia.pk }}"><i class="fas fa-eye"></i> Ver Detalles</a>
+                                                        <a href="#" class="archive-btn warning" data-historia-id="{{ historia.pk }}" data-historia-numero="{{ historia.numero_historia }}"><i class="fas fa-archive"></i> Archivar</a>
+                                                        <a href="{% url 'historia_pdf' historia.pk %}" target="_blank" class="info"><i class="fas fa-file-pdf"></i> Generar PDF</a>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        {% else %}
+                                            <a href="#" class="ver-historia" data-historia-id="{{ historia.pk }}"><i class="fas fa-eye"></i> Ver</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" style="text-align: center; padding: 20px;">No se encontraron historias clínicas.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Modal para ver detalles -->
+<div class="modal" id="verHistoriaModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div class="historia-modal-title">
+                <div class="historia-icon"><i class="fas fa-file-lines"></i></div>
+                <div class="historia-informacion">
+                    <h2 class="historia-numero" id="modal-historia-numero"></h2>
+                    <p class="paciente-datos" id="modal-paciente-nombre-principal"></p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-body" id="modal-body-content">
+            <div class="spinner"></div>
+        </div>
+        <button type="button" class="modal-close" id="closeVerHistoriaModalBtn">×</button>
+    </div>
+</div>
+
+<!-- Modal para archivar -->
+<div class="modal-archive" id="archiveHistoriaModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3><i class="fas fa-triangle-exclamation"></i> Confirmar Archivamiento</h3>
+            <button type="button" class="modal-close" id="closeArchiveModalBtn">×</button>
+        </div>
+        <form id="archiveForm" method="POST">
+            {% csrf_token %}
+            <div class="modal-body">
+                <p>Está a punto de archivar la historia clínica <strong id="archive-historia-numero"></strong>. Esta acción marcará la historia como 'Archivada' y a sus pacientes como 'Inactivos'.</p>
+                <p><strong>Esta acción solo puede ser revertida por un administrador.</strong></p>
+                <div class="form-group">
+                    {{ archivar_form.motivo.label_tag }}
+                    {{ archivar_form.motivo }}
+                    <div class="help-text">{{ archivar_form.motivo.help_text }}</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-secondary" id="cancelArchiveBtn">Cancelar</button>
+                <button type="submit" class="btn-danger">Sí, Archivar</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Formulario oculto para desarchivar -->
+<form id="unarchive-form" method="POST" style="display:none;">
+    {% csrf_token %}
+</form>
+
+<script src="https://kit.fontawesome.com/8058dee255.js" crossorigin="anonymous"></script>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // --- 1. LÓGICA DEL DROPDOWN DE ACCIONES ---
+        document.body.addEventListener('click', function(e) {
+            document.querySelectorAll('.dropdown-content').forEach(content => {
+                if (!content.previousElementSibling.contains(e.target)) {
+                    content.style.display = 'none';
+                }
+            });
+            const dropdownButton = e.target.closest('.btn-icon');
+            if (dropdownButton) {
+                e.stopPropagation();
+                const dropdownContent = dropdownButton.nextElementSibling;
+                if (dropdownContent && dropdownContent.classList.contains('dropdown-content')) {
+                    const isVisible = dropdownContent.style.display === 'block';
+                    document.querySelectorAll('.dropdown-content').forEach(c => c.style.display = 'none');
+                    dropdownContent.style.display = isVisible ? 'none' : 'block';
+                }
+            }
+        });
+
+        // --- 2. LÓGICA DEL MODAL "VER DETALLES" ---
+        const verHistoriaModal = document.getElementById('verHistoriaModal');
+        const closeVerHistoriaModalBtn = document.getElementById('closeVerHistoriaModalBtn');
+        const modalBody = document.getElementById('modal-body-content');
+        const modalHistoriaNumero = document.getElementById('modal-historia-numero');
+        const modalPacienteNombrePrincipal = document.getElementById('modal-paciente-nombre-principal');
+        
+        function closeVerModal() {
+            if (verHistoriaModal) {
+                verHistoriaModal.classList.remove('active');
+                modalBody.innerHTML = '<div class="spinner"></div>'; 
+            }
+        }
+
+        document.querySelector('.historia-table tbody').addEventListener('click', function(e) {
+            const verButton = e.target.closest('.ver-historia');
+            if (verButton) {
+                e.preventDefault();
+                const historiaId = verButton.dataset.historiaId;
+                verHistoriaModal.classList.add('active');
+                fetchHistoriaDetails(historiaId);
+            }
+        });
+
+        if (closeVerHistoriaModalBtn) closeVerHistoriaModalBtn.addEventListener('click', closeVerModal);
+        if (verHistoriaModal) verHistoriaModal.addEventListener('click', e => { if (e.target === verHistoriaModal) closeVerModal(); });
+
+        function fetchHistoriaDetails(historiaId) {
+            fetch(`/ajax/historia-details/${historiaId}/`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Error de red o servidor.');
+                    return response.json();
+                })
+                .then(data => {
+                    populateModal(data);
+                })
+                .catch(error => {
+                    console.error('Error al obtener detalles de la historia:', error);
+                    modalBody.innerHTML = `<p style="color: red; text-align: center; padding: 20px;">No se pudieron cargar los detalles.</p>`;
+                });
+        }
+        
+        // --- FUNCIÓN populateModal COMPLETAMENTE ACTUALIZADA ---
+        function populateModal(data) {
+            modalHistoriaNumero.textContent = `HC-${data.numero_historia}`;
+            modalPacienteNombrePrincipal.textContent = data.paciente_display_principal;
+    
+            let patientSpecificHtml = '';
+            let fechaNacimientoPrincipal = 'N/A';
+    
+            if (data.propositos && data.propositos.length > 0) {
+                fechaNacimientoPrincipal = data.propositos[0].fecha_nacimiento;
+                patientSpecificHtml = `
+                    <!-- Datos del Propósito(s) -->
+                    ${data.propositos.map((proposito, index) => `
+                        <section class="info-section">
+                            <h3 class="section-title">
+                                <i class="fas fa-circle-user"></i>
+                                Datos del ${data.is_pareja ? `Cónyuge ${index + 1}` : 'Propósito'}
+                            </h3>
+                            <div class="section-content grid-3-col">
+                                <div class="info-pair"><span class="info-label">Nombre Completo</span><span class="info-value">${proposito.nombre_completo}</span></div>
+                                <div class="info-pair"><span class="info-label">Identificación</span><span class="info-value">${proposito.identificacion}</span></div>
+                                <div class="info-pair"><span class="info-label">Lugar de Nacimiento</span><span class="info-value">${proposito.lugar_nacimiento}</span></div>
+                                <div class="info-pair"><span class="info-label">Escolaridad</span><span class="info-value">${proposito.escolaridad}</span></div>
+                                <div class="info-pair"><span class="info-label">Ocupación</span><span class="info-value">${proposito.ocupacion}</span></div>
+                                <div class="info-pair"><span class="info-label">Grupo Sanguíneo</span><span class="info-value">${proposito.grupo_sanguineo}</span></div>
+                            </div>
+                        </section>
+                    `).join('')}
+    
+                    <!-- Información Familiar (solo para propósito individual) -->
+                    ${!data.is_pareja && data.propositos[0].padres_info ? `
+                    <section class="info-section">
+                        <h3 class="section-title"><i class="fas fa-users-line"></i>Información Familiar</h3>
+                        <div class="section-content">
+                            <div class="family-grid">
+                                <div class="family-member-card">
+                                    <h4 class="family-member-title">Padre</h4>
+                                    <div class="member-data-grid">
+                                        <div class="info-pair"><span class="info-label">Nombre</span><span class="info-value">${data.propositos[0].padres_info.padre?.nombre_completo || 'N/A'}</span></div>
+                                        <div class="info-pair"><span class="info-label">Identificación</span><span class="info-value">${data.propositos[0].padres_info.padre?.identificacion || 'N/A'}</span></div>
+                                        <div class="info-pair"><span class="info-label">Ocupación</span><span class="info-value">${data.propositos[0].padres_info.padre?.ocupacion || 'N/A'}</span></div>
+                                        <div class="info-pair"><span class="info-label">Grupo Sanguíneo</span><span class="info-value">${data.propositos[0].padres_info.padre?.grupo_sanguineo || 'N/A'}</span></div>
+                                    </div>
+                                </div>
+                                <div class="family-member-card">
+                                    <h4 class="family-member-title">Madre</h4>
+                                    <div class="member-data-grid">
+                                        <div class="info-pair"><span class="info-label">Nombre</span><span class="info-value">${data.propositos[0].padres_info.madre?.nombre_completo || 'N/A'}</span></div>
+                                        <div class="info-pair"><span class="info-label">Identificación</span><span class="info-value">${data.propositos[0].padres_info.madre?.identificacion || 'N/A'}</span></div>
+                                        <div class="info-pair"><span class="info-label">Ocupación</span><span class="info-value">${data.propositos[0].padres_info.madre?.ocupacion || 'N/A'}</span></div>
+                                        <div class="info-pair"><span class="info-label">Grupo Sanguíneo</span><span class="info-value">${data.propositos[0].padres_info.madre?.grupo_sanguineo || 'N/A'}</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                    ` : ''}
+    
+                    <!-- Examen Físico -->
+                    ${data.propositos.map(proposito => proposito.examen_fisico ? `
+                    <section class="info-section">
+                        <h3 class="section-title"><i class="fas fa-stethoscope"></i>Examen Físico de ${proposito.nombre_completo}</h3>
+                        <div class="section-content">
+                            <div class="measurements-grid">
+                                <div class="info-pair"><span class="info-label">Talla (cm)</span><span class="info-value">${proposito.examen_fisico.talla}</span></div>
+                                <div class="info-pair"><span class="info-label">Peso (Kg)</span><span class="info-value">${proposito.examen_fisico.peso}</span></div>
+                                <div class="info-pair"><span class="info-label">Medida Brazada</span><span class="info-value">${proposito.examen_fisico.medida_abrazada}</span></div>
+                                <div class="info-pair"><span class="info-label">Segmento Superior</span><span class="info-value">${proposito.examen_fisico.segmento_superior}</span></div>
+                                <div class="info-pair"><span class="info-label">Segmento Inferior</span><span class="info-value">${proposito.examen_fisico.segmento_inferior}</span></div>
+                                <div class="info-pair"><span class="info-label">Dist. Interc. Interna</span><span class="info-value">${proposito.examen_fisico.distancia_interc_interna}</span></div>
+                                <div class="info-pair"><span class="info-label">Dist. Interc. Externa</span><span class="info-value">${proposito.examen_fisico.distancia_interc_externa}</span></div>
+                                <div class="info-pair"><span class="info-label">Dist. Interpupilar</span><span class="info-value">${proposito.examen_fisico.distancia_interpupilar}</span></div>
+                            </div>
+                        </div>
+                    </section>
+                    ` : '').join('')}
+                `;
+            } else {
+                patientSpecificHtml = `<section class="info-section"><div style="text-align: center; padding: 2rem 1rem; background-color: #fff3e0; border: 1px solid #ffe0b2; border-radius: 8px; margin-top: 1rem;"><i class="fas fa-exclamation-triangle" style="font-size: 2.5rem; color: #ff9800; margin-bottom: 1rem;"></i><h4 style="margin: 0; font-size: 1.25rem; color: #e65100;">Paciente no Asignado</h4><p style="color: #4e4e4e; margin: 0.5rem 0 0 0;">Esta historia clínica aún no tiene un paciente o pareja asociada.</p></div></section>`;
+            }
+    
+            const generalInfoHtml = `
+                <div class="main-grid-2-col">
+                    <section class="info-section card">
+                        <h3 class="section-title"><i class="fas fa-notes-medical"></i>Información Médica</h3>
+                        <div class="section-content">
+                            <div class="info-pair"><span class="info-label">Motivo de Consulta</span><span class="info-value">${data.motivo_consulta}</span></div>
+                            <div class="info-pair"><span class="info-label">Genetista Asignado</span><span class="info-value">${data.genetista_asignado}</span></div>
+                            <div class="info-pair"><span class="info-label">Médico de Referencia</span><span class="info-value">${data.medico_referencia}</span></div>
+                            <div class="info-pair"><span class="info-label">Centro de Referencia</span><span class="info-value">${data.centro_referencia}</span></div>
+                        </div>
+                    </section>
+                    <section class="info-section card">
+                        <h3 class="section-title"><i class="fas fa-calendar-alt"></i>Datos de Registro</h3>
+                        <div class="section-content">
+                            <div class="info-pair"><span class="info-label">Fecha de Creación</span><span class="info-value">${data.fecha_creacion}</span></div>
+                            <div class="info-pair"><span class="info-label">Última modificación</span><span class="info-value">${data.fecha_ultima_modificacion}</span></div>
+                            <div class="info-pair"><span class="info-label">Fecha de Nacimiento</span><span class="info-value">${fechaNacimientoPrincipal}</span></div>
+                        </div>
+                    </section>
+                </div>
+            `;
+            
+            modalBody.innerHTML = generalInfoHtml + patientSpecificHtml;
+        }
+
+        // --- 3. LÓGICA DEL MODAL "ARCHIVAR" ---
+        const archiveModal = document.getElementById('archiveHistoriaModal');
+        const closeArchiveModalBtn = document.getElementById('closeArchiveModalBtn');
+        const cancelArchiveBtn = document.getElementById('cancelArchiveBtn');
+        const archiveForm = document.getElementById('archiveForm');
+        const archiveHistoriaNumero = document.getElementById('archive-historia-numero');
+
+        if (archiveModal) {
+            document.querySelector('.historia-table tbody').addEventListener('click', function(e) {
+                const archiveButton = e.target.closest('.archive-btn');
+                if (archiveButton) {
+                    e.preventDefault();
+                    const historiaId = archiveButton.dataset.historiaId;
+                    const historiaNumero = archiveButton.dataset.historiaNumero;
+                    archiveForm.action = `/historias/archive/${historiaId}/`;
+                    archiveHistoriaNumero.textContent = `HC-${historiaNumero}`;
+                    archiveModal.classList.add('active');
+                }
+            });
+
+            const closeArchiveModal = () => {
+                archiveModal.classList.remove('active');
+                archiveForm.reset();
+            };
+
+            if (closeArchiveModalBtn) closeArchiveModalBtn.addEventListener('click', closeArchiveModal);
+            if (cancelArchiveBtn) cancelArchiveBtn.addEventListener('click', closeArchiveModal);
+            archiveModal.addEventListener('click', e => { if (e.target === archiveModal) closeArchiveModal(); });
+        }
+
+        // --- 4. LÓGICA DEL BOTÓN "DESARCHIVAR" ---
+        document.querySelector('.historia-table tbody').addEventListener('click', function(e) {
+            const unarchiveButton = e.target.closest('.unarchive-btn');
+            if (unarchiveButton) {
+                e.preventDefault();
+                if (confirm('¿Está seguro de que desea desarchivar esta historia clínica? Sus pacientes asociados serán reactivados.')) {
+                    const form = document.getElementById('unarchive-form');
+                    form.action = unarchiveButton.dataset.unarchiveUrl;
+                    form.submit();
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

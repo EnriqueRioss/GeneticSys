@@ -1,0 +1,266 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>{% block title %}GenClinic - IIG LUZ{% endblock %}</title>
+    <link rel="stylesheet" href="{% static '/styles/stylesside.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <link rel="stylesheet" href="{% static 'styles/chatbot.css' %}">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo">
+                <div class="logo-icon">G</div>
+                <div class="logo-text">
+                    <span class="logo-title">GenClinic</span>
+                    <span class="logo-subtitle">Sistema de Gestión</span>
+                </div>
+            </div>
+            {% if user.is_authenticated %}
+            <div class="user-profile">
+                <div class="user-avatar">
+                    {% if user.first_name and user.last_name %}
+                        {{ user.first_name|first|upper }}{{ user.last_name|first|upper }}
+                    {% elif user.first_name %}
+                        {{ user.first_name|slice:":2"|upper }}
+                    {% else %}
+                        {{ user.username|first|upper }}
+                    {% endif %}
+                </div>
+                <div class="user-info">
+                    <span class="user-name">{{ user.get_full_name|default:user.username }}</span>
+                    {% if user.genetistas and user.genetistas.rol %}
+                        <span class="user-role">{{ user.genetistas.get_rol_display }}</span>
+                    {% elif user.is_superuser %}
+                        <span class="user-role">Superusuario</span>
+                    {% else %}
+                        <span class="user-role">Usuario</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <h3 class="nav-section-title">Principal</h3>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="{% url 'index' %}" class="nav-link">
+                            <i class="fas fa-home"></i>
+                            <span class="text">Inicio</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'gestion_pacientes' %}" class="nav-link">
+                            <i class="fas fa-users"></i>
+                            <span class="text">Pacientes</span>
+                        </a>
+                    </li>
+                    {# --- LÓGICA MODIFICADA PARA INCLUIR AL LECTOR --- #}
+                    {% if user.is_authenticated and user.genetistas %}
+                        {% if user.genetistas.rol == 'GEN' or user.genetistas.rol == 'ADM' or user.genetistas.rol == 'LEC' or user.is_superuser %}
+                        <li class="nav-item">
+                            <a href="{% url 'ver_historias' %}" class="nav-link">
+                                <i class="fas fa-file-alt"></i>
+                                <span class="text">Historias Clínicas</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+            </div>
+
+            <div class="nav-section">
+                <h3 class="nav-section-title">Análisis</h3>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="{% url 'reports_dashboard' %}" class="nav-link">
+                            <i class="fas fa-chart-bar"></i>
+                            <span class="text">Reportes</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            {% if user.is_authenticated and user.genetistas and user.genetistas.rol == 'ADM' or user.is_superuser %}
+            <div class="nav-section">
+                <h3 class="nav-section-title">Administración</h3>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="{% url 'gestion_usuarios' %}" class="nav-link">
+                            <i class="fas fa-user-check"></i>
+                            <span class="text">Gestión de Usuarios</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'gestion_pacientes' %}" class="nav-link">
+                            <i class="fas fa-database"></i>
+                            <span class="text">Gestión de Pacientes</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link"> 
+                            <i class="fas fa-cog"></i>
+                            <span class="text">Configuraciones</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="nav-section">
+                <h3 class="nav-section-title">Sistema</h3>
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a href="{% url 'logout' %}" class="nav-link">
+                            <i class="fa-solid fa-right-to-bracket"></i>
+                            <span class="text">Cerrar Sesion</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+    </aside>
+       
+    <div class="content">
+        {% if messages %}
+            <div class="messages-container" style="padding: 2rem 2rem 0rem 27rem;">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" 
+                         style="background-color: {% if message.tags == 'success' %}#d4edda{% elif message.tags == 'error' %}#f8d7da{% elif message.tags == 'warning' %}#fff3cd{% else %}#cce5ff{% endif %}; 
+                                color: {% if message.tags == 'success' %}#155724{% elif message.tags == 'error' %}#721c24{% elif message.tags == 'warning' %}#856404{% else %}#004085{% endif %}; 
+                                border: 1px solid {% if message.tags == 'success' %}#c3e6cb{% elif message.tags == 'error' %}#f5c6cb{% elif message.tags == 'warning' %}#ffeeba{% else %}#b8daff{% endif %}; 
+                                padding: .75rem 1.25rem; margin-bottom: 1rem; border-radius: .25rem; position: relative;">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" 
+                                style="position: absolute; top: 0; right: 0; padding: .75rem 1.25rem; background: transparent; border: 0; font-size: 1.2rem; cursor: pointer;"
+                                onclick="this.parentElement.style.display='none';">×</button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+        
+    </div>  
+    
+    <!-- El resto del HTML (Chatbot y Scripts) permanece igual -->
+    <div id="chatbot-container" class="chatbot-container">
+        <div class="chatbot-header">
+            <h3><i class="fas fa-robot"></i> GenAssist</h3>
+            <button id="chatbot-close-btn" class="chatbot-close-btn">×</button>
+        </div>
+        <div id="chatbot-messages" class="chatbot-messages"></div>
+        <div id="chatbot-suggestions" class="chatbot-suggestions"></div>
+        <form id="chatbot-form" class="chatbot-form">
+            <input type="text" id="chatbot-input" placeholder="Escribe tu pregunta..." autocomplete="off" disabled>
+            <button type="submit" id="chatbot-send-btn" disabled>
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </form>
+    </div>
+    <button id="chatbot-fab" class="chatbot-fab">
+        <i class="fas fa-brain"></i>
+    </button> 
+
+<script>
+        function setupAjaxForm(formId) {
+            const form = document.getElementById(formId);
+            if (!form) {
+                console.error(`Form with ID "${formId}" not found.`);
+                return;
+            }
+        
+            let clickedButton = null;
+        
+            form.querySelectorAll('button[type="submit"]').forEach(button => {
+                button.addEventListener('click', function() {
+                    clickedButton = this;
+                });
+            });
+        
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+        
+                const formData = new FormData(form);
+        
+                if (clickedButton) {
+                    formData.append(clickedButton.name, clickedButton.value || '');
+                }
+        
+                form.querySelectorAll('.field-errors').forEach(el => el.innerHTML = '');
+                const nonFieldErrors = form.querySelector('.non-field-errors');
+                if (nonFieldErrors) nonFieldErrors.innerHTML = '';
+        
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.redirect_url) {
+                        window.location.href = data.redirect_url;
+                    } else {
+                        if (data.errors) {
+                            if (data.errors.__all__) {
+                                data.errors.__all__.forEach(error => {
+                                    if(nonFieldErrors) nonFieldErrors.innerHTML += `<span>${error}</span>`;
+                                });
+                            }
+                            for (const fieldName in data.errors) {
+                                if (fieldName !== '__all__') {
+                                    const errorDiv = document.getElementById(`error_id_${fieldName}`);
+                                    const fieldErrorContainer = form.querySelector(`#error_id_${fieldName}`);
+        
+                                    if (fieldErrorContainer) {
+                                        let errorHtml = '';
+                                        data.errors[fieldName].forEach(error => {
+                                            errorHtml += `<span>${error.message || error}</span>`;
+                                        });
+                                        fieldErrorContainer.innerHTML = errorHtml;
+                                    }
+                                }
+                            }
+                        } else {
+                             if(nonFieldErrors) nonFieldErrors.innerHTML = '<span>Ocurrió un error inesperado.</span>';
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Error en la petición AJAX:', error);
+                    if(nonFieldErrors) nonFieldErrors.innerHTML = '<span>Error de conexión. Intente de nuevo.</span>';
+                });
+        
+                clickedButton = null;
+            });
+        }
+      
+
+    document.addEventListener('DOMContentLoaded', function() {
+        {% if messages %}
+            {% for message in messages %}
+                {% if 'POPUP:' in message.message %}
+                    alert("{{ message.message|slice:'7:'|escapejs }}");
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+    });
+</script>
+<script src="{% static 'js/chatbot.js' %}"></script>
+</body>
+
+</html>
