@@ -18,6 +18,14 @@
 
     <aside class="sidebar">
         <div class="sidebar-header">
+
+            <!-- ==== PRIMERA MODIFICACIÓN PARA QUE SE VEA RESPONSIVE EL SIDEBAR ====== -->
+            <button class="sidebar-close-btn" id="sidebar-close-btn">
+                <i class="fas fa-file"></i>
+            </button>
+
+            <!-- ==== FIN DE LA PRIMER MODIFICACION ====== -->
+
             <div class="sidebar-logo">
                 <div class="logo-icon">G</div>
                 <div class="logo-text">
@@ -130,12 +138,33 @@
             </div>
         </nav>
     </aside>
+
+    <!-- ==== SEGUNDA MODIFICACIÓN PARA QUE SE VEA RESPONSIVE EL SIDEBAR ====== -->
+
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- ==== FIN DE LA SEGUNDA MODIFICACION ====== -->
+
+
+
        
     <div class="content">
+
+        <!-- ==== TERCERA MODIFICACIÓN PARA QUE SE VEA RESPONSIVE EL SIDEBAR ====== -->
+        <header class="main-header">
+            <button class="sidebar-toggle-btn" id="sidebar-toggle-btn">
+                <i class="fas fa-bars"></i>
+            </button>
+        </header>
+        <!-- ==== FIN DE LA TERCERA MODIFICACION ====== -->
+
+
+
+
         <!-- ===== INICIO DE LA MODIFICACIÓN ===== -->
         {% if messages %}
             <!-- Contenedor con el padding corregido para no superponerse al sidebar -->
-            <div class="messages-container" style="padding: 2rem 2rem 0rem 27rem;">
+            <div class="messages-container" style="padding: 2rem 2rem 0rem 2rem;">
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" 
                          style="background-color: {% if message.tags == 'success' %}#d4edda{% elif message.tags == 'error' %}#f8d7da{% elif message.tags == 'warning' %}#fff3cd{% else %}#cce5ff{% endif %}; 
@@ -270,6 +299,33 @@
         }
     });
     // ===== FIN DE SCRIPT PARA MOSTRAR SOLO LA ÚLTIMA ALERTA =====
+
+
+
+    // ===== INICIO DEL SCRIPT PARA EL FUNCIONAMIENTO RESPONSIVE DEL SIDEBAR ====
+    document.addEventListener('DOMContentLoaded', function () {
+            const toggleBtn = document.getElementById('sidebar-toggle-btn');
+            const closeBtn = document.getElementById('sidebar-close-btn');
+            const overlay = document.getElementById('sidebar-overlay');
+            const body = document.body;
+
+            function toggleSidebar() {
+                body.classList.toggle('sidebar-open');
+            }
+
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', toggleSidebar);
+            }
+
+            if (closeBtn) {
+                closeBtn.addEventListener('click', toggleSidebar);
+            }
+            
+            if (overlay) {
+                overlay.addEventListener('click', toggleSidebar);
+            }
+        });
+    // ===== FIN DEL SCRIPT PARA RESPONSIVIDAD DEL SIDEBAR =======
 </script>
 <script src="{% static 'js/chatbot.js' %}"></script>
 </body>
