@@ -1,7 +1,7 @@
-{% extends 'layouts/base.html' %}
+{% extends 'layouts/base2.html' %}
 {% load static %}
 
-{% block content %}
+{% block form_content %}
 <head>
     <title>{% if editing %}EDITAR HISTORIA{% else %}CREAR HISTORIA{% endif %} | IIG - LUZ</title>
     <link rel="stylesheet" href="{% static '/styles/stylesforms.css' %}">
@@ -29,12 +29,6 @@
 
             <div class="stepper">
                 <div class="stepper-item active" data-step="1"><div class="step-counter"><i class="fas fa-file"></i></div><div class="step-name"><p class="font-bold">Informacion General</p></div></div>
-                <div class="stepper-item" data-step="2"><div class="step-counter"><i class="fas fa-user"></i></div><div class="step-name"><p>Datos del Proposito</p></div></div>
-                <div class="stepper-item" data-step="3"><div class="step-counter"><i class="fas fa-user"></i></div><div class="step-name"><p>Datos del Representante</p></div></div>
-                <div class="stepper-item" data-step="4"><div class="step-counter"><i class="fas fa-file-medical"></i></div><div class="step-name"><p>Antecedentes Personales</p></div></div>
-                <div class="stepper-item" data-step="5"><div class="step-counter"><i class="fas fa-users"></i></div><div class="step-name"><p>Datos preconcepcionales</p></div></div>
-                <div class="stepper-item" data-step="6"><div class="step-counter"><i class="fas fa-stethoscope"></i></div><div class="step-name"><p>Examen Fisico</p></div></div>
-                <div class="stepper-item" data-step="7"><div class="step-counter"><i class="fas fa-clipboard-check"></i></div><div class="step-name"><p>Diagnóstico Final</p></div></div>
             </div>
             
             <!-- El formulario ahora es simple, el action será la URL actual, que es lo que queremos. -->
@@ -100,4 +94,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 
-{% endblock %}
+{% endblock form_content %}
