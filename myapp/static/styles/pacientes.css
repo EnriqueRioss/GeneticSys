@@ -137,6 +137,7 @@ li{
   text-align: left;
   cursor: pointer;
   transition: background-color 0.2s;
+  margin-bottom: 2rem;
 }
 
 button i {
@@ -567,7 +568,7 @@ a i{
 }
 
 .tab-btn {
-  padding: 0.8rem 8rem;
+  padding: 1rem 8rem;
   background: none;
   border: none;
   cursor: pointer;
@@ -592,6 +593,7 @@ a i{
 
 .tab-content.active {
   display: block;
+  height: auto;
 }
 
 @keyframes fadeIn{
