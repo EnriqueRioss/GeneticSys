@@ -12,6 +12,9 @@
     --border-gray: #b3b3b3;
     --liner-gray: #d3d2d2;
     --button-gray: #e4e4e4;
+
+
+    --sidebar-width: 25rem;
 }
 
 html {
@@ -23,7 +26,7 @@ html {
 
 body{
     background-color: var(--background-color);
-    overflow: hidden;
+    overflow-x: hidden;
 }
 
 * {
@@ -53,24 +56,27 @@ li{
 	position: fixed;
 	top: 0;
 	left: 0;
-	width: 25rem;
+	width: var(--sidebar-width);
 	height: 100vh;
 	background: var(--lighter-blue);
     color: var(--primary-darkerblue);
     border-right: 1px solid var(--primary-lightblue);
     display: flex;
     flex-direction: column;
+    z-index: 1000;
+    transition: transform 0.3s ease-in-out;
     font-family: "Poppins", serif;
-    overflow-x: hidden;
+    padding: 1.5rem;
 
-	/*z-index: 2000;
+	/*
 	transition: .3s ease;
 	*/
 }
 
 .sidebar-header{
-    padding: 2rem;
+    padding-bottom: 1.5rem;
     border-bottom: 1px solid var(--primary-lightblue);
+    margin-bottom: 1.5rem;
 }
 
 .sidebar-logo{
@@ -204,4 +210,88 @@ li{
     background-color: var(--primary-lightblue);
     color: var(--primary-darkerblue);
     font-weight: 500;
+}
+
+.content{
+    margin-left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+    transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out;
+    padding-bottom: 2rem;
+}
+
+.main-header{
+    display: flex;
+    padding: 1rem 2rem;
+    background-color: var(--background-color);
+    border-bottom: 1px solid var(--border-gray);
+    align-items: center;
+}
+
+.sidebar-toggle-btn{
+    background: none;
+    border: none;
+    font-size: 2.2rem;
+    cursor: pointer;
+    color: var(--primary-darkerblue);
+}
+
+.sidebar-close-btn i{
+    display: none;
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    font-size: 2.4rem;
+    cursor: pointer;
+    color: var(--border-gray);
+}
+
+.sidebar-overlay{
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+}
+
+
+/* Estilos para el contenedor de mensajes */
+.messages-container {
+    padding: 2rem 2rem 0 2rem; /* Padding normal en todos los lados (arriba, derecha, abajo, izquierda) */
+}
+
+@media (max-width: 992px) {
+    .sidebar {
+        /* Mueve el sidebar fuera de la pantalla por defecto */
+        transform: translateX(-100%);
+    }
+
+    .content {
+        /* El contenido ocupa todo el ancho */
+        margin-left: 0;
+        width: 100%;
+    }
+
+    .main-header {
+        display: flex; /* Muestra el header con el botón hamburguesa */
+    }
+
+    .sidebar-close-btn {
+        display: block; /* Muestra el botón de cierre dentro del sidebar */
+    }
+
+    /* ESTADO ABIERTO: Cuando body tiene la clase .sidebar-open */
+    body.sidebar-open .sidebar {
+        /* Trae el sidebar de vuelta a la pantalla */
+        transform: translateX(0);
+        box-shadow: 0 0 25px rgba(0,0,0,0.2);
+    }
+    
+    body.sidebar-open .sidebar-overlay {
+        display: block; /* Muestra el overlay */
+    }
 }
