@@ -66,7 +66,6 @@
                             <span class="text">Pacientes</span>
                         </a>
                     </li>
-                    {# --- LÓGICA MODIFICADA PARA INCLUIR AL LECTOR --- #}
                     {% if user.is_authenticated and user.genetistas %}
                         {% if user.genetistas.rol == 'GEN' or user.genetistas.rol == 'ADM' or user.genetistas.rol == 'LEC' or user.is_superuser %}
                         <li class="nav-item">
@@ -133,29 +132,40 @@
     </aside>
        
     <div class="content">
+        <!-- ===== INICIO DE LA MODIFICACIÓN ===== -->
         {% if messages %}
+            <!-- Contenedor con el padding corregido para no superponerse al sidebar -->
             <div class="messages-container" style="padding: 2rem 2rem 0rem 27rem;">
                 {% for message in messages %}
                     <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" 
                          style="background-color: {% if message.tags == 'success' %}#d4edda{% elif message.tags == 'error' %}#f8d7da{% elif message.tags == 'warning' %}#fff3cd{% else %}#cce5ff{% endif %}; 
                                 color: {% if message.tags == 'success' %}#155724{% elif message.tags == 'error' %}#721c24{% elif message.tags == 'warning' %}#856404{% else %}#004085{% endif %}; 
                                 border: 1px solid {% if message.tags == 'success' %}#c3e6cb{% elif message.tags == 'error' %}#f5c6cb{% elif message.tags == 'warning' %}#ffeeba{% else %}#b8daff{% endif %}; 
-                                padding: .75rem 1.25rem; margin-bottom: 1rem; border-radius: .25rem; position: relative;">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close" 
-                                style="position: absolute; top: 0; right: 0; padding: .75rem 1.25rem; background: transparent; border: 0; font-size: 1.2rem; cursor: pointer;"
-                                onclick="this.parentElement.style.display='none';">×</button>
+                                padding: .75rem 1.25rem; margin-bottom: 1rem; border-radius: .25rem; position: relative; display: flex; align-items: center; justify-content: space-between;">
+                        <span>
+                            {% if message.tags == 'success' %}<i class="fas fa-check-circle" style="margin-right: 8px;"></i>
+                            {% elif message.tags == 'error' %}<i class="fas fa-times-circle" style="margin-right: 8px;"></i>
+                            {% elif message.tags == 'warning' %}<i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+                            {% else %}<i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+                            {% endif %}
+                            {{ message }}
+                        </span>
+                        <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close" 
+                                style="background: transparent; border: 0; font-size: 1.2rem; cursor: pointer; padding: 0 .75rem;"
+                                onclick="this.parentElement.style.display='none';">
+                            <span aria-hidden="true">×</span>
+                        </button>
                     </div>
                 {% endfor %}
             </div>
         {% endif %}
+        <!-- ===== FIN DE LA MODIFICACIÓN ===== -->
 
         {% block content %}
         {% endblock %}
         
     </div>  
     
-    <!-- El resto del HTML (Chatbot y Scripts) permanece igual -->
     <div id="chatbot-container" class="chatbot-container">
         <div class="chatbot-header">
             <h3><i class="fas fa-robot"></i> GenAssist</h3>
@@ -249,16 +259,17 @@
             });
         }
       
-
+    // ===== INICIO DE SCRIPT PARA MOSTRAR SOLO LA ÚLTIMA ALERTA =====
     document.addEventListener('DOMContentLoaded', function() {
-        {% if messages %}
-            {% for message in messages %}
-                {% if 'POPUP:' in message.message %}
-                    alert("{{ message.message|slice:'7:'|escapejs }}");
-                {% endif %}
-            {% endfor %}
-        {% endif %}
+        const alerts = document.querySelectorAll('.messages-container .alert');
+        if (alerts.length > 1) {
+            // Ocultar todas las alertas excepto la última
+            for (let i = 0; i < alerts.length - 1; i++) {
+                alerts[i].style.display = 'none';
+            }
+        }
     });
+    // ===== FIN DE SCRIPT PARA MOSTRAR SOLO LA ÚLTIMA ALERTA =====
 </script>
 <script src="{% static 'js/chatbot.js' %}"></script>
 </body>

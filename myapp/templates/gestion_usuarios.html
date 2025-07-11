@@ -17,16 +17,7 @@
         </div>
       </header>
 
-      {% if messages %}
-        {% for message in messages %}
-          <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" style="margin: 1rem 0; padding: 1rem; border-radius: 0.5rem; background-color: {% if message.tags == 'success' %}var(--primary-lightblue){% elif message.tags == 'error' %}#f8d7da{% else %}var(--lighter-blue){% endif %}; color: {% if message.tags == 'success' %}var(--primary-darkerblue){% elif message.tags == 'error' %}#721c24{% else %}var(--primary-darkerblue){% endif %};">
-              {{ message }}
-              <button type="button" class="close" data-dismiss="alert" aria-label="Close" style="float: right; background: none; border: none; font-size: 1.5rem; cursor:pointer;">
-                  <span aria-hidden="true">×</span>
-              </button>
-          </div>
-        {% endfor %}
-      {% endif %}
+   
 
     <div class="users-content">
         <div class="contenido-header">

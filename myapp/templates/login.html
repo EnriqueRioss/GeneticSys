@@ -1,5 +1,3 @@
-
-
 {% load static %}
 
 <!DOCTYPE html>
@@ -9,6 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>INICIAR SESIÓN | IIG - LUZ</title>
     <link rel="stylesheet" href="{% static '/styles/style.css' %}">
+    <!-- Se añade FontAwesome para los iconos de las alertas -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <header>
@@ -29,14 +29,49 @@
 
     <main class="main-content">
         <section class="contenedor contenedor-inicio">
+            <!-- ===== INICIO DE CONTENEDOR DE MENSAJES ===== -->
+            {% if messages %}
+                <div class="messages-container" style="width: 100%; max-width: 500px; margin: 0 auto 1rem auto;">
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert" 
+                             style="background-color: {% if message.tags == 'success' %}#d4edda{% elif message.tags == 'error' %}#f8d7da{% elif message.tags == 'warning' %}#fff3cd{% else %}#cce5ff{% endif %}; 
+                                    color: {% if message.tags == 'success' %}#155724{% elif message.tags == 'error' %}#721c24{% elif message.tags == 'warning' %}#856404{% else %}#004085{% endif %}; 
+                                    border: 1px solid {% if message.tags == 'success' %}#c3e6cb{% elif message.tags == 'error' %}#f5c6cb{% elif message.tags == 'warning' %}#ffeeba{% else %}#b8daff{% endif %}; 
+                                    padding: .75rem 1.25rem; margin-bottom: 1rem; border-radius: .25rem; position: relative; display: flex; align-items: center; justify-content: space-between;">
+                            <span>
+                                {% if message.tags == 'success' %}<i class="fas fa-check-circle" style="margin-right: 8px;"></i>
+                                {% elif message.tags == 'error' %}<i class="fas fa-times-circle" style="margin-right: 8px;"></i>
+                                {% elif message.tags == 'warning' %}<i class="fas fa-exclamation-triangle" style="margin-right: 8px;"></i>
+                                {% else %}<i class="fas fa-info-circle" style="margin-right: 8px;"></i>
+                                {% endif %}
+                                {{ message }}
+                            </span>
+                            <button type="button" class="btn-close" data-dismiss="alert" aria-label="Close" 
+                                    style="background: transparent; border: 0; font-size: 1.2rem; cursor: pointer; padding: 0 .75rem;"
+                                    onclick="this.parentElement.style.display='none';">
+                                <span aria-hidden="true">×</span>
+                            </button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            <!-- ===== FIN DE CONTENEDOR DE MENSAJES ===== -->
+
             <div class="login-container">
                 <div class="logo">
                     <img src="{% static '/images/pngwing.com.png' %}" width="150" height="150"   alt="IIG - LUZ">
                 </div>
                 <form class="login-form" method="POST">
-                    {%  csrf_token %}
+                    {% csrf_token %}
                     <h2>Iniciar Sesión</h2>
-                    {{error}}
+                    
+                    {% if error %}
+                        <div class="form-error-message">
+                            <i class="fas fa-exclamation-circle"></i>
+                            {{ error }}
+                        </div>
+                    {% endif %}
+
                     <div class="form-group">
                         <label for="username">Usuario</label>
                         {{form.username}}
@@ -72,11 +107,18 @@
                 eyeIcon.src = "{% static '/images/ojoabierto.png' %}";
             }
         }
+
+        // ===== INICIO DE SCRIPT PARA MOSTRAR SOLO LA ÚLTIMA ALERTA =====
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.messages-container .alert');
+            if (alerts.length > 1) {
+                // Ocultar todas las alertas excepto la última
+                for (let i = 0; i < alerts.length - 1; i++) {
+                    alerts[i].style.display = 'none';
+                }
+            }
+        });
+        // ===== FIN DE SCRIPT PARA MOSTRAR SOLO LA ÚLTIMA ALERTA =====
     </script>
-
-
 </body>
-
 </html>
-    
-

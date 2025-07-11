@@ -1485,13 +1485,19 @@ def signup(request):
 
 @never_cache
 def login_medico(request):
-    if request.user.is_authenticated: return redirect('index')
+    if request.user.is_authenticated:
+        return redirect('index')
+    
+    # ===== INICIO DE LA MODIFICACIÓN =====
+    error_message = None  # Variable para el error de credenciales
+    
     if request.method == 'POST':
         form = LoginForm(request.POST) 
         if form.is_valid():
             username = form.cleaned_data['username']
             password = form.cleaned_data['password']
             user = authenticate(request, username=username, password=password)
+            
             if user is not None:
                 try:
                     gen_profile = getattr(user, 'genetistas', None)
@@ -1499,22 +1505,32 @@ def login_medico(request):
                         if user.is_superuser:
                            gen_profile, _ = Genetistas.objects.get_or_create(user=user)
                         else:
-                           messages.error(request, "Perfil de aplicación no encontrado. Contacte al admin.")
+                           # Este es un error de configuración, usamos messages.error porque es importante
+                           messages.error(request, "Perfil de aplicación no encontrado. Contacte al administrador.")
                            return render(request, "login.html", {'form': form})
                     
                     if not gen_profile.rol:
-                        messages.error(request, "El perfil no tiene un rol asignado. Contacte al admin.")
+                        # Error de configuración, también usamos messages.error
+                        messages.error(request, "El perfil no tiene un rol asignado. Contacte al administrador.")
                         return render(request, "login.html", {'form': form})
 
                     login(request, user)
-                    messages.info(request, f"Bienvenido, {user.get_full_name() or user.username} ({gen_profile.get_rol_display()}).")
+                    # Mensaje de bienvenida, este sí va a la siguiente página
+                    messages.success(request, f"Bienvenido, {user.get_full_name() or user.username} ({gen_profile.get_rol_display()}).")
                     return redirect(request.GET.get('next') or 'index')
                 except Genetistas.DoesNotExist:
-                     messages.error(request, "Este usuario no tiene un perfil de genetista. Contacte al admin.")
-            else: messages.error(request, "Usuario o contraseña incorrectos.")
-        else: messages.error(request, "Ingrese usuario y contraseña válidos.")
-    else: form = LoginForm()
-    return render(request, "login.html", {'form': form})
+                     messages.error(request, "Este usuario no tiene un perfil de genetista. Contacte al administrador.")
+            else:
+                # El error de credenciales se maneja localmente
+                error_message = "Usuario o contraseña incorrectos."
+        else:
+            # El error de formulario inválido también se maneja localmente
+            error_message = "Por favor, ingrese un usuario y contraseña válidos."
+    else:
+        form = LoginForm()
+
+    # Pasamos el error local (si existe) al contexto de la plantilla
+    return render(request, "login.html", {'form': form, 'error': error_message})
 
 def signout(request):
     logout(request)
