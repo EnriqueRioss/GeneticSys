@@ -48,7 +48,7 @@ li{
 .main-content{
     flex: 1;
     padding: 1rem;
-    margin-left: 25rem;
+    /*margin-left: 25rem;*/
 }
 
 .barra-content{
@@ -173,7 +173,7 @@ li{
 }
 
 .stat-content h2{
-    font-size: 2.2rem;
+    font-size: 2.6rem;
     font-weight: 700;
     margin-bottom: 0.25rem;
     color: var(--buttons-blue);
