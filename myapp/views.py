@@ -1401,6 +1401,11 @@ def ver_historias(request):
     }
     return render(request, 'ver_historias.html', context)
 
+
+def enfermedad_actual(request):
+    return render(request, 'enfermedad_actual.html')
+
+
 # views.py
 @require_POST
 @login_required
