@@ -66,7 +66,6 @@ li{
 
 .barra-content{
     flex: 1;
-    margin-left: 25rem; /* This implies a fixed sidebar of 25rem width */
 }
 
 .content-header{
