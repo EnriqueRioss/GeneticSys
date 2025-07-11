@@ -15,6 +15,8 @@
     .patients-table tbody tr.pareja-row:last-of-type {
        border-bottom: 2px solid #aed6f1;
     }
+
+    
     .spinner {
         border: 4px solid rgba(0, 0, 0, 0.1);
         width: 36px;
@@ -25,6 +27,8 @@
         margin: 20px auto;
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    
     .file-delete-list {
         list-style-type: none;
         padding: 0;
@@ -34,7 +38,7 @@
         align-items: center;
         margin-bottom: 5px;
     }
-    /* Estilos nuevos */
+   
     .btn-destructive {
         background-color: #dc3545;
         color: white;
@@ -387,7 +391,7 @@
             <div class="tabs-header">
                 <button class="tab-btn active" data-tab="personal-info">Información Personal</button>
                 <button class="tab-btn" data-tab="medical-record">Historia Clínica</button>
-                <button class="tab-btn" data-tab="tests">Análisis y Pruebas</button>
+                <!--<button class="tab-btn" data-tab="tests">Análisis y Pruebas</button>-->
             </div>
 
             <div class="tab-content active" id="personal-info">
@@ -442,8 +446,8 @@
                 </div>
             </div>
 
-             <!-- Tab: Historia Clínica -->
-             <div class="tab-content" id="medical-record">
+            <!-- Tab: Historia Clínica -->
+            <div class="tab-content" id="medical-record">
                 <div class="tab-content-header">
                     <h3 class="tab-main-title">Historia Clínica Genética</h3>
                     <a href="#" id="btn-nueva-consulta" class="btn-primary" style="display: none;">
@@ -451,12 +455,65 @@
                         Nueva Consulta
                     </a>
                 </div>
+
+                
+                     <!-- Contenedor para Diagnósticos Presuntivos -->
+                    <div class="analysis-card" id="diagnosticos-presuntivos-card">
+                        <div class="analysis-card-header">
+                            <i class="fas fa-notes-medical" class="analysis-card-icon"></i>
+                            <h4 class="analysis-card-title">Diagnósticos Presuntivos</h4>
+                        </div>
+                        <div class="analysis-list" id="diagnosticos-presuntivos-list">
+                        
+                        </div>
+                    </div>
+                
+                
+                    <div id="diagnostico-final-container" data-evaluacion-id="" style="margin-top: 20px;">
+                
+                        <div id="diagnostico-final-view" class="analysis-card final-diagnosis-view" style="display: none;">
+                            <div class="analysis-card-header">
+                                <i class="fas fa-gavel" class="analysis-card-icon"></i>
+                                <h4 class="analysis-card-title">Diagnóstico Final y Conclusiones</h4>
+                            </div>
+                            <div class="final-diagnosis-content">
+                                <p class="history-subtitle" id="diagnostico-final-text" style="white-space: pre-wrap;"></p>
+                                <button class="btn-editar" id="btn-edit-diagnostico-final" title="Editar Diagnóstico Final">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Formulario para editar/añadir el diagnóstico final -->
+                        <div id="diagnostico-final-edit" class="analysis-card" style="display: none;">
+                            <div class="analysis-card-header">
+                                <i class="fas fa-gavel" class="analysis-card-icon"></i>
+                                <h4 class="analysis-card-title">Añadir/Editar Diagnóstico Final</h4>
+                            </div>
+                            <div class="form-group" style="padding: 15px;">
+                                <textarea id="diagnostico-final-textarea" rows="4" placeholder="Ingrese el diagnóstico final o las conclusiones de la evaluación..."></textarea>
+                            </div>
+                            <div class="card-actions edit-actions" style="justify-content: flex-end; padding: 0 15px 15px;">
+                                <button type="button" class="btn btn-secondary" id="btn-cancel-diagnostico-final">Cancelar</button>
+                                <button type="button" class="btn btn-primary" id="btn-save-diagnostico-final">Guardar Diagnóstico</button>
+                            </div>
+                        </div>
+                    </div>
+                
+                
+                    <div class="add-final-diagnosis-container" style="text-align: center; margin-top: 20px;">
+                        <button class="btn-outline" id="btn-add-diagnostico-final" style="display: none;">
+                            <i class="fas fa-plus"></i> Añadir Diagnóstico Final
+                        </button>
+                    </div>
+            
+
                 <div class="history-list" id="history-list-container">
                     <div class="spinner"></div>
                 </div>
             </div>
 
-         
+            <!--
             <div class="tab-content" id="tests">
                 <div class="tab-content-header">
                     <h3 class="tab-main-title">Diagnósticos</h3>
@@ -466,62 +523,11 @@
                     </a>
                 </div>
             
-                <!-- Contenedor para Diagnósticos Presuntivos -->
-                <div class="analysis-card" id="diagnosticos-presuntivos-card">
-                    <div class="analysis-card-header">
-                        <i class="fas fa-notes-medical" class="analysis-card-icon"></i>
-                        <h4 class="analysis-card-title">Diagnósticos Presuntivos</h4>
-                    </div>
-                    <div class="analysis-list" id="diagnosticos-presuntivos-list">
-                     
-                    </div>
-                </div>
-            
-              
-                <div id="diagnostico-final-container" data-evaluacion-id="" style="margin-top: 20px;">
                
-                    <div id="diagnostico-final-view" class="analysis-card final-diagnosis-view" style="display: none;">
-                        <div class="analysis-card-header">
-                            <i class="fas fa-gavel" class="analysis-card-icon"></i>
-                            <h4 class="analysis-card-title">Diagnóstico Final y Conclusiones</h4>
-                        </div>
-                        <div class="final-diagnosis-content">
-                            <p class="history-subtitle" id="diagnostico-final-text" style="white-space: pre-wrap;"></p>
-                            <button class="btn-editar" id="btn-edit-diagnostico-final" title="Editar Diagnóstico Final">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Formulario para editar/añadir el diagnóstico final -->
-                    <div id="diagnostico-final-edit" class="analysis-card" style="display: none;">
-                         <div class="analysis-card-header">
-                            <i class="fas fa-gavel" class="analysis-card-icon"></i>
-                            <h4 class="analysis-card-title">Añadir/Editar Diagnóstico Final</h4>
-                        </div>
-                        <div class="form-group" style="padding: 15px;">
-                            <textarea id="diagnostico-final-textarea" rows="4" placeholder="Ingrese el diagnóstico final o las conclusiones de la evaluación..."></textarea>
-                        </div>
-                        <div class="card-actions edit-actions" style="justify-content: flex-end; padding: 0 15px 15px;">
-                            <button type="button" class="btn btn-secondary" id="btn-cancel-diagnostico-final">Cancelar</button>
-                            <button type="button" class="btn btn-primary" id="btn-save-diagnostico-final">Guardar Diagnóstico</button>
-                        </div>
-                    </div>
-                </div>
-            
-               
-                <div class="add-final-diagnosis-container" style="text-align: center; margin-top: 20px;">
-                    <button class="btn-outline" id="btn-add-diagnostico-final" style="display: none;">
-                        <i class="fas fa-plus"></i> Añadir Diagnóstico Final
-                    </button>
-                </div>
-            </div>
-            
-
+            </div>-->
         </div>
 
         <button type="button" class="modal-close" id="closeVerPacienteModalBtn">×</button>
-      
     </div>
 </div>
 
@@ -535,7 +541,7 @@
         const historyListContainer = document.getElementById('history-list-container');
         const getCSRFToken = () => document.querySelector('[name=csrfmiddlewaretoken]').value;
         const nuevaConsultaBtn = document.getElementById('btn-nueva-consulta');
-        const nuevoDiagnosticoBtn = document.getElementById('btn-nuevo-diagnostico');
+        //const nuevoDiagnosticoBtn = document.getElementById('btn-nuevo-diagnostico');
 
         function closeModal() {
             if (verPacienteModal) {
@@ -600,8 +606,8 @@
             // Resetear botones
             nuevaConsultaBtn.style.display = 'none';
             nuevaConsultaBtn.href = '#';
-            nuevoDiagnosticoBtn.style.display = 'none';
-            nuevoDiagnosticoBtn.href = '#';
+            //nuevoDiagnosticoBtn.style.display = 'none';
+           // nuevoDiagnosticoBtn.href = '#';
 
             const presuntivosList = document.getElementById('diagnosticos-presuntivos-list');
             const finalContainer = document.getElementById('diagnostico-final-container');
@@ -623,8 +629,8 @@
                         const urlNuevaConsulta = `/evaluacion/${data.evaluacion_id}/nueva-consulta/`;
                         nuevaConsultaBtn.href = urlNuevaConsulta;
                         nuevaConsultaBtn.style.display = 'inline-flex';
-                        nuevoDiagnosticoBtn.href = urlNuevaConsulta;
-                        nuevoDiagnosticoBtn.style.display = 'inline-flex';
+                        //nuevoDiagnosticoBtn.href = urlNuevaConsulta;
+                        //nuevoDiagnosticoBtn.style.display = 'inline-flex';
                     }
                     if (data.planes_de_estudio.length > 0) {
                         data.planes_de_estudio.forEach(plan => {
