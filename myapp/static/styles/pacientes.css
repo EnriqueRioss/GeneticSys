@@ -56,7 +56,6 @@ li{
 .app-container {
   display: flex;
   min-height: 100vh;
-  margin-left: 25rem;
 }
 
 .main-content {
