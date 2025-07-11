@@ -1,0 +1,36 @@
+{% extends 'layouts/base2.html' %}
+{% load static %}
+
+{% block form_content %}
+
+<head>
+    <title>Enfermedad Actual</title>
+    <link rel="stylesheet" href="{% static '/styles/stylesforms.css' %}">
+</head>
+
+<div class="contenedor-formulario">
+   
+    <form id="enfermedad-actual" method="post">
+
+        <div class="form-step active">
+            <div class="step-content-header">
+                <i class="fas fa-file-medical"></i>
+                <h2>Enfermedad actual del Paciente</h2>
+            </div>
+
+            <br><br>
+            <div class="form-group">
+                <label for="enfermedad actual">Datos de la Enfermedad Actual</label>
+                <textarea name="enfermedad-actual" id="enfermedad-actual"></textarea>
+            </div>
+        </div>
+        
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="window.history.back()">Anterior</button>
+            <button type="submit" name="save_draft" class="btn btn-outline">Guardar Borrador</button>
+            <button type="submit" class="btn btn-primary" id="nextBtn">Siguiente</button>
+        </div>
+    </form>
+</div>
+
+{% endblock form_content %}
