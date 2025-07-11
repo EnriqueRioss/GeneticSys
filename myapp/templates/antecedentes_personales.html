@@ -44,7 +44,7 @@
                     <div class="form-group-tres">
                         <div class="third-width"><label for="{{ form.fur.id_for_label }}">FUR (Fecha de Última Regla)</label>{{ form.fur }}<div class="field-errors" id="error_{{ form.fur.id_for_label }}"></div></div>
                         <div class="third-width"><label for="{{ form.controles_prenatales.id_for_label }}">Controles Prenatales</label>{{ form.controles_prenatales }}<div class="field-errors" id="error_{{ form.controles_prenatales.id_for_label }}"></div></div>
-                        <div class="third-width"><label for="{{ form.edad_gestacional.id_for_label }}">Edad Gestacional</label>{{ form.edad_gestacional }}<div class="field-errors" id="error_{{ form.edad_gestacional.id_for_label }}"></div></div>
+                        <div class="third-width"><label for="{{ form.edad_gestacional.id_for_label }}">Edad Gestacional (Semanas)</label>{{ form.edad_gestacional }}<div class="field-errors" id="error_{{ form.edad_gestacional.id_for_label }}"></div></div>
                     </div>
                     <div class="form-group-tres">
                         <div class="third-width"><label for="{{ form.numero_partos.id_for_label }}">Número de Partos</label>{{ form.numero_partos }}<div class="field-errors" id="error_{{ form.numero_partos.id_for_label }}"></div></div>
@@ -54,9 +54,9 @@
                     <div class="form-group-tres">
                         <div class="third-width"><label for="{{ form.numero_abortos.id_for_label }}">Número de Abortos</label>{{ form.numero_abortos }}<div class="field-errors" id="error_{{ form.numero_abortos.id_for_label }}"></div></div>
                         <div class="third-width"><label for="{{ form.numero_mortinatos.id_for_label }}">Número de Mortinatos</label>{{ form.numero_mortinatos }}<div class="field-errors" id="error_{{ form.numero_mortinatos.id_for_label }}"></div></div>
-                        <div class="third-width"><label for="{{ form.numero_malformaciones.id_for_label }}">Número de Malformaciones</label>{{ form.numero_malformaciones }}<div class="field-errors" id="error_{{ form.numero_malformaciones.id_for_label }}"></div></div>
+                        <div class="third-width"><label for="{{ form.numero_malformaciones.id_for_label }}">Número de Malformados</label>{{ form.numero_malformaciones }}<div class="field-errors" id="error_{{ form.numero_malformaciones.id_for_label }}"></div></div>
                     </div>
-                    <div class="form-group"><label for="{{ form.complicaciones_embarazo.id_for_label }}">Complicaciones del Embarazo</label>{{ form.complicaciones_embarazo }}<div class="field-errors" id="error_{{ form.complicaciones_embarazo.id_for_label }}"></div></div>
+                    <div class="form-group"><label for="{{ form.complicaciones_embarazo.id_for_label }}">Complicaciones durante el Embarazo</label>{{ form.complicaciones_embarazo }}<div class="field-errors" id="error_{{ form.complicaciones_embarazo.id_for_label }}"></div></div>
                     <div class="form-group"><label for="{{ form.exposicion_teratogenos.id_for_label }}">Exposición a Teratógenos</label>{{ form.exposicion_teratogenos }}<div class="field-errors" id="error_{{ form.exposicion_teratogenos.id_for_label }}"></div></div>
                     <div class="form-group"><label for="{{ form.descripcion_exposicion.id_for_label }}">Descripción de la Exposición</label>{{ form.descripcion_exposicion }}<div class="field-errors" id="error_{{ form.descripcion_exposicion.id_for_label }}"></div></div>
                     <div class="form-group"><label for="{{ form.enfermedades_maternas.id_for_label }}">Enfermedades Maternas</label>{{ form.enfermedades_maternas }}<div class="field-errors" id="error_{{ form.enfermedades_maternas.id_for_label }}"></div></div>
@@ -112,12 +112,12 @@
                         <table class="table-container">
                             <thead><tr><th>Desarrollo Psicomotor</th><th>VH (Valor Habitual)</th><th>PCTE</th></tr></thead>
                             <tbody>
-                                <tr><td>Sostener Cabeza</td><td>1er Mes</td><td>{{ form.sostener_cabeza }}<div class="field-errors" id="error_{{ form.sostener_cabeza.id_for_label }}"></div></td></tr>
+                                <tr><td>Sostén Cefálico</td><td>1er Mes</td><td>{{ form.sostener_cabeza }}<div class="field-errors" id="error_{{ form.sostener_cabeza.id_for_label }}"></div></td></tr>
                                 <tr><td>Sonrisa Social</td><td>2do Mes</td><td>{{ form.sonrisa_social }}<div class="field-errors" id="error_{{ form.sonrisa_social.id_for_label }}"></div></td></tr>
-                                <tr><td>Sentarse</td><td>6to Mes</td><td>{{ form.sentarse }}<div class="field-errors" id="error_{{ form.sentarse.id_for_label }}"></div></td></tr>
-                                <tr><td>Gatear</td><td>9no Mes</td><td>{{ form.gatear }}<div class="field-errors" id="error_{{ form.gatear.id_for_label }}"></div></td></tr>
-                                <tr><td>Pararse</td><td>11vo Mes</td><td>{{ form.pararse }}<div class="field-errors" id="error_{{ form.pararse.id_for_label }}"></div></td></tr>
-                                <tr><td>Caminar</td><td>12vo Mes</td><td>{{ form.caminar }}<div class="field-errors" id="error_{{ form.caminar.id_for_label }}"></div></td></tr>
+                                <tr><td>Se sentó</td><td>6to Mes</td><td>{{ form.sentarse }}<div class="field-errors" id="error_{{ form.sentarse.id_for_label }}"></div></td></tr>
+                                <tr><td>Gateó</td><td>9no Mes</td><td>{{ form.gatear }}<div class="field-errors" id="error_{{ form.gatear.id_for_label }}"></div></td></tr>
+                                <tr><td>Se paró</td><td>11vo Mes</td><td>{{ form.pararse }}<div class="field-errors" id="error_{{ form.pararse.id_for_label }}"></div></td></tr>
+                                <tr><td>Caminó</td><td>12vo Mes</td><td>{{ form.caminar }}<div class="field-errors" id="error_{{ form.caminar.id_for_label }}"></div></td></tr>
                                 <tr><td>Primeras Palabras</td><td>12vo Mes</td><td>{{ form.primeras_palabras }}<div class="field-errors" id="error_{{ form.primeras_palabras.id_for_label }}"></div></td></tr>
                                 <tr><td>Primeros Dientes</td><td>6to Mes</td><td>{{ form.primeros_dientes }}<div class="field-errors" id="error_{{ form.primeros_dientes.id_for_label }}"></div></td></tr>
                             </tbody>
