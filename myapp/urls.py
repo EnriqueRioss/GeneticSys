@@ -64,7 +64,7 @@ path('ajax/get-historia-clinica/<int:proposito_id>/', views.get_historia_clinica
 path('gestion/usuarios/reset-password/<int:user_id>/', views.reset_password_admin, name='reset_password_admin'),
 path('gestion/usuarios/edit/<int:user_id>/', views.edit_user_admin, name='edit_user_admin'), 
  path('ajax/evaluacion/<int:evaluacion_id>/guardar-diagnostico-final/', views.guardar_diagnostico_final_ajax, name='ajax_guardar_diagnostico_final'),
-
+    path('historias/enfermedad-actual/', views.enfermedad_actual, name='enfermedad_actual'),
 
 path('historias/archive/<int:historia_id>/', views.archive_historia, name='historia_archive'),
     path('historias/unarchive/<int:historia_id>/', views.unarchive_historia, name='historia_unarchive'),
