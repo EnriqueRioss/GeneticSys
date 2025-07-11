@@ -1171,44 +1171,49 @@ class AdminUserEditForm(forms.ModelForm):
         return user
     
 class AutorizacionForm(forms.ModelForm):
-    # Campo personalizado para el selector del representante que no está en el modelo directamente
+    # Campo personalizado para el selector del representante
     representante_selector = forms.ModelChoiceField(
         queryset=InformacionPadres.objects.none(),
         required=False,
         label="Representante (Padre/Madre)",
         empty_label="Seleccione un representante..."
     )
+    
+    # ===== CAMPO AÑADIDO =====
+    # Este campo oculto recibirá los datos Base64 de la firma desde el frontend (ej: signature_pad.js).
+    # No es requerido porque el usuario puede guardar sin cambiar la firma.
+    signature_data = forms.CharField(widget=forms.HiddenInput(), required=False)
 
     class Meta:
         model = Autorizaciones
-        fields = ['autorizacion_examenes', 'archivo_autorizacion']
+        # ===== CAMBIO: Excluimos 'archivo_autorizacion' ya que lo manejaremos en la vista =====
+        # a partir del campo 'signature_data'.
+        fields = ['autorizacion_examenes']
         widgets = {
             'autorizacion_examenes': forms.Select(choices=[('', 'Seleccione...'), (True, 'Sí'), (False, 'No')]),
         }
 
     def __init__(self, *args, **kwargs):
-        # Extraemos el propósito que pasaremos desde la vista
         proposito = kwargs.pop('proposito', None)
         super().__init__(*args, **kwargs)
 
-        # Si el propósito es menor, poblamos el queryset del selector de representantes
         if proposito and proposito.is_minor():
             padres_qs = InformacionPadres.objects.filter(proposito=proposito).order_by('tipo')
             self.fields['representante_selector'].queryset = padres_qs
             self.fields['representante_selector'].label_from_instance = lambda obj: f"{obj.get_tipo_display()}: {obj.nombres} {obj.apellidos}"
             
-            # Si ya hay una instancia con un representante, lo seleccionamos
             if self.instance and self.instance.representante_padre:
                 self.fields['representante_selector'].initial = self.instance.representante_padre
         else:
-             # Si no es menor, no necesitamos este campo
              del self.fields['representante_selector']
 
     def save(self, commit=True):
-        # Antes de guardar, asignamos el valor del selector al campo real del modelo
+        # Asignamos el valor del selector al campo real del modelo
         instance = super().save(commit=False)
         if 'representante_selector' in self.cleaned_data:
             instance.representante_padre = self.cleaned_data.get('representante_selector')
+        
+        # El guardado del archivo de firma se hará explícitamente en la VISTA.
         
         if commit:
             instance.save()

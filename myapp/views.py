@@ -1,6 +1,9 @@
-#
-# ESTE ES EL ARCHIVO COMPLETO Y CORREGIDO
-#
+
+
+import base64
+import re
+from django.core.files.base import ContentFile
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import JsonResponse, HttpResponseRedirect, HttpResponse
 from django.contrib.auth import login, authenticate, logout
@@ -1142,26 +1145,49 @@ def autorizaciones_view(request, historia_id, tipo, objeto_id):
         for proposito in propositos_a_procesar:
             prefix = f'form_{proposito.proposito_id}'
             autorizacion_instance, _ = Autorizaciones.objects.get_or_create(proposito=proposito)
-            form = AutorizacionForm(request.POST, request.FILES, instance=autorizacion_instance, prefix=prefix, proposito=proposito)
+            form = AutorizacionForm(request.POST, instance=autorizacion_instance, prefix=prefix, proposito=proposito)
 
             if form.is_valid():
                 autorizacion = form.save(commit=False)
                 autorizacion.proposito = proposito
-                autorizacion.save()
+
+                # ===== INICIO DE LA LÓGICA CORREGIDA PARA PROCESAR LA FIRMA =====
+                signature_base64 = form.cleaned_data.get('signature_data')
+                
+                # Solo procesamos si el campo de firma no está vacío (es decir, si el usuario dibujó una nueva firma).
+                if signature_base64:
+                    try:
+                        # Formato esperado: "data:image/png;base64,iVBORw0KGgo..."
+                        format, imgstr = signature_base64.split(';base64,') 
+                        ext = format.split('/')[-1] # ej. 'png'
+                        file_name = f'firma_{proposito.identificacion}_{timezone.now().strftime("%Y%m%d%H%M%S")}.{ext}'
+                        data = ContentFile(base64.b64decode(imgstr), name=file_name)
+                        
+                        # Si ya existía una firma, la eliminamos del almacenamiento antes de guardar la nueva.
+                        if autorizacion.pk and autorizacion.archivo_autorizacion:
+                            autorizacion.archivo_autorizacion.delete(save=False)
+                            
+                        autorizacion.archivo_autorizacion = data
+                    except (ValueError, TypeError, IndexError):
+                        # Este error ocurre si la cadena base64 no tiene el formato esperado.
+                        form.add_error(None, f"Formato de firma inválido para {proposito.nombres}.")
+                        all_forms_valid = False
+                        errors[f'{prefix}-__all__'] = [{'message': 'Formato de firma inválido.', 'code': ''}]
+
+                if all_forms_valid:
+                    autorizacion.save()
             else:
                 all_forms_valid = False
                 for field, error_list in form.errors.items():
                     errors[f"{prefix}-{field}"] = error_list
 
         if all_forms_valid:
-            # MODIFICADO: Cambiar estado y finalizar
             historia.estado = HistoriasClinicas.ESTADO_FINALIZADA
             historia.save(update_fields=['estado'])
             
             messages.success(request, "¡Historia clínica finalizada y guardada exitosamente!")
             
             request.session.pop('historia_en_progreso_id', None)
-            # --- AÑADIDO ---
             request.session.pop('source_is_edit_list', None)
 
             redirect_url = reverse('index')
@@ -2314,19 +2340,70 @@ def generar_pdf_historia(request, historia_id):
 
     # 6. Autorización (sin cambios)
     if autorizaciones:
-        story.append(PageBreak()); _add_section_title("AUTORIZACIÓN")
+        story.append(PageBreak())
+        _add_section_title("AUTORIZACIÓN")
         for auto in autorizaciones:
-            autoriza_text = "Sí" if auto.autorizacion_examenes else "No"; firmante = "El mismo propósito."
+            autoriza_text = "Sí" if auto.autorizacion_examenes else "No"
+            firmante = "El mismo paciente."
             if auto.proposito.is_minor():
-                if auto.representante_padre: firmante = f"Representante: {auto.representante_padre.nombres} {auto.representante_padre.apellidos} (C.I: {_format_val(auto.representante_padre.identificacion)})"
-                else: firmante = "Representante no especificado."
-            story.append(Paragraph(f"<b>Propósito:</b> {auto.proposito.nombres} {auto.proposito.apellidos}", styles['Normal'])); story.append(Paragraph(f"¿Autoriza la realización de exámenes genéticos?: <b>{autoriza_text}</b>", styles['Normal'])); story.append(Paragraph(f"Firmante: <b>{firmante}</b>", styles['Normal'])); story.append(Spacer(1, 0.4*inch)); story.append(Paragraph("______________________________", styles['Left'])); story.append(Paragraph("Firma", styles['Left']))
+                if auto.representante_padre:
+                    firmante = f"Representante: {auto.representante_padre.nombres} {auto.representante_padre.apellidos} (C.I: {_format_val(auto.representante_padre.identificacion)})"
+                else:
+                    firmante = "Representante no especificado."
+
+            story.append(Paragraph(f"<b>Propósito:</b> {auto.proposito.nombres} {auto.proposito.apellidos}", styles['Normal']))
+            story.append(Paragraph(f"¿Autoriza la realización de exámenes genéticos?: <b>{autoriza_text}</b>", styles['Normal']))
+            story.append(Paragraph(f"Firmante: <b>{firmante}</b>", styles['Normal']))
+            story.append(Spacer(1, 0.2 * inch))
+
+            # =====================================================================
+            # ===== INICIO DE LA LÓGICA DEFINITIVAMENTE CORREGIDA PARA LA FIRMA =====
+            # =====================================================================
+            if auto.archivo_autorizacion and hasattr(auto.archivo_autorizacion, 'path'):
+                try:
+                    absolute_path = auto.archivo_autorizacion.path
+
+                    # Paso 1: Crear el objeto Image SÓLO con argumentos válidos (path, width, height)
+                    # Esto define un "cajón" o "bounding box" donde la imagen se dibujará.
+                    signature_img = Image(
+                        absolute_path,
+                        width=2.5 * inch, 
+                        height=1.2 * inch
+                    )
+                    
+                    # Paso 2: Establecer las PROPIEDADES en la instancia de la imagen ya creada.
+                    signature_img.preserveAspectRatio = True  # Esto hace que la imagen se escale sin distorsionarse para caber en el "cajón".
+                    signature_img.hAlign = 'LEFT'             # Esto alinea la imagen a la izquierda dentro de su "cajón".
+
+                    # Añadir la imagen configurada a la historia del PDF
+                    story.append(signature_img)
+                    story.append(Paragraph("______________________________", styles['Left']))
+                    story.append(Paragraph("Firma", styles['Left']))
+
+                except Exception as e:
+                    # Este bloque de error ahora es aún más importante.
+                    print(f"Error al procesar imagen de firma para PDF (path: {auto.archivo_autorizacion.name}): {e}")
+                    story.append(Paragraph("<i>[Firma no disponible - Error al procesar imagen]</i>", styles['Alert']))
+                    story.append(Spacer(1, 0.4 * inch))
+            else:
+                # Si no hay firma, se muestra el espacio para firmar manualmente.
+                story.append(Spacer(1, 0.4 * inch))
+                story.append(Paragraph("______________________________", styles['Left']))
+                story.append(Paragraph("Firma", styles['Left']))
+            
+            # ===================================================================
+            # ===== FIN DE LA LÓGICA DEFINITIVAMENTE CORREGIDA PARA LA FIRMA =====
+            # ===================================================================
+            
+            story.append(Spacer(1, 0.5 * inch))
 
     # Construir y devolver el PDF
     try:
         doc.build(story)
     except Exception as e:
-        return HttpResponse(f"Error generando el PDF: {e}", status=500)
+        # Añadir un print en la consola del servidor para más detalles del error
+        print(f"CRITICAL PDF BUILD ERROR: {e}")
+        return HttpResponse(f"Error crítico al construir el PDF. Revise la consola del servidor. Error: {e}", status=500)
     
     buffer.seek(0)
     response = HttpResponse(buffer, content_type='application/pdf')
