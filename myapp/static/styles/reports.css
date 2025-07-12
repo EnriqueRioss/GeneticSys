@@ -132,6 +132,12 @@ li{
   transition: background-color 0.2s;
 }
 
+.btn-outline i, .btn-buscar i{
+  margin-right: 1rem;
+  width: 2rem;
+  text-align: center;
+}
+
 .btn-primary{
   display: flex;
   align-items: center;
@@ -145,13 +151,6 @@ li{
   text-align: left;
   cursor: pointer;
   transition: background-color 0.2s;
-}
-
-button i {
-  font-size: 1.3rem;
-  margin-right: 1rem;
-  width: 2rem;
-  text-align: center;
 }
 
 
