@@ -146,12 +146,12 @@ li{
   transition: background-color 0.2s;
 }
 
-button i { /* General icon styling within buttons */
+/*button i { /* General icon styling within buttons 
   font-size: 1.3rem;
   margin-right: 1rem;
   width: 2rem;
   text-align: center;
-}
+}*/
 
 
 /*---------- Tarjetas ------------*/
