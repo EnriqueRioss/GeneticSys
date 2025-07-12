@@ -1,0 +1,275 @@
+{% extends 'layouts/base2.html' %}
+{% load static %}
+
+{% block form_content %}
+
+<head>
+    <title>Autorización</title>
+    <link rel="stylesheet" href="{% static '/styles/stylesforms.css' %}">
+    <style>
+        .signature-pad-container {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            position: relative;
+            width: 100%;
+            height: 150px;
+            margin-top: 5px;
+            background-color: #fff; /* Fondo blanco para el pad */
+        }
+        /* ===== NUEVO ESTILO: Canvas deshabilitado ===== */
+        .signature-pad-container.disabled {
+            background-color: #f0f0f0; /* Color gris para indicar que está inactivo */
+            cursor: not-allowed;
+        }
+        .signature-pad-container canvas {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+        }
+        .signature-clear-button {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            font-size: 12px;
+            padding: 2px 8px;
+            z-index: 10; /* Para que esté por encima del canvas */
+        }
+        /* Estilo para la imagen de la firma guardada */
+        .saved-signature-img {
+            max-height: 80px; 
+            border: 1px solid #ddd;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+
+<div class="contenedor-formulario">
+    <form id="autorizacion-form" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        {% for ctx in autorizacion_contexts %}
+        <div class="form-step active">
+            <div class="step-content-header">
+                <i class="fas fa-file-signature"></i>
+                <h2>Autorización para: {{ ctx.proposito.nombres }} {{ ctx.proposito.apellidos }}</h2>
+            </div>
+            <p class="step-subtitle">Datos de la autorización para el Paciente o su Representante.</p>
+            <p class="autorizacion-text">El suscrito paciente o representante del mismo Sr. o Sra.: 
+                Autorizo a él o los médicos del Instituto de Investigaciones Genéticas de L.U.Z
+                a efectuar todo examen físico y de laboratorio, fotografías y/o videos clínicos, 
+                imagenes diagnósticas, terapéuticas, estudios anatomopatológicos incluyendo necropsia
+                en caso de muerte, y diversas técnicas de diagnositico prenatal que se consideren pertinentes
+                para el diagnositico y tratamiento del mismo. Así mismo, autorizo a que la información, resultados
+                de examenes complementarios, fotografías y/o videos obtenidos durante el estudio del paciente,
+                siempre y cuando no se mencione su nombre, pueden ser divulgados por medios audiovisuales
+                y/o publicaciones escritas con fines estrictamente académicas o científicos. 
+            </p>
+            <div class="alert alert-danger non-field-errors" data-prefix="{{ ctx.form.prefix }}" style="display: none;"></div>
+            <div class="form-group-tres">
+                <div class="third-width">
+                    <label for="{{ ctx.form.autorizacion_examenes.id_for_label }}">{{ ctx.form.autorizacion_examenes.label }}</label>
+                    <!-- ===== CAMBIO: El campo del formulario no cambia, pero el JS lo usará ===== -->
+                    {{ ctx.form.autorizacion_examenes }}
+                    <div class="error-message" data-field-name="{{ ctx.form.prefix }}-autorizacion_examenes"></div>
+                </div>
+                <div class="third-width">
+                    <label>Firma del Paciente o Representante</label>
+                    
+                    <!-- ===== CAMBIO: Contenedor del pad de firma ===== -->
+                    <!-- Se añade clase 'disabled' si ya hay una firma guardada para que el JS la desactive -->
+                    <div class="signature-pad-container {% if ctx.form.instance.archivo_autorizacion %}disabled{% endif %}">
+                        <canvas id="signature-pad-{{ ctx.proposito.proposito_id }}" class="signature-pad"></canvas>
+                        
+                        <!-- El botón de limpiar solo aparece si NO hay una firma guardada -->
+                        {% if not ctx.form.instance.archivo_autorizacion %}
+                            <button type="button" class="btn btn-sm btn-outline-secondary signature-clear-button" data-pad-id="signature-pad-{{ ctx.proposito.proposito_id }}">Limpiar</button>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- ===== CAMBIO: Se añade el campo oculto que enviará los datos Base64 ===== -->
+                    {{ ctx.form.signature_data }}
+                    
+                    <!-- ===== CAMBIO: Muestra la firma guardada si existe ===== -->
+                    {% if ctx.form.instance.archivo_autorizacion %}
+                        <p class="mt-2 mb-0 small">Firma guardada:</p>
+                        <img src="{{ ctx.form.instance.archivo_autorizacion.url }}" alt="Firma guardada" class="saved-signature-img">
+                    {% else %}
+                        <p class="mt-2 mb-0 small text-muted">Por favor, dibuje la firma en el recuadro.</p>
+                    {% endif %}
+
+                    <!-- Mensaje de error para el campo de firma (ahora asociado a signature_data) -->
+                    <div class="error-message" data-field-name="{{ ctx.form.prefix }}-signature_data"></div>
+                    <div class="error-message" data-field-name="{{ ctx.form.prefix }}-__all__"></div>
+                </div>
+                <div class="third-width">
+                    {% if ctx.is_minor %}
+                        <label for="{{ ctx.form.representante_selector.id_for_label }}">{{ ctx.form.representante_selector.label }}</label>
+                        {{ ctx.form.representante_selector }}
+                        <div class="error-message" data-field-name="{{ ctx.form.prefix }}-representante_selector"></div>
+                    {% else %}
+                        <label>Firmante</label>
+                        <p class="form-static-info"><strong>{{ ctx.proposito.nombres }} {{ ctx.proposito.apellidos }}</strong> (Paciente mayor de edad)</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" onclick="window.history.back()">Anterior</button>
+            <!-- ===== CAMBIO: Se añade un ID al botón de guardar para controlarlo con JS ===== -->
+            <button type="submit" id="submit-button" class="btn-primary">Finalizar y Guardar Historia Clínica</button>
+        </div>
+    </form>
+</div>
+
+<!-- Librería para el pad de firmas -->
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('autorizacion-form');
+    const signaturePads = {};
+    const submitButton = document.getElementById('submit-button');
+    const autorizacionSelects = document.querySelectorAll('select[name$="autorizacion_examenes"]');
+
+    // ===== NUEVA FUNCIÓN: Para verificar el estado de los selectores =====
+    // Deshabilita el botón de "Finalizar" a menos que TODAS las autorizaciones estén en "Sí".
+    // Esto es una medida de seguridad para no finalizar una historia sin autorización explícita.
+    function checkAllAuthorizations() {
+        const allYes = Array.from(autorizacionSelects).every(select => select.value === 'True');
+        submitButton.disabled = !allYes;
+        if (!allYes) {
+            submitButton.title = 'Debe autorizar los exámenes para todos los pacientes para poder finalizar la historia.';
+        } else {
+            submitButton.title = '';
+        }
+    }
+
+    // ===== NUEVO: Event listener para los selectores de autorización =====
+    autorizacionSelects.forEach(select => {
+        select.addEventListener('change', checkAllAuthorizations);
+    });
+    
+    // ===== LÓGICA REFACTORIZADA: Inicializar pads de firma =====
+    document.querySelectorAll('.signature-pad').forEach(canvas => {
+        const signaturePad = new SignaturePad(canvas, { backgroundColor: 'rgb(255, 255, 255)' });
+        signaturePads[canvas.id] = signaturePad;
+
+        // Si el contenedor tiene la clase 'disabled' (porque ya hay firma), desactivamos el dibujo.
+        if (canvas.parentElement.classList.contains('disabled')) {
+            signaturePad.off(); 
+        }
+
+        // Función para ajustar el tamaño del canvas (importante para responsive)
+        function resizeCanvas() {
+            const ratio =  Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            canvas.getContext("2d").scale(ratio, ratio);
+            // Si hay una firma guardada, no la borramos al redimensionar.
+            // Si no, la limpiamos para que el usuario pueda empezar de cero.
+            if (!canvas.parentElement.classList.contains('disabled')) {
+                 signaturePad.clear();
+            }
+        }
+        window.addEventListener("resize", resizeCanvas);
+        resizeCanvas();
+    });
+
+    // ===== LÓGICA REFACTORIZADA: Botones de limpiar =====
+    document.querySelectorAll('.signature-clear-button').forEach(button => {
+        button.addEventListener('click', function() {
+            const padId = this.getAttribute('data-pad-id');
+            if (signaturePads[padId]) {
+                signaturePads[padId].clear();
+            }
+        });
+    });
+
+    // ===== LÓGICA REFACTORIZADA: Envío del formulario con AJAX =====
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        // 1. Actualizar campos ocultos con datos de la firma
+        Object.keys(signaturePads).forEach(padId => {
+            const signaturePad = signaturePads[padId];
+            // Solo actualizamos si el pad no está deshabilitado y si se ha dibujado algo
+            if (!signaturePad.isEmpty() && !signaturePad.canvas.parentElement.classList.contains('disabled')) {
+                const propositoId = padId.split('-').pop();
+                const hiddenInput = document.getElementById(`id_form_${propositoId}-signature_data`);
+                if (hiddenInput) {
+                    hiddenInput.value = signaturePad.toDataURL('image/png'); // 'image/png' es un buen default
+                }
+            }
+        });
+        
+        // 2. Limpiar errores previos
+        document.querySelectorAll('.error-message, .non-field-errors').forEach(el => {
+            el.textContent = '';
+            if (el.classList.contains('non-field-errors')) el.style.display = 'none';
+        });
+
+        // 3. Preparar y enviar la petición AJAX
+        const formData = new FormData(form);
+        const originalButtonText = submitButton.innerHTML;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Guardando...';
+        submitButton.disabled = true;
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => {
+            if (!response.ok) {
+                 // Si la respuesta es 4xx o 5xx, la parseamos como JSON para obtener los errores
+                return response.json().then(err => Promise.reject(err));
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                window.location.href = data.redirect_url;
+            } else {
+                 // Esto ahora se maneja en el .catch, pero lo dejamos por si acaso
+                alert("Hubo un error inesperado.");
+            }
+        })
+        .catch(errorData => { // El error puede ser de red o los errores JSON del backend
+            if (errorData.errors) {
+                Object.keys(errorData.errors).forEach(key => {
+                    const errorMessages = errorData.errors[key].map(e => e.message || e).join(' ');
+                    const fieldErrorElement = document.querySelector(`.error-message[data-field-name="${key}"]`);
+                    if (fieldErrorElement) {
+                        fieldErrorElement.textContent = errorMessages;
+                    } else { // Errores no asociados a un campo (non_field_errors)
+                        const prefix = key.split('-')[0];
+                        const nonFieldErrorsContainer = document.querySelector(`.non-field-errors[data-prefix="${prefix}"]`);
+                        if (nonFieldErrorsContainer) {
+                             nonFieldErrorsContainer.textContent += errorMessages + ' ';
+                             nonFieldErrorsContainer.style.display = 'block';
+                        }
+                    }
+                });
+                alert("Por favor, corrija los errores en el formulario.");
+            } else {
+                console.error('Error:', errorData);
+                alert('Ocurrió un error de red o del servidor. Por favor, intente de nuevo.');
+            }
+        })
+        .finally(() => {
+            submitButton.innerHTML = originalButtonText;
+            // La reactivación del botón la gestiona la función checkAllAuthorizations
+            checkAllAuthorizations(); 
+        });
+    });
+
+    // ===== NUEVO: Llamar a la función al cargar la página para establecer el estado inicial del botón =====
+    checkAllAuthorizations();
+});
+</script>
+
+{% endblock form_content %}

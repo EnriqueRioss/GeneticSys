@@ -6,6 +6,17 @@
     <title>Registrar Pareja</title>
     <link rel="stylesheet" href="{% static '/styles/stylesforms.css' %}">
     <script src="https://kit.fontawesome.com/8058dee255.js" crossorigin="anonymous"></script>
+    <style>
+        .custom-file-input { border: 1px solid #ccc; border-radius: 4px; padding: 6px; background-color: #f9f9f9; }
+        .custom-file-input-current { margin-bottom: 10px; }
+        .custom-file-input-current a { font-weight: bold; color: #0056b3; }
+        .custom-file-input-clear { display: inline-flex; align-items: center; margin: 5px 0; }
+        .custom-file-input-clear input { margin-right: 8px; }
+        .input-group { display: flex; gap: 10px; align-items: flex-end; }
+        .input-group-prefix { flex: 0 0 100px; }
+        .input-group-main { flex: 1 1 auto; }
+        .input-group label { margin-bottom: 0.25rem; display: block; }
+    </style>
 </head>
 
 <div class="contenedor-formulario">
@@ -18,227 +29,135 @@
                 <h2>Datos de la Pareja</h2>
             </div>
 
-            <p class="step-subtitle">Datos básicos de la pareja</p>
+            <p class="step-subtitle">Datos básicos de la pareja. Los campos con * son obligatorios.</p>
 
             <p class="historia-info">Nº de Historia Clínica: {{ historia.numero_historia }}</p>
             
-            <!--  INICIO DEL CAMBIO: Mostrar mensaje en modo edición -->
             {% if editing %}
                 <p class="editing-info"><em>Modo Edición: Actualizando datos de la pareja.</em></p>
             {% endif %}
-            <!--  FIN DEL CAMBIO -->
 
             <div class="alert alert-danger non-field-errors"></div>
 
             <div class="conyugue-section">
                 <div class="section-liner">
-                    <h3 class="conyugue-title">
-                        <i class="fas fa-user"></i> 
-                        Primer Cónyugue
-                    </h3>
+                    <h3 class="conyugue-title"><i class="fas fa-user"></i> Primer Cónyuge</h3>
                 </div><br>
                 <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.nombres_1.id_for_label }}">{{ form.nombres_1.label }}</label>{{ form.nombres_1 }}<div class="field-errors" id="error_{{ form.nombres_1.id_for_label }}"></div></div>
+                    <div class="half-width"><label for="{{ form.apellidos_1.id_for_label }}">{{ form.apellidos_1.label }}</label>{{ form.apellidos_1 }}<div class="field-errors" id="error_{{ form.apellidos_1.id_for_label }}"></div></div>
+                </div>
+                <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.sexo_1.id_for_label }}">{{ form.sexo_1.label }}</label>{{ form.sexo_1 }}<div class="field-errors" id="error_{{ form.sexo_1.id_for_label }}"></div></div>
                     <div class="half-width">
-                        <label for="{{ form.nombres_1.id_for_label }}">Nombres*</label>
-                        {{ form.nombres_1 }}
-                        <div class="field-errors" id="error_{{ form.nombres_1.id_for_label }}"></div>
-                    </div>
-                    <div class="half-width">
-                        <label for="{{ form.apellidos_1.id_for_label }}">Apellidos*</label>
-                        {{ form.apellidos_1 }}
-                        <div class="field-errors" id="error_{{ form.apellidos_1.id_for_label }}"></div>
+                        <label>{{ form.identificacion_prefijo_1.label }}</label>
+                        <div class="input-group">
+                            <div class="input-group-prefix">{{ form.identificacion_prefijo_1 }}</div>
+                            <div class="input-group-main">{{ form.identificacion_numero_1 }}</div>
+                        </div>
+                        <div class="field-errors" id="error_{{ form.identificacion_numero_1.id_for_label }}"></div>
                     </div>
                 </div>
                 <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.fecha_nacimiento_1.id_for_label }}">{{ form.fecha_nacimiento_1.label }}</label>{{ form.fecha_nacimiento_1 }}<div class="field-errors" id="error_{{ form.fecha_nacimiento_1.id_for_label }}"></div></div>
+                    <div class="half-width"><label for="{{ form.lugar_nacimiento_1.id_for_label }}">{{ form.lugar_nacimiento_1.label }}</label>{{ form.lugar_nacimiento_1 }}<div class="field-errors" id="error_{{ form.lugar_nacimiento_1.id_for_label }}"></div></div>
+                </div>
+                <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.escolaridad_1.id_for_label }}">{{ form.escolaridad_1.label }}</label>{{ form.escolaridad_1 }}<div class="field-errors" id="error_{{ form.escolaridad_1.id_for_label }}"></div></div>
+                    <div class="half-width"><label for="{{ form.ocupacion_1.id_for_label }}">{{ form.ocupacion_1.label }}</label>{{ form.ocupacion_1 }}<div class="field-errors" id="error_{{ form.ocupacion_1.id_for_label }}"></div></div>
+                </div>
+                <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.grupo_rh_combinado_1.id_for_label }}">{{ form.grupo_rh_combinado_1.label }}</label>{{ form.grupo_rh_combinado_1 }}<div class="field-errors" id="error_{{ form.grupo_rh_combinado_1.id_for_label }}"></div></div>
                     <div class="half-width">
-                        <label for="{{ form.sexo_1.id_for_label }}">Sexo*</label>
-                        {{ form.sexo_1 }}
-                        <div class="field-errors" id="error_{{ form.sexo_1.id_for_label }}"></div>
-                    </div>
-                    <div class="half-width">
-                        <label for="{{ form.identificacion_1.id_for_label }}">Identificación*</label>
-                        {{ form.identificacion_1 }}
-                        <div class="field-errors" id="error_{{ form.identificacion_1.id_for_label }}"></div>
+                        <label>{{ form.telefono_prefijo_1.label }}</label>
+                        <div class="input-group">
+                            <div class="input-group-prefix">{{ form.telefono_prefijo_1 }}</div>
+                            <div class="input-group-main">{{ form.telefono_numero_1 }}</div>
+                        </div>
+                        <div class="field-errors" id="error_{{ form.telefono_numero_1.id_for_label }}"></div>
                     </div>
                 </div>
                 <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.email_1.id_for_label }}">{{ form.email_1.label }}</label>{{ form.email_1 }}<div class="field-errors" id="error_{{ form.email_1.id_for_label }}"></div></div>
                     <div class="half-width">
-                        <label for="{{ form.fecha_nacimiento_1.id_for_label }}">Fecha Nacimiento</label>
-                        {{ form.fecha_nacimiento_1 }}
-                        <div class="field-errors" id="error_{{ form.fecha_nacimiento_1.id_for_label }}"></div>
-                    </div>
-                    <div class="half-width">
-                        <label for="{{ form.edad_1.id_for_label }}">Edad</label>
-                        {{ form.edad_1 }}
-                        <div class="field-errors" id="error_{{ form.edad_1.id_for_label }}"></div>
-                    </div>
-                </div>
-                <div class="form-group-medio">
-                    <div class="half-width">
-                        <label for="{{ form.lugar_nacimiento_1.id_for_label }}">Lugar Nacimiento</label>
-                        {{ form.lugar_nacimiento_1 }}
-                        <div class="field-errors" id="error_{{ form.lugar_nacimiento_1.id_for_label }}"></div>
-                    </div>
-                    <div class="half-width">
-                        <label for="{{ form.escolaridad_1.id_for_label }}">Escolaridad</label>
-                        {{ form.escolaridad_1 }}
-                        <div class="field-errors" id="error_{{ form.escolaridad_1.id_for_label }}"></div>
-                    </div>
-                </div>
-                <div class="form-group-medio">
-                    <div class="half-width">
-                        <label for="{{ form.ocupacion_1.id_for_label }}">Ocupación</label>
-                        {{ form.ocupacion_1 }}
-                        <div class="field-errors" id="error_{{ form.ocupacion_1.id_for_label }}"></div>
-                    </div>
-                    <div class="half-width">
-                        <label for="{{ form.grupo_sanguineo_1.id_for_label }}">Grupo Sanguíneo</label>
-                        {{ form.grupo_sanguineo_1 }}
-                        <div class="field-errors" id="error_{{ form.grupo_sanguineo_1.id_for_label }}"></div>
-                    </div>
-                </div>
-                <div class="form-group-medio">
-                    <div class="half-width">
-                        <label for="{{ form.factor_rh_1.id_for_label }}">Factor RH</label>
-                        {{ form.factor_rh_1 }}
-                        <div class="field-errors" id="error_{{ form.factor_rh_1.id_for_label }}"></div>
-                    </div>
-                    <div class="half-width">
-                        <label for="{{ form.telefono_1.id_for_label }}">Teléfono</label>
-                        {{ form.telefono_1 }}
-                        <div class="field-errors" id="error_{{ form.telefono_1.id_for_label }}"></div>
-                    </div>
-                </div>
-                <div class="form-group-medio">
-                    <div class="half-width">
-                        <label for="{{ form.email_1.id_for_label }}">Email</label>
-                        {{ form.email_1 }}
-                        <div class="field-errors" id="error_{{ form.email_1.id_for_label }}"></div>
-                    </div>
-                    <div class="half-width">
-                        <label for="{{ form.foto_1.id_for_label }}">Foto</label>
-                        <div class="file-input-container">
-                            {{ form.foto_1 }}
+                        <label for="{{ form.foto_1.id_for_label }}">{{ form.foto_1.label }}</label>
+                        <div class="photo-upload-container">
+                            {% if form.conyuge1_instance.foto %}
+                                <div class="current-photo-section">
+                                    <img src="{{ form.conyuge1_instance.foto.url }}" alt="Foto actual" class="photo-preview">
+                                    <button type="button" class="btn btn-secondary btn-sm replace-photo-btn">Reemplazar Foto</button>
+                                </div>
+                                <div class="new-photo-section" style="display: none;">{{ form.foto_1 }}</div>
+                            {% else %}
+                                <div class="new-photo-section">{{ form.foto_1 }}</div>
+                            {% endif %}
                         </div>
                         <div class="field-errors" id="error_{{ form.foto_1.id_for_label }}"></div>
                     </div>
                 </div>
-                    
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.direccion_1.id_for_label }}">Dirección</label>
-                    {{ form.direccion_1 }}
-                    <div class="field-errors" id="error_{{ form.direccion_1.id_for_label }}"></div>
-                </div>
+                <div class="form-group"><label for="{{ form.direccion_1.id_for_label }}">{{ form.direccion_1.label }}</label>{{ form.direccion_1 }}<div class="field-errors" id="error_{{ form.direccion_1.id_for_label }}"></div></div>
             </div>
 
             <br><br><br>
 
             <div class="conyugue-section">
-                <div class="section-liner">
-                    <h3 class="conyugue-title">
-                        <i class="fas fa-user"></i> 
-                        Segundo Cónyugue
-                    </h3>
-                </div><br>
+                <div class="section-liner"><h3 class="conyugue-title"><i class="fas fa-user"></i> Segundo Cónyuge</h3></div><br>
                 <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.nombres_2.id_for_label }}">{{ form.nombres_2.label }}</label>{{ form.nombres_2 }}<div class="field-errors" id="error_{{ form.nombres_2.id_for_label }}"></div></div>
+                    <div class="half-width"><label for="{{ form.apellidos_2.id_for_label }}">{{ form.apellidos_2.label }}</label>{{ form.apellidos_2 }}<div class="field-errors" id="error_{{ form.apellidos_2.id_for_label }}"></div></div>
+                </div>
+                <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.sexo_2.id_for_label }}">{{ form.sexo_2.label }}</label>{{ form.sexo_2 }}<div class="field-errors" id="error_{{ form.sexo_2.id_for_label }}"></div></div>
                     <div class="half-width">
-                        <label for="{{ form.nombres_2.id_for_label }}">Nombres*</label>
-                        {{ form.nombres_2 }}
-                        <div class="field-errors" id="error_{{ form.nombres_2.id_for_label }}"></div>
-                    </div>
-                    <div class="half-width">
-                        <label for="{{ form.apellidos_2.id_for_label }}">Apellidos*</label>
-                        {{ form.apellidos_2 }}
-                        <div class="field-errors" id="error_{{ form.apellidos_2.id_for_label }}"></div>
+                        <label>{{ form.identificacion_prefijo_2.label }}</label>
+                        <div class="input-group">
+                            <div class="input-group-prefix">{{ form.identificacion_prefijo_2 }}</div>
+                            <div class="input-group-main">{{ form.identificacion_numero_2 }}</div>
+                        </div>
+                        <div class="field-errors" id="error_{{ form.identificacion_numero_2.id_for_label }}"></div>
                     </div>
                 </div>
                 <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.fecha_nacimiento_2.id_for_label }}">{{ form.fecha_nacimiento_2.label }}</label>{{ form.fecha_nacimiento_2 }}<div class="field-errors" id="error_{{ form.fecha_nacimiento_2.id_for_label }}"></div></div>
+                    <div class="half-width"><label for="{{ form.lugar_nacimiento_2.id_for_label }}">{{ form.lugar_nacimiento_2.label }}</label>{{ form.lugar_nacimiento_2 }}<div class="field-errors" id="error_{{ form.lugar_nacimiento_2.id_for_label }}"></div></div>
+                </div>
+                <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.escolaridad_2.id_for_label }}">{{ form.escolaridad_2.label }}</label>{{ form.escolaridad_2 }}<div class="field-errors" id="error_{{ form.escolaridad_2.id_for_label }}"></div></div>
+                    <div class="half-width"><label for="{{ form.ocupacion_2.id_for_label }}">{{ form.ocupacion_2.label }}</label>{{ form.ocupacion_2 }}<div class="field-errors" id="error_{{ form.ocupacion_2.id_for_label }}"></div></div>
+                </div>
+                <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.grupo_rh_combinado_2.id_for_label }}">{{ form.grupo_rh_combinado_2.label }}</label>{{ form.grupo_rh_combinado_2 }}<div class="field-errors" id="error_{{ form.grupo_rh_combinado_2.id_for_label }}"></div></div>
                     <div class="half-width">
-                        <label for="{{ form.sexo_2.id_for_label }}">Sexo*</label>
-                        {{ form.sexo_2 }}
-                        <div class="field-errors" id="error_{{ form.sexo_2.id_for_label }}"></div>
-                    </div>
-                    <div class="half-width">
-                        <label for="{{ form.identificacion_2.id_for_label }}">Identificación*</label>
-                        {{ form.identificacion_2 }}
-                        <div class="field-errors" id="error_{{ form.identificacion_2.id_for_label }}"></div>
+                        <label>{{ form.telefono_prefijo_2.label }}</label>
+                        <div class="input-group">
+                            <div class="input-group-prefix">{{ form.telefono_prefijo_2 }}</div>
+                            <div class="input-group-main">{{ form.telefono_numero_2 }}</div>
+                        </div>
+                        <div class="field-errors" id="error_{{ form.telefono_numero_2.id_for_label }}"></div>
                     </div>
                 </div>
                 <div class="form-group-medio">
+                    <div class="half-width"><label for="{{ form.email_2.id_for_label }}">{{ form.email_2.label }}</label>{{ form.email_2 }}<div class="field-errors" id="error_{{ form.email_2.id_for_label }}"></div></div>
                     <div class="half-width">
-                        <label for="{{ form.fecha_nacimiento_2.id_for_label }}">Fecha Nacimiento</label>
-                        {{ form.fecha_nacimiento_2 }}
-                        <div class="field-errors" id="error_{{ form.fecha_nacimiento_2.id_for_label }}"></div>
-                    </div>
-                    <div class="half-width">
-                        <label for="{{ form.edad_2.id_for_label }}">Edad</label>
-                        {{ form.edad_2 }}
-                        <div class="field-errors" id="error_{{ form.edad_2.id_for_label }}"></div>
-                    </div>
-                </div>
-                <div class="form-group-medio">
-                    <div class="half-width">
-                        <label for="{{ form.lugar_nacimiento_2.id_for_label }}">Lugar Nacimiento</label>
-                        {{ form.lugar_nacimiento_2 }}
-                        <div class="field-errors" id="error_{{ form.lugar_nacimiento_2.id_for_label }}"></div>
-                    </div>
-                    <div class="half-width">
-                        <label for="{{ form.escolaridad_2.id_for_label }}">Escolaridad</label>
-                        {{ form.escolaridad_2 }}
-                        <div class="field-errors" id="error_{{ form.escolaridad_2.id_for_label }}"></div>
-                    </div>
-                </div>
-                <div class="form-group-medio">
-                    <div class="half-width">
-                        <label for="{{ form.ocupacion_2.id_for_label }}">Ocupación</label>
-                        {{ form.ocupacion_2 }}
-                        <div class="field-errors" id="error_{{ form.ocupacion_2.id_for_label }}"></div>
-                    </div>
-                    <div class="half-width">
-                        <label for="{{ form.grupo_sanguineo_2.id_for_label }}">Grupo Sanguíneo</label>
-                        {{ form.grupo_sanguineo_2 }}
-                        <div class="field-errors" id="error_{{ form.grupo_sanguineo_2.id_for_label }}"></div>
-                    </div>
-                </div>
-                <div class="form-group-medio">
-                    <div class="half-width">
-                        <label for="{{ form.factor_rh_2.id_for_label }}">Factor RH</label>
-                        {{ form.factor_rh_2 }}
-                        <div class="field-errors" id="error_{{ form.factor_rh_2.id_for_label }}"></div>
-                    </div>
-                    <div class="half-width">
-                        <label for="{{ form.telefono_2.id_for_label }}">Teléfono</label>
-                        {{ form.telefono_2 }}
-                        <div class="field-errors" id="error_{{ form.telefono_2.id_for_label }}"></div>
-                    </div>
-                </div>
-                <div class="form-group-medio">
-                    <div class="half-width">
-                        <label for="{{ form.email_2.id_for_label }}">Email</label>
-                        {{ form.email_2 }}
-                        <div class="field-errors" id="error_{{ form.email_2.id_for_label }}"></div>
-                    </div>
-                    <div class="half-width">
-                        <label for="{{ form.foto_2.id_for_label }}">Foto</label>
-                        <div class="file-input-container">
-                            {{ form.foto_2 }}
+                        <label for="{{ form.foto_2.id_for_label }}">{{ form.foto_2.label }}</label>
+                        <div class="photo-upload-container">
+                            {% if form.conyuge2_instance.foto %}
+                                <div class="current-photo-section">
+                                    <img src="{{ form.conyuge2_instance.foto.url }}" alt="Foto actual" class="photo-preview">
+                                    <button type="button" class="btn btn-secondary btn-sm replace-photo-btn">Reemplazar Foto</button>
+                                </div>
+                                <div class="new-photo-section" style="display: none;">{{ form.foto_2 }}</div>
+                            {% else %}
+                                <div class="new-photo-section">{{ form.foto_2 }}</div>
+                            {% endif %}
                         </div>
                         <div class="field-errors" id="error_{{ form.foto_2.id_for_label }}"></div>
                     </div>
                 </div>
-                    
-                </div>
-                <div class="form-group">
-                    <label for="{{ form.direccion_2.id_for_label }}">Dirección</label>
-                    {{ form.direccion_2 }}
-                    <div class="field-errors" id="error_{{ form.direccion_2.id_for_label }}"></div>
-                </div>
-                
+                <div class="form-group"><label for="{{ form.direccion_2.id_for_label }}">{{ form.direccion_2.label }}</label>{{ form.direccion_2 }}<div class="field-errors" id="error_{{ form.direccion_2.id_for_label }}"></div></div>
             </div>
         </div>
         
-        <!-- BOTONES CONDICIONALES -->
         <div class="form-actions">
             {% if from_gestion %}
             <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'gestion_pacientes' %}'">Cancelar</button>
@@ -252,18 +171,64 @@
     </form>
 </div>
 
-
 <script>
-document.getElementById('{{ form.foto_1.id_for_label }}')?.addEventListener('change', e => {
-    document.getElementById('file-name-1').textContent = e.target.files[0]?.name || 'Ningún archivo seleccionado';
-});
-document.getElementById('{{ form.foto_2.id_for_label }}')?.addEventListener('change', e => {
-    document.getElementById('file-name-2').textContent = e.target.files[0]?.name || 'Ningún archivo seleccionado';
-});
-
 document.addEventListener('DOMContentLoaded', function() {
     setupAjaxForm('crear-pareja-form');
+
+    function setupFileInput(containerId) {
+        const fotoContainer = document.getElementById(containerId);
+        if (fotoContainer) {
+            const currentLink = fotoContainer.querySelector('a');
+            const clearCheckbox = fotoContainer.querySelector('input[type="checkbox"]');
+            const fileInput = fotoContainer.querySelector('input[type="file"]');
+            
+            let newHtml = '';
+            if (currentLink) {
+                newHtml += `<div class="custom-file-input-current">Foto actual: ${currentLink.outerHTML}</div>`;
+            }
+            if (clearCheckbox) {
+                newHtml += `<div class="custom-file-input-clear"><label for="${clearCheckbox.id}">${clearCheckbox.outerHTML} Eliminar foto actual</label></div>`;
+            }
+            if (fileInput) {
+                const labelText = currentLink ? 'Cambiar foto:' : 'Subir foto:';
+                newHtml += `<label>${labelText}</label>${fileInput.outerHTML}`;
+            }
+            
+            fotoContainer.innerHTML = newHtml;
+        }
+    }
+
+    setupFileInput('custom-foto-input-1');
+    setupFileInput('custom-foto-input-2');
 });
 </script>
+
+<style>
+    .photo-upload-container .photo-preview {
+        max-width: 150px;
+        max-height: 150px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        margin-bottom: 10px;
+        display: block;
+    }
+    .photo-upload-container .replace-photo-btn {
+        cursor: pointer;
+    }
+    </style>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        setupAjaxForm('crear-pareja-form');
+    
+        document.querySelectorAll('.replace-photo-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const container = this.closest('.photo-upload-container');
+                container.querySelector('.current-photo-section').style.display = 'none';
+                container.querySelector('.new-photo-section').style.display = 'block';
+            });
+        });
+    });
+    </script>
 
 {% endblock form_content%}

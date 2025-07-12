@@ -1,0 +1,97 @@
+{% extends 'layouts/base2.html' %}
+{% load static %}
+
+{% block form_content %}
+<head>
+    <title>{% if editing %}EDITAR HISTORIA{% else %}CREAR HISTORIA{% endif %} | IIG - LUZ</title>
+    <link rel="stylesheet" href="{% static '/styles/stylesforms.css' %}">
+</head>
+
+<div class="main-content">
+    <div class="form-container">
+        <div class="form-container-card">
+            <div class="card-header">
+                <div>
+                    <h1>{% if editing %}Editar Historia Clínica Genética{% else %}Historia Clínica Genética{% endif %}</h1>
+                    <p>{% if editing %}Actualice los campos necesarios de la historia clínica.{% else %}Complete todos los campos requeridos para crear la historia clínica.{% endif %}</p>
+                    {% if editing %}
+                    <p class="editing-info"><em>Modo Edición: Actualizando datos para la Historia Nº {{ historia.numero_historia }}.</em></p>
+                    {% endif %}
+                </div>
+                <div class="step-indicator" id="stepIndicator">Paso 1 de 7</div>
+            </div>
+
+            <div class="seccion-progreso">
+                <p class="progress-title">Progreso del formulario</p>
+                <div class="progress-bar-container"><div class="progress-bar"></div></div>
+                <p class="progress-percentage">17% completado</p>
+            </div>
+
+            <div class="stepper">
+                <div class="stepper-item active" data-step="1"><div class="step-counter"><i class="fas fa-file"></i></div><div class="step-name"><p class="font-bold">Informacion General</p></div></div>
+            </div>
+            
+            <!-- El formulario ahora es simple, el action será la URL actual, que es lo que queremos. -->
+            <form method="post" id="crear-historia-form">
+                {% csrf_token %}
+                <div class="form-step active">
+                    <div class="step-content-header"><i class="fas fa-file"></i><h2>Informacion General</h2></div>
+                    <p class="step-subtitle">Datos basicos de la historia clinica genetica</p>
+                    <div class="alert alert-danger non-field-errors"></div>
+                    <div class="info-box"><i class="fas fa-circle-exclamation"></i><p><strong>Información importante:</strong> Los campos marcados con asterisco (*) son obligatorios.</p></div>
+                    
+                    <div class="form-group-medio">
+                        <div class="half-width">
+                            <label for="{{ form1.numero_historia.id_for_label }}">Numero Historia *</label>
+                            {{ form1.numero_historia }}
+                            <div class="field-errors" id="error_{{ form1.numero_historia.id_for_label }}"></div>
+                        </div>
+                        <div class="half-width">
+                            <label for="{{ form1.motivo_tipo_consulta.id_for_label }}">Motivo de Consulta *</label>
+                            {{ form1.motivo_tipo_consulta }}
+                            <div class="field-errors" id="error_{{ form1.motivo_tipo_consulta.id_for_label }}"></div>
+                        </div>
+                    </div><br>
+                    <div class="form-group-medio">
+                        <div class="half-width">
+                            <label for="{{ form1.cursante_postgrado.id_for_label }}">Cursante de Postgrado</label>
+                            {{ form1.cursante_postgrado }}
+                            <div class="field-errors" id="error_{{ form1.cursante_postgrado.id_for_label }}"></div>
+                        </div>
+                        <div class="half-width">
+                            <label for="{{ form1.centro_referencia.id_for_label }}">Centro de Referencia</label>
+                            {{ form1.centro_referencia }}
+                            <div class="field-errors" id="error_{{ form1.centro_referencia.id_for_label }}"></div>
+                        </div>
+                    </div><br>
+                    <div class="form-group-medio">
+                        <div class="half-width">
+                            <label for="{{ form1.medico.id_for_label }}">Médico de Referencia</label>
+                            {{ form1.medico }}
+                            <div class="field-errors" id="error_{{ form1.medico.id_for_label }}"></div>
+                        </div>
+                        <div class="half-width">
+                            <label for="{{ form1.especialidad.id_for_label }}">Especialidad Medico de Referencia</label>
+                            {{ form1.especialidad }}
+                            <div class="field-errors" id="error_{{ form1.especialidad.id_for_label }}"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" name="save_draft" class="btn btn-outline">Guardar Borrador</button>
+                    <button type="submit" class="btn btn-primary" id="nextBtn">{% if editing %}Actualizar y Siguiente{% else %}Siguiente{% endif %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // El script AJAX ahora funcionará perfectamente sin establecer el 'action' aquí.
+    // Tomará la URL de la página actual, que es justo lo que necesitamos.
+    setupAjaxForm('crear-historia-form');
+});
+</script>
+
+{% endblock form_content %}

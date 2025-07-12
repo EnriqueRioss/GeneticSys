@@ -5,6 +5,39 @@
 <head>
     <title>Datos del Propósito</title>
     <link rel="stylesheet" href="{% static '/styles/stylesforms.css' %}">
+    <style>
+        .custom-file-input {
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            padding: 6px;
+            background-color: #f9f9f9;
+        }
+        .custom-file-input-current {
+            margin-bottom: 10px;
+        }
+        .custom-file-input-current a {
+            font-weight: bold;
+            color: #0056b3;
+        }
+        .custom-file-input-clear {
+            display: inline-flex;
+            align-items: center;
+            margin: 5px 0;
+        }
+        .custom-file-input-clear input {
+            margin-right: 8px;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        .input-group-prefix {
+            flex: 0 0 100px;
+        }
+        .input-group-main {
+            flex: 1 1 auto;
+        }
+    </style>
 </head>
 
 
@@ -18,13 +51,12 @@
                 <h2>Datos del Propósito</h2>
             </div>
 
-            <p class="step-subtitle">Datos básicos del paciente</p>
+            <p class="step-subtitle">Datos básicos del paciente. Los campos con * son obligatorios.</p>
 
             <p class="historia-info">Nº de Historia Clínica: {{ historia.numero_historia }}</p>
             {% if editing %}
                 <p class="editing-info"><em>Modo Edición: Actualizando datos del propósito.</em></p>
             {% endif %}
-
 
             <div class="alert alert-danger non-field-errors"></div>
 
@@ -32,94 +64,106 @@
             
                 <div class="form-group-medio">
                     <div class="half-width">
-                        <label for="{{ form.nombres.id_for_label }}">Nombres</label>
+                        <label for="{{ form.nombres.id_for_label }}">{{ form.nombres.label }}</label>
                         {{ form.nombres }}
                         <div class="field-errors" id="error_{{ form.nombres.id_for_label }}"></div>
                     </div>
                     <div class="half-width">
-                        <label for="{{ form.apellidos.id_for_label }}">Apellidos</label>
+                        <label for="{{ form.apellidos.id_for_label }}">{{ form.apellidos.label }}</label>
                         {{ form.apellidos }}
                         <div class="field-errors" id="error_{{ form.apellidos.id_for_label }}"></div>
                     </div>
                 </div>
                 <div class="form-group-medio">
                     <div class="half-width">
-                        <label for="{{ form.sexo.id_for_label }}">Sexo</label>
+                        <label for="{{ form.sexo.id_for_label }}">{{ form.sexo.label }}</label>
                         {{ form.sexo }}
                         <div class="field-errors" id="error_{{ form.sexo.id_for_label }}"></div>
                     </div>
                     <div class="half-width">
-                        <label for="{{ form.fecha_nacimiento.id_for_label }}">Fecha de Nacimiento</label>
+                        <label for="{{ form.fecha_nacimiento.id_for_label }}">{{ form.fecha_nacimiento.label }}</label>
                         {{ form.fecha_nacimiento }}
                         <div class="field-errors" id="error_{{ form.fecha_nacimiento.id_for_label }}"></div>
                     </div>
                 </div>
                 <div class="form-group-medio">
                     <div class="half-width">
-                        <label for="{{ form.lugar_nacimiento.id_for_label }}">Lugar de Nacimiento</label>
+                        <label for="{{ form.lugar_nacimiento.id_for_label }}">{{ form.lugar_nacimiento.label }}</label>
                         {{ form.lugar_nacimiento }}
                         <div class="field-errors" id="error_{{ form.lugar_nacimiento.id_for_label }}"></div>
                     </div>
                     <div class="half-width">
-                        <label for="{{ form.identificacion.id_for_label }}">Identificación</label>
-                        {{ form.identificacion }}
-                        <div class="field-errors" id="error_{{ form.identificacion.id_for_label }}"></div>
+                        <label>{{ form.identificacion_prefijo.label }}</label>
+                        <div class="input-group">
+                            <div class="input-group-prefix">{{ form.identificacion_prefijo }}</div>
+                            <div class="input-group-main">{{ form.identificacion_numero }}</div>
+                        </div>
+                        <div class="field-errors" id="error_{{ form.identificacion_numero.id_for_label }}"></div>
                     </div>
                 </div>
                 <div class="form-group-medio">
                     <div class="half-width">
-                        <label for="{{ form.escolaridad.id_for_label }}">Escolaridad</label>
+                        <label for="{{ form.escolaridad.id_for_label }}">{{ form.escolaridad.label }}</label>
                         {{ form.escolaridad }}
                         <div class="field-errors" id="error_{{ form.escolaridad.id_for_label }}"></div>
                     </div>
                     <div class="half-width">
-                        <label for="{{ form.ocupacion.id_for_label }}">Ocupación</label>
+                        <label for="{{ form.ocupacion.id_for_label }}">{{ form.ocupacion.label }}</label>
                         {{ form.ocupacion }}
                         <div class="field-errors" id="error_{{ form.ocupacion.id_for_label }}"></div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="{{ form.edad.id_for_label }}">Edad</label>
-                    {{ form.edad }}
-                    <div class="field-errors" id="error_{{ form.edad.id_for_label }}"></div>
+                <div class="form-group-medio">
+                    <div class="half-width">
+                        <label for="{{ form.grupo_rh_combinado.id_for_label }}">{{ form.grupo_rh_combinado.label }}</label>
+                        {{ form.grupo_rh_combinado }}
+                        <div class="field-errors" id="error_{{ form.grupo_rh_combinado.id_for_label }}"></div>
+                    </div>
+                     <div class="half-width">
+                        <label>{{ form.telefono_prefijo.label }}</label>
+                        <div class="input-group">
+                            <div class="input-group-prefix">{{ form.telefono_prefijo }}</div>
+                            <div class="input-group-main">{{ form.telefono_numero }}</div>
+                        </div>
+                        <div class="field-errors" id="error_{{ form.telefono_numero.id_for_label }}"></div>
+                    </div>
                 </div>
                 <div class="form-group-medio">
                     <div class="half-width">
-                        <label for="{{ form.grupo_sanguineo.id_for_label }}">Grupo Sanguíneo</label>
-                        {{ form.grupo_sanguineo }}
-                        <div class="field-errors" id="error_{{ form.grupo_sanguineo.id_for_label }}"></div>
-                    </div>
-                    <div class="half-width">
-                        <label for="{{ form.factor_rh.id_for_label }}">Factor RH</label>
-                        {{ form.factor_rh }}
-                        <div class="field-errors" id="error_{{ form.factor_rh.id_for_label }}"></div>
-                    </div>
-                </div>
-                <div class="form-group-medio">
-                    <div class="half-width">
-                        <label for="{{ form.telefono.id_for_label }}">Teléfono</label>
-                        {{ form.telefono }}
-                        <div class="field-errors" id="error_{{ form.telefono.id_for_label }}"></div>
-                    </div>
-                    <div class="half-width">
-                        <label for="{{ form.email.id_for_label }}">Email</label>
+                        <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
                         {{ form.email }}
                         <div class="field-errors" id="error_{{ form.email.id_for_label }}"></div>
                     </div>
+                    <div class="half-width">
+                        <label>{{ form.foto.label }}</label>
+                        <div class="photo-upload-container">
+                            {% if form.instance.foto %}
+                                <!-- MODO EDICIÓN: Mostrar foto actual y botón Reemplazar -->
+                                <div class="current-photo-section">
+                                    <img src="{{ form.instance.foto.url }}" alt="Foto actual del propósito" class="photo-preview">
+                                    <button type="button" class="btn btn-secondary btn-sm replace-photo-btn">Reemplazar Foto</button>
+                                </div>
+                                <!-- El input para subir la nueva foto, inicialmente oculto -->
+                                <div class="new-photo-section" style="display: none;">
+                                     {{ form.foto }}
+                                </div>
+                            {% else %}
+                                <!-- MODO CREACIÓN: Mostrar solo el input para subir -->
+                                <div class="new-photo-section">
+                                    {{ form.foto }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="field-errors" id="error_{{ form.foto.id_for_label }}"></div>
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label for="{{ form.direccion.id_for_label }}">Dirección</label>
+                    <label for="{{ form.direccion.id_for_label }}">{{ form.direccion.label }}</label>
                     {{ form.direccion }}
                     <div class="field-errors" id="error_{{ form.direccion.id_for_label }}"></div>
                 </div>
-                <div class="form-group">
-                        <label for="{{ form.foto.id_for_label }}">Foto del Propósito</label>
-                        {{ form.foto }}
-                        <div class="field-errors" id="error_{{ form.foto.id_for_label }}"></div>
-                    </div>
             </div>
 
-            <!-- BOTONES CONDICIONALES -->
             <div class="form-actions">
                 {% if from_gestion %}
                 <button type="button" class="btn btn-secondary" onclick="window.location.href='{% url 'gestion_pacientes' %}'">Cancelar</button>
@@ -139,7 +183,59 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     setupAjaxForm('crear-paciente-form');
+
+    // --- Script para mejorar la UI del campo de archivo ---
+    const fotoContainer = document.getElementById('custom-foto-input');
+    if (fotoContainer) {
+        const currentLink = fotoContainer.querySelector('a');
+        const clearCheckbox = fotoContainer.querySelector('input[type="checkbox"]');
+        const fileInput = fotoContainer.querySelector('input[type="file"]');
+        
+        let newHtml = '';
+        if (currentLink) {
+            newHtml += `<div class="custom-file-input-current">Foto actual: ${currentLink.outerHTML}</div>`;
+        }
+        if (clearCheckbox) {
+            newHtml += `<div class="custom-file-input-clear"><label for="${clearCheckbox.id}">${clearCheckbox.outerHTML} Eliminar foto actual</label></div>`;
+        }
+        if (fileInput) {
+            const labelText = currentLink ? 'Cambiar foto:' : 'Subir foto:';
+            newHtml += `<label>${labelText}</label>${fileInput.outerHTML}`;
+        }
+        
+        fotoContainer.innerHTML = newHtml;
+    }
 });
 </script>
+
+<style>
+    .photo-upload-container .photo-preview {
+        max-width: 150px;
+        max-height: 150px;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+        margin-bottom: 10px;
+        display: block;
+    }
+    .photo-upload-container .replace-photo-btn {
+        cursor: pointer;
+    }
+    </style>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // La función setupAjaxForm debe estar definida en tu script global
+        setupAjaxForm('crear-paciente-form');
+    
+        const replaceBtn = document.querySelector('.replace-photo-btn');
+        if (replaceBtn) {
+            replaceBtn.addEventListener('click', function() {
+                const container = this.closest('.photo-upload-container');
+                container.querySelector('.current-photo-section').style.display = 'none';
+                container.querySelector('.new-photo-section').style.display = 'block';
+            });
+        }
+    });
+    </script>
 
 {% endblock form_content %}
