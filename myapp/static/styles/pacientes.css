@@ -20,6 +20,7 @@
     --dark-gray: #343a40;           /* For generic modal close button text */
     --danger-color: #dc3545;        /* For errors, destructive actions */
     --success-color: #28a745;       /* For success badges */
+    --success-letter-color: #76c989;
     --warning-color: #ffc107;
 }
 
@@ -139,12 +140,18 @@ li{
   margin-bottom: 2rem;
 }
 
-button i {
-  font-size: 1.3rem;
+.btn-buscar i{
   margin-right: 1rem;
   width: 2rem;
   text-align: center;
 }
+
+/*button i {
+  font-size: 1.3rem;
+  margin-right: 1rem;
+  width: 2rem;
+  text-align: center;
+}*/
 
 /*-------------Tarjetas de estadisticas-------------*/
 
@@ -497,12 +504,14 @@ a i{
   border-radius: 1rem;
   width: 90%;
   max-width: 95rem;
-  max-height: 80vh;
+  max-height: 90vh;
   box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-  overflow-y: auto;
-  scrollbar-gutter: stable; /* Reserva espacio para el scrollbar, evitando el salto */
   transition: scale(0.95);
   transition: transform 0.3s ease;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-header {
@@ -510,6 +519,7 @@ a i{
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-shrink: 0;
 }
 
 
@@ -554,6 +564,10 @@ a i{
 /* ----------- Modal Tabs ------------*/
 .modal-tabs{
   padding: 1rem 3.5rem 2rem 3.5rem;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  min-height: 0;
 }
 
 .tabs-header {
@@ -563,11 +577,21 @@ a i{
   background-color: var(--lighter-blue);
   border-radius: 0.5rem;
   padding: 0.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2.4rem;
+  flex-shrink: 0;
 }
 
+.contenido-tabs{
+  padding: 0 1rem 2rem 0;
+  overflow-y: auto; /* AHORA SÍ FUNCIONARÁ */
+  flex-grow: 1; /* Crece para llenar el espacio, pero overflow lo limita */
+  scrollbar-color: var(--light-gray);
+  scrollbar-gutter: stable;
+}
+
+
 .tab-btn {
-  padding: 1rem 8rem;
+  padding: 1rem 15rem;
   background: none;
   border: none;
   cursor: pointer;
@@ -576,6 +600,7 @@ a i{
   color: var(--complement-blue);
   position: relative;
   transition: all 0.3s ease;
+  border-radius: 0.5rem;
 }
 
 .tab-btn.active {
@@ -588,11 +613,11 @@ a i{
   color: var(--primary-darkerblue);
   display: none;
   animation: fadeIn 0.5s ease;
+  
 }
 
 .tab-content.active {
   display: block;
-  height: auto;
 }
 
 @keyframes fadeIn{
@@ -606,6 +631,7 @@ a i{
   background-color: var(--background-color);
   border-radius: 0.5rem;
   cursor: pointer;
+  color: var(--primary-darkerblue);
 }
 
 .btn-ver i, .btn-editar i{
@@ -679,6 +705,25 @@ a i{
   margin-bottom: 2.4rem;
 }
 
+.cuadro-resumen{
+  border: 1px solid var(--success-color);
+  border-radius: 1rem;
+  padding: 1rem;
+  margin-bottom: 1.8rem;
+}
+
+.cuadro-resumen h2{
+  font-size: 1.8rem;
+  color: var(--success-color);
+  font-family: "Poppins", serif;
+}
+
+.cuadro-resumen p{
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: var(--success-letter-color);
+}
+
 .tab-main-title{
   font-size: 1.8rem;
   font-weight: 600;
@@ -724,7 +769,7 @@ a i{
 .history-card{
   position: relative;
   background-color: var(--white);
-  border: 1px solid var(--lighter-blue);
+  border: 2px solid var(--lighter-blue);
   border-radius: 1rem;
   padding: 2.4rem;
   overflow: hidden;
@@ -859,7 +904,6 @@ a i{
 
 .action-btn i{
   font-size: 1.3rem;
-  margin-left: 0.8rem;
 }
 
       /*----- ESTADO DE EDICIÓN -----*/
@@ -874,7 +918,7 @@ a i{
       /*---- ESTILOS PARA EL FORMULARIO DE EDICION DE CONSULTA ----*/
 
 .editable-content h4{
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   font-weight: 600;
   margin-bottom: 2rem;
 }
@@ -892,7 +936,7 @@ a i{
   display: block;
   font-weight: 500;
   margin-bottom: 0.6rem;
-  font-size: 1rem;
+  font-size: 1.3rem;
 }
 
 .form-group input, textarea{
@@ -900,7 +944,14 @@ a i{
   padding: 1rem;
   border: 1px solid var(--border-gray);
   border-radius: 0.8rem;
-  font-size: 1rem;
+  font-size: 1.3rem;
+  font-family: "Poppins", serif;
+}
+
+.form-group  input[type="checkbox"]{
+  width: 1.2rem;
+  height: 1.2rem;
+  margin-right: 1rem;
 }
 
 .card-actions.edit-actions{
@@ -1030,7 +1081,28 @@ a i{
   color: #1f2937;
 }
 
+.form-group-medio {
+    display: flex;
+    justify-content: space-around;
+    width: 100%;
+}
 
+.half-width{
+    width: 50%;
+}
+
+.form-group-medio label{
+    font-family: "Poppins", serif;
+    font-size: 1.3rem;
+    color: var(--primary-darkerblue);
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.half-width:first-child{
+    margin-right: 2%;
+}
     
 
 /* Responsive */
