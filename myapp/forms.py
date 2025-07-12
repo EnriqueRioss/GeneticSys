@@ -235,12 +235,12 @@ class PropositosForm(ModelForm):
 
     class Meta:
         model = Propositos
-        # Excluimos los campos que se manejan automáticamente o se componen
         exclude = ['proposito_id', 'historia', 'estado', 'edad', 'identificacion', 'telefono', 'grupo_sanguineo', 'factor_rh']
         widgets = {
             'sexo': forms.Select,
             'fecha_nacimiento': DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'foto': ClearableFileInput(attrs={'accept': 'image/*'}),
+            # --- CAMBIO CLAVE: Usamos un widget más simple ---
+            'foto': forms.FileInput(attrs={'accept': 'image/*'}),
         }
         labels = {
             'nombres': "Nombres*",
@@ -254,29 +254,24 @@ class PropositosForm(ModelForm):
             'email': "Email",
             'foto': 'Foto del Propósito (Opcional)'
         }
-
+    
+    # El resto de la clase (init, clean, save) no necesita cambios.
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Si es una instancia existente (edición), pre-llenar los campos compuestos
         if self.instance and self.instance.pk:
-            # Pre-llenar ID
             if self.instance.identificacion and '-' in self.instance.identificacion:
                 prefijo, numero = self.instance.identificacion.split('-', 1)
                 self.fields['identificacion_prefijo'].initial = prefijo
                 self.fields['identificacion_numero'].initial = numero
-            # Pre-llenar Teléfono
             if self.instance.telefono and '-' in self.instance.telefono:
                 prefijo, numero = self.instance.telefono.split('-', 1)
                 self.fields['telefono_prefijo'].initial = prefijo
                 self.fields['telefono_numero'].initial = numero
-            # Pre-llenar Grupo Sanguíneo
             if self.instance.grupo_sanguineo and self.instance.factor_rh:
                 self.fields['grupo_rh_combinado'].initial = f"{self.instance.grupo_sanguineo}-{self.instance.factor_rh}"
 
     def clean(self):
         cleaned_data = super().clean()
-        
-        # --- Componer y validar Identificación ---
         id_prefijo = cleaned_data.get('identificacion_prefijo')
         id_numero = cleaned_data.get('identificacion_numero', '').strip()
         if not id_numero.isdigit(): self.add_error('identificacion_numero', "La identificación solo debe contener números.")
@@ -285,14 +280,12 @@ class PropositosForm(ModelForm):
         if id_prefijo and id_numero:
             full_id = f"{id_prefijo}-{id_numero}"
             cleaned_data['identificacion'] = full_id
-            
             query = Propositos.objects.filter(identificacion=full_id)
             if self.instance and self.instance.pk:
                 query = query.exclude(pk=self.instance.pk)
             if query.exists():
                 self.add_error('identificacion_numero', "Ya existe un propósito con esta identificación.")
 
-        # --- Componer y validar Teléfono ---
         tel_prefijo = cleaned_data.get('telefono_prefijo')
         tel_numero = cleaned_data.get('telefono_numero', '').strip()
         if not tel_numero.isdigit() or len(tel_numero) != 7:
@@ -300,7 +293,6 @@ class PropositosForm(ModelForm):
         else:
             cleaned_data['telefono'] = f"{tel_prefijo}-{tel_numero}"
 
-        # --- Separar Grupo Sanguíneo y RH ---
         grupo_rh = cleaned_data.get('grupo_rh_combinado')
         if grupo_rh and '-' in grupo_rh:
             grupo, rh = grupo_rh.split('-', 1)
@@ -308,7 +300,6 @@ class PropositosForm(ModelForm):
             cleaned_data['factor_rh'] = rh
         else:
             self.add_error('grupo_rh_combinado', 'Debe seleccionar un grupo sanguíneo y factor RH.')
-
         return cleaned_data
 
     def clean_fecha_nacimiento(self):
@@ -319,19 +310,14 @@ class PropositosForm(ModelForm):
 
     def save(self, commit=True, historia=None):
         proposito = super().save(commit=False)
-        
-        # Asignar los valores compuestos al modelo
         proposito.identificacion = self.cleaned_data.get('identificacion')
         proposito.telefono = self.cleaned_data.get('telefono')
         proposito.grupo_sanguineo = self.cleaned_data.get('grupo_sanguineo')
         proposito.factor_rh = self.cleaned_data.get('factor_rh')
-
         if historia:
             proposito.historia = historia
-            
         if commit:
-            proposito.save() # El método save() del modelo calculará la edad
-            
+            proposito.save()
         return proposito
 
 
@@ -339,7 +325,7 @@ class PropositosForm(ModelForm):
 # Reemplaza esta clase completa en forms.py
 
 class ParejaPropositosForm(forms.Form):
-    # --- Campos para Cónyuge 1 (sin cambios en la definición) ---
+    # --- Campos para Cónyuge 1 ---
     nombres_1 = forms.CharField(max_length=100, label="Nombres*", strip=True)
     apellidos_1 = forms.CharField(max_length=100, label="Apellidos*", strip=True)
     sexo_1 = forms.ChoiceField(choices=[('', 'Seleccione')] + Propositos.SEXO_CHOICES, label="Sexo*")
@@ -354,9 +340,10 @@ class ParejaPropositosForm(forms.Form):
     telefono_numero_1 = forms.CharField(max_length=7, label="Número Telf.*", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}))
     email_1 = forms.EmailField(max_length=100, required=False, label="Email")
     grupo_rh_combinado_1 = forms.ChoiceField(choices=GRUPOS_RH_CHOICES, label="Grupo Sanguíneo y RH*")
-    foto_1 = forms.ImageField(required=False, widget=ClearableFileInput(attrs={'accept': 'image/*'}), label="Foto (Opcional)")
+    # --- CAMBIO CLAVE: Usamos un widget más simple ---
+    foto_1 = forms.ImageField(required=False, widget=forms.FileInput(attrs={'accept': 'image/*'}), label="Foto (Opcional)")
 
-    # --- Campos para Cónyuge 2 (sin cambios en la definición) ---
+    # --- Campos para Cónyuge 2 ---
     nombres_2 = forms.CharField(max_length=100, label="Nombres*", strip=True)
     apellidos_2 = forms.CharField(max_length=100, label="Apellidos*", strip=True)
     sexo_2 = forms.ChoiceField(choices=[('', 'Seleccione')] + Propositos.SEXO_CHOICES, label="Sexo*")
@@ -371,13 +358,14 @@ class ParejaPropositosForm(forms.Form):
     telefono_numero_2 = forms.CharField(max_length=7, label="Número Telf.*", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}))
     email_2 = forms.EmailField(max_length=100, required=False, label="Email")
     grupo_rh_combinado_2 = forms.ChoiceField(choices=GRUPOS_RH_CHOICES, label="Grupo Sanguíneo y RH*")
-    foto_2 = forms.ImageField(required=False, widget=ClearableFileInput(attrs={'accept': 'image/*'}), label="Foto (Opcional)")
+    # --- CAMBIO CLAVE: Usamos un widget más simple ---
+    foto_2 = forms.ImageField(required=False, widget=forms.FileInput(attrs={'accept': 'image/*'}), label="Foto (Opcional)")
 
+    # El resto de la clase (init, clean, etc.) no necesita cambios.
     def __init__(self, *args, **kwargs):
         self.conyuge1_instance = kwargs.pop('conyuge1_instance', None)
         self.conyuge2_instance = kwargs.pop('conyuge2_instance', None)
         super().__init__(*args, **kwargs)
-
         if not self.is_bound:
             if self.conyuge1_instance:
                 self._populate_fields_from_instance(self.conyuge1_instance, '1')
@@ -388,17 +376,14 @@ class ParejaPropositosForm(forms.Form):
         for field in instance._meta.fields:
             if hasattr(instance, field.name):
                 self.initial[f'{field.name}_{suffix}'] = getattr(instance, field.name, None)
-
         if instance.identificacion and '-' in instance.identificacion:
             prefijo, numero = instance.identificacion.split('-', 1)
             self.initial[f'identificacion_prefijo_{suffix}'] = prefijo
             self.initial[f'identificacion_numero_{suffix}'] = numero
-        
         if instance.telefono and '-' in instance.telefono:
             prefijo, numero = instance.telefono.split('-', 1)
             self.initial[f'telefono_prefijo_{suffix}'] = prefijo
             self.initial[f'telefono_numero_{suffix}'] = numero
-
         if instance.grupo_sanguineo and instance.factor_rh:
             self.initial[f'grupo_rh_combinado_{suffix}'] = f"{instance.grupo_sanguineo}-{instance.factor_rh}"
 
@@ -426,23 +411,16 @@ class ParejaPropositosForm(forms.Form):
         cleaned_data = super().clean()
         self._clean_composite_fields_for_conyuge(cleaned_data, '1')
         self._clean_composite_fields_for_conyuge(cleaned_data, '2')
-        
         id_1 = cleaned_data.get('identificacion_1')
         id_2 = cleaned_data.get('identificacion_2')
-
         if id_1 and id_2 and id_1 == id_2:
             self.add_error('identificacion_numero_2', "Las identificaciones de los cónyuges deben ser diferentes.")
-        
-        ### --- INICIO DE LA NUEVA VALIDACIÓN --- ###
         sexo_1 = cleaned_data.get('sexo_1')
         sexo_2 = cleaned_data.get('sexo_2')
-
         if sexo_1 and sexo_2 and sexo_1 == sexo_2:
             error_msg = "Los cónyuges no pueden tener el mismo sexo. Uno debe ser Masculino y el otro Femenino."
             self.add_error('sexo_1', error_msg)
             self.add_error('sexo_2', error_msg)
-        ### --- FIN DE LA NUEVA VALIDACIÓN --- ###
-
         return cleaned_data
 
     def clean_fecha_nacimiento_1(self):
