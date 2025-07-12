@@ -154,7 +154,6 @@ li{
 .sidebar-nav{
     flex: 1;
     overflow-y: auto;
-    padding: 2rem;
 }
 
 .nav-section{
@@ -230,7 +229,7 @@ li{
 .sidebar-toggle-btn{
     background: none;
     border: none;
-    font-size: 2.2rem;
+    font-size: 1.4rem;
     cursor: pointer;
     color: var(--primary-darkerblue);
 }
