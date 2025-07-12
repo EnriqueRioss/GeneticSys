@@ -7,36 +7,23 @@
     <link rel="stylesheet" href="{% static '/styles/stylesforms.css' %}">
 </head>
 
-<div class="main-content">
-    <div class="form-container">
-        <div class="form-container-card">
-            <div class="card-header">
-                <div>
-                    <h1>{% if editing %}Editar Historia Clínica Genética{% else %}Historia Clínica Genética{% endif %}</h1>
-                    <p>{% if editing %}Actualice los campos necesarios de la historia clínica.{% else %}Complete todos los campos requeridos para crear la historia clínica.{% endif %}</p>
-                    {% if editing %}
-                    <p class="editing-info"><em>Modo Edición: Actualizando datos para la Historia Nº {{ historia.numero_historia }}.</em></p>
-                    {% endif %}
-                </div>
-                <div class="step-indicator" id="stepIndicator">Paso 1 de 7</div>
+<div class="contenedor-formulario">
+   <!-- El formulario ahora es simple, el action será la URL actual, que es lo que queremos. -->
+    <form method="post" id="crear-historia-form">
+        {% csrf_token %}
+        <div class="form-step active">
+            <div class="step-content-header">
+                <i class="fas fa-file"></i>
+                <h2>Información General</h2>
             </div>
 
-            <div class="seccion-progreso">
-                <p class="progress-title">Progreso del formulario</p>
-                <div class="progress-bar-container"><div class="progress-bar"></div></div>
-                <p class="progress-percentage">17% completado</p>
-            </div>
+            <p class="step-subtitle">Datos básicos de la historia clínica genética</p>
+            {% if editing %}
+                <p class="editing-info"><em>Modo Edición: Actualizando datos para la Historia N°: {{ historia.numero_historia }}</em></p>
+            {% endif %}
 
-            <div class="stepper">
-                <div class="stepper-item active" data-step="1"><div class="step-counter"><i class="fas fa-file"></i></div><div class="step-name"><p class="font-bold">Informacion General</p></div></div>
-            </div>
+            <div class="alert alert-danger non-field-errors"></div>
             
-            <!-- El formulario ahora es simple, el action será la URL actual, que es lo que queremos. -->
-            <form method="post" id="crear-historia-form">
-                {% csrf_token %}
-                <div class="form-step active">
-                    <div class="step-content-header"><i class="fas fa-file"></i><h2>Informacion General</h2></div>
-                    <p class="step-subtitle">Datos basicos de la historia clinica genetica</p>
                     <div class="alert alert-danger non-field-errors"></div>
                     <div class="info-box"><i class="fas fa-circle-exclamation"></i><p><strong>Información importante:</strong> Los campos marcados con asterisco (*) son obligatorios.</p></div>
                     
@@ -76,14 +63,13 @@
                             <div class="field-errors" id="error_{{ form1.especialidad.id_for_label }}"></div>
                         </div>
                     </div>
-                </div>
+            
                 <div class="form-actions">
                     <button type="submit" name="save_draft" class="btn btn-outline">Guardar Borrador</button>
                     <button type="submit" class="btn btn-primary" id="nextBtn">{% if editing %}Actualizar y Siguiente{% else %}Siguiente{% endif %}</button>
                 </div>
-            </form>
         </div>
-    </div>
+    </form>
 </div>
 
 <script>
