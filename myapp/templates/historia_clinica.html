@@ -5,6 +5,20 @@
 <head>
     <title>{% if editing %}EDITAR HISTORIA{% else %}CREAR HISTORIA{% endif %} | IIG - LUZ</title>
     <link rel="stylesheet" href="{% static '/styles/stylesforms.css' %}">
+    <style>
+        /* 
+         * Este estilo se aplicará a cualquier campo de input o select que esté deshabilitado,
+         * dándole el fondo celeste claro solicitado y cambiando el cursor para indicar
+         * que no se puede interactuar con él.
+        */
+        input:disabled,
+        select:disabled {
+            background-color: #e7f5ff !important; /* Tono celeste claro */
+            cursor: not-allowed;
+            opacity: 1; /* Asegura que el texto sea completamente legible */
+        }
+    </style>
+    <!-- === FIN DEL CÓDIGO A AÑADIR === -->
 </head>
 
 <div class="contenedor-formulario">
