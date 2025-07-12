@@ -176,6 +176,13 @@ class AntecedentesPersonales(models.Model):
         null=True,
         blank=True
     )
+
+    enfermedad_actual = models.TextField(
+        verbose_name="Enfermedad Actual",
+        blank=True,
+        null=True,
+        help_text="Descripción de la enfermedad actual, motivo de consulta y cronología."
+    )
     fur = models.DateField(null=True, blank=True)
     edad_gestacional = models.IntegerField(null=True, blank=True)
     controles_prenatales = models.CharField(max_length=100, blank=True, default='')

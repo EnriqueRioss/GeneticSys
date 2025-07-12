@@ -64,7 +64,7 @@ from .forms import (
     ExtendedUserCreationForm, HistoriasForm, PropositosForm, PadresPropositoForm,
     AntecedentesDesarrolloNeonatalForm, AntecedentesPreconcepcionalesForm,
     ExamenFisicoForm, ParejaPropositosForm, EvaluacionGeneticaForm,
-    LoginForm, CreateNewTask, CreateNewProject, ReportSearchForm, AdminUserCreationForm, EvaluacionGeneticaForm, DiagnosticoFormSet, PlanEstudioFormSet,PasswordResetAdminForm,AdminUserEditForm,AutorizacionForm,PlanEstudioEditForm,ArchivarHistoriaForm,PatientSearchForm
+    LoginForm, CreateNewTask, CreateNewProject, ReportSearchForm, AdminUserCreationForm, EvaluacionGeneticaForm, DiagnosticoFormSet, PlanEstudioFormSet,PasswordResetAdminForm,AdminUserEditForm,AutorizacionForm,PlanEstudioEditForm,ArchivarHistoriaForm,PatientSearchForm,EnfermedadActualForm,
 )
 
 from django.forms.models import model_to_dict
@@ -609,7 +609,7 @@ def crear_pareja(request, historia_id):
                 else:
                     action_verb = 'creada' if pareja_created else 'actualizada'
                     messages.success(request, f"Pareja ({proposito1.nombres} y {proposito2.nombres}) {action_verb} exitosamente.")
-                    redirect_url = reverse('antecedentes_personales_crear', kwargs={'historia_id': historia.historia_id, 'tipo': "pareja", 'objeto_id': pareja.pareja_id})
+                    redirect_url = reverse('enfermedad_actual_crear', kwargs={'historia_id': historia.historia_id, 'tipo': "pareja", 'objeto_id': pareja.pareja_id})
 
                 if is_ajax:
                     return JsonResponse({'success': True, 'redirect_url': redirect_url})
@@ -697,7 +697,7 @@ def padres_proposito(request, historia_id, proposito_id):
                     
                 # Lógica para "Siguiente"
                 messages.success(request, "Información de los padres guardada/actualizada.")
-                redirect_url = reverse('antecedentes_personales_crear', kwargs={'historia_id': historia_id, 'tipo': 'proposito', 'objeto_id': proposito_id})
+                redirect_url = reverse('enfermedad_actual_crear', kwargs={'historia_id': historia_id, 'tipo': 'proposito', 'objeto_id': proposito_id})
                 if is_ajax:
                     return JsonResponse({'success': True, 'redirect_url': redirect_url})
                 return redirect(redirect_url)
@@ -1428,9 +1428,79 @@ def ver_historias(request):
     return render(request, 'ver_historias.html', context)
 
 
-def enfermedad_actual(request):
-    return render(request, 'enfermedad_actual.html')
+@login_required
+@genetista_or_admin_required
+@never_cache
+def enfermedad_actual(request, historia_id, tipo, objeto_id):
+    historia = get_object_or_404(HistoriasClinicas, historia_id=historia_id)
+    proposito_obj, pareja_obj, context_object_name = None, None, ""
+    antecedentes_instance = None
+    user_gen_profile = request.user.genetistas
+    is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
 
+    if tipo == 'proposito':
+        proposito_obj = get_object_or_404(Propositos, proposito_id=objeto_id, historia=historia)
+        if user_gen_profile.rol == 'GEN' and proposito_obj.historia.genetista != user_gen_profile:
+            raise PermissionDenied("No tiene permiso para esta acción.")
+        context_object_name = f"{proposito_obj.nombres} {proposito_obj.apellidos}"
+        lookup_kwargs = {'proposito': proposito_obj}
+    elif tipo == 'pareja':
+        pareja_obj = get_object_or_404(Parejas, pareja_id=objeto_id)
+        if user_gen_profile.rol == 'GEN' and pareja_obj.proposito_id_1.historia.genetista != user_gen_profile:
+            raise PermissionDenied("No tiene permiso para esta acción sobre la pareja.")
+        context_object_name = f"Pareja: {pareja_obj.proposito_id_1.nombres} y {pareja_obj.proposito_id_2.nombres}"
+        lookup_kwargs = {'pareja': pareja_obj}
+    else:
+        messages.error(request, 'Tipo de objeto no válido.')
+        return redirect('index')
+
+    antecedentes_instance, created = AntecedentesPersonales.objects.get_or_create(**lookup_kwargs)
+    editing = bool(antecedentes_instance.enfermedad_actual)
+
+    if request.method == 'POST':
+        form = EnfermedadActualForm(request.POST, instance=antecedentes_instance)
+        if form.is_valid():
+            try:
+                form.save()
+                request.session.pop('form_data', None)
+
+                if 'save_draft' in request.POST:
+                    request.session.pop('historia_en_progreso_id', None)
+                    messages.success(request, f"Borrador de enfermedad actual para {context_object_name} guardado.")
+                    redirect_url = reverse('ver_historias')
+                    if is_ajax:
+                        return JsonResponse({'success': True, 'redirect_url': redirect_url})
+                    return redirect(redirect_url)
+
+                action_verb = "actualizada" if editing else "guardada"
+                messages.success(request, f"Enfermedad actual {action_verb} para {context_object_name}.")
+                redirect_url = reverse('antecedentes_personales_crear', kwargs={'historia_id': historia_id, 'tipo': tipo, 'objeto_id': objeto_id})
+                
+                if is_ajax:
+                    return JsonResponse({'success': True, 'redirect_url': redirect_url})
+                return redirect(redirect_url)
+            except Exception as e:
+                error_msg = f'Error al guardar enfermedad actual: {str(e)}'
+                if is_ajax: return JsonResponse({'success': False, 'errors': {'__all__': [error_msg]}}, status=400)
+                messages.error(request, error_msg)
+                request.session['form_data'] = request.POST.copy()
+                return redirect(request.path_info)
+        else:
+            if is_ajax: return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+            messages.error(request, "No se pudo guardar la enfermedad actual. Corrija los errores.")
+            request.session['form_data'] = request.POST.copy()
+            return redirect(request.path_info)
+    else:
+        form_data = request.session.pop('form_data', None)
+        form = EnfermedadActualForm(form_data or None, instance=antecedentes_instance)
+        if editing and not form_data:
+            messages.info(request, f"Editando enfermedad actual para {context_object_name}.")
+
+    context = {
+        'form': form, 'historia': historia, 'tipo': tipo, 'objeto': proposito_obj or pareja_obj, 
+        'context_object_name': context_object_name, 'editing': editing
+    }
+    return render(request, 'enfermedad_actual.html', context)
 
 # views.py
 @require_POST

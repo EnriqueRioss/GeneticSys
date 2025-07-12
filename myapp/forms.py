@@ -1230,3 +1230,27 @@ class ArchivarHistoriaForm(forms.Form):
         }),
         help_text="Este motivo será registrado y visible para los administradores."
     )
+
+
+
+class EnfermedadActualForm(ModelForm):
+    class Meta:
+        model = AntecedentesPersonales
+        fields = ['enfermedad_actual']
+        widgets = {
+            'enfermedad_actual': forms.Textarea(attrs={
+                'rows': 8,
+                'placeholder': 'Describa la enfermedad actual, motivo de la consulta, y la cronología de los eventos...'
+            }),
+        }
+        labels = {
+            'enfermedad_actual': 'Datos de la Enfermedad Actual *'
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Hacemos el campo requerido a nivel de formulario
+        self.fields['enfermedad_actual'].required = True
+        self.fields['enfermedad_actual'].error_messages = {
+            'required': 'Este campo es obligatorio. Por favor, describa la enfermedad actual.'
+        }

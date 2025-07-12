@@ -27,8 +27,8 @@ urlpatterns = [
     path('historias/delete/<int:historia_id>/', views.delete_historia, name='historia_delete'),
 
     path('historias/crear/', views.crear_editar_historia, name="historia_crear"),
-     path('historias/<int:historia_id>/pdf/', views.generar_pdf_historia, name='historia_pdf'),
-path('historias/<int:historia_id>/editar/', views.crear_editar_historia, name="historia_editar"),
+    path('historias/<int:historia_id>/pdf/', views.generar_pdf_historia, name='historia_pdf'),
+    path('historias/<int:historia_id>/editar/', views.crear_editar_historia, name="historia_editar"),
     path('historias/<int:historia_id>/paciente/crear/', views.crear_paciente, name="paciente_crear"),
     path('historias/<int:historia_id>/pareja/crear/', views.crear_pareja, name="pareja_crear"),
     path('historias/<int:historia_id>/proposito/<int:proposito_id>/padres/', views.padres_proposito, name="padres_proposito_crear"),
@@ -51,7 +51,7 @@ path('historias/<int:historia_id>/editar/', views.crear_editar_historia, name="h
 
 
     path('ajax/buscar-propositos/', views.buscar_propositos, name='ajax_buscar_propositos'), 
-path('ajax/get-historia-clinica/<int:proposito_id>/', views.get_historia_clinica_data, name='ajax_get_historia_clinica'),
+    path('ajax/get-historia-clinica/<int:proposito_id>/', views.get_historia_clinica_data, name='ajax_get_historia_clinica'),
     path('ajax/edit-plan-estudio/<int:plan_id>/', views.edit_plan_estudio, name='ajax_edit_plan_estudio'),
     path('reports/', views.reports_view, name="reports_dashboard"),
     path('ver_historias/', views.ver_historias, name="ver_historias"),
@@ -61,12 +61,13 @@ path('ajax/get-historia-clinica/<int:proposito_id>/', views.get_historia_clinica
     path('gestion/usuarios/toggle-status/<int:user_id>/', views.toggle_user_active_status, name='toggle_user_active'),
    # path('gestion/usuarios/delete/<int:user_id>/', views.delete_user_admin, name='delete_user_admin'),
    #path('pacientes/inactivar/', views.inactivar_pacientes_view, name='pacientes_inactivar'), 
-path('gestion/usuarios/reset-password/<int:user_id>/', views.reset_password_admin, name='reset_password_admin'),
-path('gestion/usuarios/edit/<int:user_id>/', views.edit_user_admin, name='edit_user_admin'), 
- path('ajax/evaluacion/<int:evaluacion_id>/guardar-diagnostico-final/', views.guardar_diagnostico_final_ajax, name='ajax_guardar_diagnostico_final'),
-    path('historias/enfermedad-actual/', views.enfermedad_actual, name='enfermedad_actual'),
+    path('gestion/usuarios/reset-password/<int:user_id>/', views.reset_password_admin, name='reset_password_admin'),
+    path('gestion/usuarios/edit/<int:user_id>/', views.edit_user_admin, name='edit_user_admin'), 
+    path('ajax/evaluacion/<int:evaluacion_id>/guardar-diagnostico-final/', views.guardar_diagnostico_final_ajax, name='ajax_guardar_diagnostico_final'),
+    path('historias/<int:historia_id>/<str:tipo>/<int:objeto_id>/enfermedad-actual/',
+         views.enfermedad_actual, name="enfermedad_actual_crear"),
 
-path('historias/archive/<int:historia_id>/', views.archive_historia, name='historia_archive'),
+    path('historias/archive/<int:historia_id>/', views.archive_historia, name='historia_archive'),
     path('historias/unarchive/<int:historia_id>/', views.unarchive_historia, name='historia_unarchive'),
 ]
 
