@@ -257,12 +257,12 @@
                                             <input type="checkbox" id="select-all-checkbox" title="Seleccionar todos">
                                         </th>
                                         <th>Paciente</th>
-                                        <th>Edad</th>
-                                        <th>Contacto</th>
-                                        <th>Genetista</th>
-                                        <th>Última Visita</th>
+                                        <th class="hide-on-mobile">Edad</th>
+                                        <th class="hide-on-tablet">Contacto</th>
+                                        <th class="hide-on-tablet">Genetista</th>
+                                        <th class="hide-on-mobile">Última Visita</th>
                                         <th>Estado</th>
-                                        <th>Historia ID / Pendientes
+                                        <th class="hide-on-mobile">Historia ID / Pendientes
                                         </th>
                                         <th>Acciones</th>
                                     </tr>
@@ -297,13 +297,13 @@
                                                     {% endif %}
                                                 </div>
                                                 <div class="patient-details">
-                                                    <div class="patient-name">{{ proposito.nombres }} {{ proposito.apellidos }}</div>
+                                                    <div class="patient-name" data-label="Paciente">{{ proposito.nombres }} {{ proposito.apellidos }}</div>
                                                     <div class="patient-id">ID: {{ proposito.identificacion }}</div>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td>{{ proposito.edad|default_if_none:"N/A" }} años</td>
-                                        <td>
+                                        <td class="hide-on-mobile" data-label="Edad">{{ proposito.edad|default_if_none:"N/A" }} años</td>
+                                        <td class="hide-on-tablet" data-label="Contacto">
                                             <div class="contact-info">
                                                 {% if proposito.telefono %}
                                                 <div class="contact-item">
@@ -319,12 +319,12 @@
                                                 {% endif %}
                                             </div>
                                         </td>
-                                        <td>{{ proposito.historia.genetista.user.get_full_name|default:"N/A" }}</td>
-                                        <td>{{ proposito.historia.fecha_ingreso|date:"Y-m-d" }}</td>
-                                        <td>
+                                        <td class="hide-on-tablet" data-label="Genetista">{{ proposito.historia.genetista.user.get_full_name|default:"N/A" }}</td>
+                                        <td class="hide-on-mobile" data-label="Ultima Visita">{{ proposito.historia.fecha_ingreso|date:"Y-m-d" }}</td>
+                                        <td data-label="Estado">
                                             <span class="badge badge-{{ proposito.estado|slugify }}">{{ proposito.get_estado_display }}</span>
                                         </td>
-                                        <td>
+                                        <td class="hide-on-mobile" data-label="Historia ID">
                                             <div class="history-badges">
                                                 {% if proposito.historia %}
                                                     <span class="badge">HC {{ proposito.historia.numero_historia }}</span>
@@ -334,7 +334,7 @@
                                                 {% endif %}
                                             </div>
                                         </td>
-                                        <td>
+                                        <td data-label="Acciones">
                                             <div class="action-buttons">
                                                 {% if proposito.estado != 'inactivo' %}
                                                     <button type="button" class="btn-ver">
