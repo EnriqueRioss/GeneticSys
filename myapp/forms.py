@@ -19,7 +19,19 @@ from .models import (
 )
 
 # --- General Purpose Forms ---
-
+PREFIJOS_ID = [('V', 'V'), ('E', 'E')]
+PREFIJOS_TELEFONO = [
+    ('0414', '0414'), ('0424', '0424'),
+    ('0412', '0412'), ('0416', '0416'),
+    ('0426', '0426')
+]
+GRUPOS_RH_CHOICES = [
+    ('', 'Seleccione...'),
+    ('A-Positivo', 'A+'), ('A-Negativo', 'A-'),
+    ('B-Positivo', 'B+'), ('B-Negativo', 'B-'),
+    ('AB-Positivo', 'AB+'), ('AB-Negativo', 'AB-'),
+    ('O-Positivo', 'O+'), ('O-Negativo', 'O-'),
+]
 class CreateNewTask(forms.Form):
     title = forms.CharField(label="Title", max_length=200, strip=True)
     description = forms.CharField(label="Description", widget=forms.Textarea, strip=True)
@@ -87,97 +99,118 @@ class HistoriasForm(ModelForm):
         return numero_historia
 
 class PadresPropositoForm(forms.Form):
-    
-    # ... (campos del padre y la madre se mantienen igual) ...
-    padre_nombres = forms.CharField(max_length=100, label="Nombres del Padre", strip=True)
-    padre_apellidos = forms.CharField(max_length=100, label="Apellidos del Padre", strip=True)
-    padre_escolaridad = forms.CharField(max_length=100, required=False, label="Escolaridad del Padre", strip=True)
-    padre_ocupacion = forms.CharField(max_length=100, required=False, label="Ocupación del Padre", strip=True)
-    padre_lugar_nacimiento = forms.CharField(max_length=100, required=False, label="Lugar de Nacimiento del Padre", strip=True)
-    padre_fecha_nacimiento = forms.DateField(
-        required=False,
-        widget=DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-        label="Fecha de Nacimiento del Padre"
-    )
-    padre_edad = forms.IntegerField(required=False, label="Edad del Padre (años)", widget=forms.NumberInput(attrs={'min': '0', 'max': '120'}))
-    padre_identificacion = forms.CharField(max_length=20, required=False, label="Identificación del Padre", strip=True)
-    padre_grupo_sanguineo = forms.ChoiceField(
-        choices=[('', 'Seleccione')] + InformacionPadres._meta.get_field('grupo_sanguineo').choices,
-        required=False, label="Grupo Sanguíneo del Padre"
-    )
-    padre_factor_rh = forms.ChoiceField(
-        choices=[('', 'Seleccione')] + InformacionPadres._meta.get_field('factor_rh').choices,
-        required=False, label="Factor RH del Padre"
-    )
-    padre_telefono = forms.CharField(max_length=15, required=False, label="Teléfono del Padre", strip=True)
-    padre_email = forms.EmailField(max_length=100, required=False, label="Email del Padre")
-    padre_direccion = forms.CharField(max_length=200, required=False, label="Dirección del Padre", strip=True)
+    # --- Campos del Padre ---
+    padre_nombres = forms.CharField(max_length=100, label="Nombres del Padre*", strip=True)
+    padre_apellidos = forms.CharField(max_length=100, label="Apellidos del Padre*", strip=True)
+    # --- AÑADIDO: Campo de sexo para los padres ---
+    padre_sexo = forms.ChoiceField(choices=[('', 'Seleccione')] + Propositos.SEXO_CHOICES, label="Sexo del Padre*")
+    padre_escolaridad = forms.CharField(max_length=100, label="Escolaridad del Padre*", strip=True)
+    padre_ocupacion = forms.CharField(max_length=100, label="Ocupación del Padre*", strip=True)
+    padre_lugar_nacimiento = forms.CharField(max_length=100, label="Lugar de Nacimiento del Padre*", strip=True)
+    padre_fecha_nacimiento = forms.DateField(widget=DateInput(attrs={'type': 'date', 'class': 'form-control'}), label="Fecha de Nacimiento del Padre*")
+    padre_identificacion_prefijo = forms.ChoiceField(choices=PREFIJOS_ID, label="ID*")
+    padre_identificacion_numero = forms.CharField(max_length=11, label="Número ID*", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}))
+    padre_grupo_rh_combinado = forms.ChoiceField(choices=GRUPOS_RH_CHOICES, label="Grupo Sanguíneo y RH*")
+    padre_telefono_prefijo = forms.ChoiceField(choices=PREFIJOS_TELEFONO, label="Telf.*")
+    padre_telefono_numero = forms.CharField(max_length=7, label="Número Telf.*", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}))
+    padre_email = forms.EmailField(max_length=100, required=False, label="Email")
+    padre_direccion = forms.CharField(max_length=200, label="Dirección del Padre*", strip=True)
 
-    madre_nombres = forms.CharField(max_length=100, label="Nombres de la Madre", strip=True)
-    madre_apellidos = forms.CharField(max_length=100, label="Apellidos de la Madre", strip=True)
-    madre_escolaridad = forms.CharField(max_length=100, required=False, label="Escolaridad de la Madre", strip=True)
-    madre_ocupacion = forms.CharField(max_length=100, required=False, label="Ocupación de la Madre", strip=True)
-    madre_lugar_nacimiento = forms.CharField(max_length=100, required=False, label="Lugar de Nacimiento de la Madre", strip=True)
-    madre_fecha_nacimiento = forms.DateField(
-        required=False,
-        widget=DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-        label="Fecha de Nacimiento de la Madre"
-    )
-    madre_edad = forms.IntegerField(required=False, label="Edad de la Madre (años)", widget=forms.NumberInput(attrs={'min': '0', 'max': '120'}))
-    madre_identificacion = forms.CharField(max_length=20, required=False, label="Identificación de la Madre", strip=True)
-    madre_grupo_sanguineo = forms.ChoiceField(
-        choices=[('', 'Seleccione')] + InformacionPadres._meta.get_field('grupo_sanguineo').choices,
-        required=False, label="Grupo Sanguíneo de la Madre"
-    )
-    madre_factor_rh = forms.ChoiceField(
-        choices=[('', 'Seleccione')] + InformacionPadres._meta.get_field('factor_rh').choices,
-        required=False, label="Factor RH de la Madre"
-    )
-    madre_telefono = forms.CharField(max_length=15, required=False, label="Teléfono de la Madre", strip=True)
-    madre_email = forms.EmailField(max_length=100, required=False, label="Email de la Madre")
-    madre_direccion = forms.CharField(max_length=200, required=False, label="Dirección de la Madre", strip=True)
+    # --- Campos de la Madre ---
+    madre_nombres = forms.CharField(max_length=100, label="Nombres de la Madre*", strip=True)
+    madre_apellidos = forms.CharField(max_length=100, label="Apellidos de la Madre*", strip=True)
+    # --- AÑADIDO: Campo de sexo para los padres ---
+    madre_sexo = forms.ChoiceField(choices=[('', 'Seleccione')] + Propositos.SEXO_CHOICES, label="Sexo de la Madre*")
+    madre_escolaridad = forms.CharField(max_length=100, label="Escolaridad de la Madre*", strip=True)
+    madre_ocupacion = forms.CharField(max_length=100, label="Ocupación de la Madre*", strip=True)
+    madre_lugar_nacimiento = forms.CharField(max_length=100, label="Lugar de Nacimiento de la Madre*", strip=True)
+    madre_fecha_nacimiento = forms.DateField(widget=DateInput(attrs={'type': 'date', 'class': 'form-control'}), label="Fecha de Nacimiento de la Madre*")
+    madre_identificacion_prefijo = forms.ChoiceField(choices=PREFIJOS_ID, label="ID*")
+    madre_identificacion_numero = forms.CharField(max_length=11, label="Número ID*", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}))
+    madre_grupo_rh_combinado = forms.ChoiceField(choices=GRUPOS_RH_CHOICES, label="Grupo Sanguíneo y RH*")
+    madre_telefono_prefijo = forms.ChoiceField(choices=PREFIJOS_TELEFONO, label="Telf.*")
+    madre_telefono_numero = forms.CharField(max_length=7, label="Número Telf.*", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}))
+    madre_email = forms.EmailField(max_length=100, required=False, label="Email")
+    madre_direccion = forms.CharField(max_length=200, label="Dirección de la Madre*", strip=True)
 
     def __init__(self, *args, **kwargs):
-        """
-        Añadimos un __init__ para recibir las instancias del padre y la madre desde la vista.
-        """
         self.padre_instance = kwargs.pop('padre_instance', None)
         self.madre_instance = kwargs.pop('madre_instance', None)
         super().__init__(*args, **kwargs)
 
-    def clean_padre_identificacion(self):
-        """
-        Validación de unicidad para la identificación del padre, consciente del modo edición.
-        """
-        identificacion = self.cleaned_data.get('padre_identificacion', '').strip()
-        if not identificacion:
-            return identificacion # Es opcional, no validamos si está vacío
+        if not self.is_bound:
+            if self.padre_instance: self._populate_fields_from_instance(self.padre_instance, 'padre')
+            if self.madre_instance: self._populate_fields_from_instance(self.madre_instance, 'madre')
 
-        query = InformacionPadres.objects.filter(identificacion=identificacion)
-        if self.padre_instance and self.padre_instance.pk:
-            query = query.exclude(pk=self.padre_instance.pk)
+    def _populate_fields_from_instance(self, instance, prefix):
+        # Llenar campos simples
+        for field in instance._meta.fields:
+             if hasattr(instance, field.name):
+                self.initial[f'{prefix}_{field.name}'] = getattr(instance, field.name)
+
+        if instance.identificacion and '-' in instance.identificacion:
+            id_prefijo, id_numero = instance.identificacion.split('-', 1)
+            self.initial[f'{prefix}_identificacion_prefijo'] = id_prefijo
+            self.initial[f'{prefix}_identificacion_numero'] = id_numero
+        if instance.telefono and '-' in instance.telefono:
+            tel_prefijo, tel_numero = instance.telefono.split('-', 1)
+            self.initial[f'{prefix}_telefono_prefijo'] = tel_prefijo
+            self.initial[f'{prefix}_telefono_numero'] = tel_numero
+        if instance.grupo_sanguineo and instance.factor_rh:
+            self.initial[f'{prefix}_grupo_rh_combinado'] = f"{instance.grupo_sanguineo}-{instance.factor_rh}"
+
+    def _clean_composite_field(self, data, prefix):
+        id_prefijo = data.get(f'{prefix}_identificacion_prefijo')
+        id_numero = data.get(f'{prefix}_identificacion_numero', '').strip()
+        if not id_numero.isdigit(): self.add_error(f'{prefix}_identificacion_numero', "La identificación solo debe contener números.")
+        elif len(id_numero) > 11: self.add_error(f'{prefix}_identificacion_numero', "La identificación no puede tener más de 11 dígitos.")
         
-        if query.exists():
-            raise forms.ValidationError("Ya existe una persona (padre/madre) con esta identificación.")
+        full_id = f"{id_prefijo}-{id_numero}" if id_prefijo and id_numero else None
+        data[f'{prefix}_identificacion'] = full_id
         
-        return identificacion
+        tel_prefijo = data.get(f'{prefix}_telefono_prefijo')
+        tel_numero = data.get(f'{prefix}_telefono_numero', '').strip()
+        if not tel_numero.isdigit() or len(tel_numero) != 7: self.add_error(f'{prefix}_telefono_numero', "El número de teléfono debe contener exactamente 7 dígitos.")
+        
+        data[f'{prefix}_telefono'] = f"{tel_prefijo}-{tel_numero}" if tel_prefijo and tel_numero else None
+        
+        grupo_rh = data.get(f'{prefix}_grupo_rh_combinado')
+        if grupo_rh and '-' in grupo_rh:
+            grupo, rh = grupo_rh.split('-', 1)
+            data[f'{prefix}_grupo_sanguineo'] = grupo
+            data[f'{prefix}_factor_rh'] = rh
 
-    def clean_madre_identificacion(self):
-        """
-        Validación de unicidad para la identificación de la madre, consciente del modo edición.
-        """
-        identificacion = self.cleaned_data.get('madre_identificacion', '').strip()
-        if not identificacion:
-            return identificacion # Es opcional, no validamos si está vacío
+    def clean(self):
+        cleaned_data = super().clean()
+        self._clean_composite_field(cleaned_data, 'padre')
+        self._clean_composite_field(cleaned_data, 'madre')
 
-        query = InformacionPadres.objects.filter(identificacion=identificacion)
-        if self.madre_instance and self.madre_instance.pk:
-            query = query.exclude(pk=self.madre_instance.pk)
+        padre_id = cleaned_data.get('padre_identificacion')
+        if padre_id:
+            query = InformacionPadres.objects.filter(identificacion=padre_id)
+            if self.padre_instance and self.padre_instance.pk: query = query.exclude(pk=self.padre_instance.pk)
+            if query.exists(): self.add_error('padre_identificacion_numero', "Ya existe una persona con esta identificación.")
 
-        if query.exists():
-            raise forms.ValidationError("Ya existe una persona (padre/madre) con esta identificación.")
+        madre_id = cleaned_data.get('madre_identificacion')
+        if madre_id:
+            query = InformacionPadres.objects.filter(identificacion=madre_id)
+            if self.madre_instance and self.madre_instance.pk: query = query.exclude(pk=self.madre_instance.pk)
+            if query.exists(): self.add_error('madre_identificacion_numero', "Ya existe una persona con esta identificación.")
+
+        if padre_id and madre_id and padre_id == madre_id:
+            self.add_error('madre_identificacion_numero', "La identificación de la madre no puede ser igual a la del padre.")
+        
+        ### --- INICIO DE LA NUEVA VALIDACIÓN --- ###
+        padre_sexo = cleaned_data.get('padre_sexo')
+        madre_sexo = cleaned_data.get('madre_sexo')
+
+        if padre_sexo and madre_sexo and padre_sexo == madre_sexo:
+            error_msg = "Los padres no pueden tener el mismo sexo. Uno debe ser Masculino y el otro Femenino."
+            self.add_error('padre_sexo', error_msg)
+            self.add_error('madre_sexo', error_msg)
+        ### --- FIN DE LA NUEVA VALIDACIÓN --- ###
             
-        return identificacion
+        return cleaned_data
 
     def clean_padre_fecha_nacimiento(self):
         fecha = self.cleaned_data.get('padre_fecha_nacimiento')
@@ -190,59 +223,93 @@ class PadresPropositoForm(forms.Form):
         if fecha and fecha > timezone.now().date():
             raise forms.ValidationError("La fecha de nacimiento no puede ser en el futuro.")
         return fecha
-
-    def clean_padre_edad(self):
-        edad = self.cleaned_data.get('padre_edad')
-        if edad is not None and (edad < 0 or edad > 120):
-            raise forms.ValidationError("Por favor, ingrese una edad válida (0-120 años).")
-        return edad
-
-    def clean_madre_edad(self):
-        edad = self.cleaned_data.get('madre_edad')
-        if edad is not None and (edad < 0 or edad > 120):
-            raise forms.ValidationError("Por favor, ingrese una edad válida (0-120 años).")
-        return edad
-
-    def clean(self):
-        cleaned_data = super().clean()
-        padre_id = cleaned_data.get('padre_identificacion', '').strip()
-        madre_id = cleaned_data.get('madre_identificacion', '').strip()
-
-        if padre_id and madre_id and padre_id == madre_id:
-            self.add_error('madre_identificacion', "La identificación de la madre no puede ser igual a la del padre.")
-        return cleaned_data
-
 class PropositosForm(ModelForm):
-    """
-    REESTRUCTURADO a ModelForm. Esto simplifica la vista y el manejo de instancias.
-    """
+    # --- Nuevos campos para la UI ---
+    identificacion_prefijo = forms.ChoiceField(choices=PREFIJOS_ID, label="ID*")
+    identificacion_numero = forms.CharField(max_length=11, label="Número ID*", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}))
+    
+    telefono_prefijo = forms.ChoiceField(choices=PREFIJOS_TELEFONO, label="Telf.*")
+    telefono_numero = forms.CharField(max_length=7, label="Número Telf.*", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}))
+
+    grupo_rh_combinado = forms.ChoiceField(choices=GRUPOS_RH_CHOICES, label="Grupo Sanguíneo y RH*")
+
     class Meta:
         model = Propositos
-        # Excluimos los campos que se manejan automáticamente o en la vista.
-        exclude = ['proposito_id', 'historia', 'estado'] 
+        # Excluimos los campos que se manejan automáticamente o se componen
+        exclude = ['proposito_id', 'historia', 'estado', 'edad', 'identificacion', 'telefono', 'grupo_sanguineo', 'factor_rh']
         widgets = {
             'sexo': forms.Select,
             'fecha_nacimiento': DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            'edad': forms.NumberInput(attrs={'min': '0', 'max': '120'}),
             'foto': ClearableFileInput(attrs={'accept': 'image/*'}),
         }
         labels = {
-            'nombres': "Nombres",
-            'apellidos': "Apellidos",
-            'sexo': "Sexo",
-            'lugar_nacimiento': "Lugar de Nacimiento",
-            'escolaridad': "Escolaridad",
-            'ocupacion': "Ocupación",
-            'edad': "Edad (años)",
-            'fecha_nacimiento': "Fecha de Nacimiento",
-            'identificacion': "Identificación (Cédula/Pasaporte)",
-            'direccion': "Dirección",
-            'telefono': "Teléfono",
+            'nombres': "Nombres*",
+            'apellidos': "Apellidos*",
+            'sexo': "Sexo*",
+            'lugar_nacimiento': "Lugar de Nacimiento*",
+            'escolaridad': "Escolaridad*",
+            'ocupacion': "Ocupación*",
+            'fecha_nacimiento': "Fecha de Nacimiento*",
+            'direccion': "Dirección*",
             'email': "Email",
-            'grupo_sanguineo': "Grupo Sanguíneo",
-            'factor_rh': "Factor RH",
             'foto': 'Foto del Propósito (Opcional)'
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Si es una instancia existente (edición), pre-llenar los campos compuestos
+        if self.instance and self.instance.pk:
+            # Pre-llenar ID
+            if self.instance.identificacion and '-' in self.instance.identificacion:
+                prefijo, numero = self.instance.identificacion.split('-', 1)
+                self.fields['identificacion_prefijo'].initial = prefijo
+                self.fields['identificacion_numero'].initial = numero
+            # Pre-llenar Teléfono
+            if self.instance.telefono and '-' in self.instance.telefono:
+                prefijo, numero = self.instance.telefono.split('-', 1)
+                self.fields['telefono_prefijo'].initial = prefijo
+                self.fields['telefono_numero'].initial = numero
+            # Pre-llenar Grupo Sanguíneo
+            if self.instance.grupo_sanguineo and self.instance.factor_rh:
+                self.fields['grupo_rh_combinado'].initial = f"{self.instance.grupo_sanguineo}-{self.instance.factor_rh}"
+
+    def clean(self):
+        cleaned_data = super().clean()
+        
+        # --- Componer y validar Identificación ---
+        id_prefijo = cleaned_data.get('identificacion_prefijo')
+        id_numero = cleaned_data.get('identificacion_numero', '').strip()
+        if not id_numero.isdigit(): self.add_error('identificacion_numero', "La identificación solo debe contener números.")
+        elif len(id_numero) > 11: self.add_error('identificacion_numero', "La identificación no puede tener más de 11 dígitos.")
+        
+        if id_prefijo and id_numero:
+            full_id = f"{id_prefijo}-{id_numero}"
+            cleaned_data['identificacion'] = full_id
+            
+            query = Propositos.objects.filter(identificacion=full_id)
+            if self.instance and self.instance.pk:
+                query = query.exclude(pk=self.instance.pk)
+            if query.exists():
+                self.add_error('identificacion_numero', "Ya existe un propósito con esta identificación.")
+
+        # --- Componer y validar Teléfono ---
+        tel_prefijo = cleaned_data.get('telefono_prefijo')
+        tel_numero = cleaned_data.get('telefono_numero', '').strip()
+        if not tel_numero.isdigit() or len(tel_numero) != 7:
+            self.add_error('telefono_numero', "El número de teléfono debe contener exactamente 7 dígitos.")
+        else:
+            cleaned_data['telefono'] = f"{tel_prefijo}-{tel_numero}"
+
+        # --- Separar Grupo Sanguíneo y RH ---
+        grupo_rh = cleaned_data.get('grupo_rh_combinado')
+        if grupo_rh and '-' in grupo_rh:
+            grupo, rh = grupo_rh.split('-', 1)
+            cleaned_data['grupo_sanguineo'] = grupo
+            cleaned_data['factor_rh'] = rh
+        else:
+            self.add_error('grupo_rh_combinado', 'Debe seleccionar un grupo sanguíneo y factor RH.')
+
+        return cleaned_data
 
     def clean_fecha_nacimiento(self):
         fecha = self.cleaned_data.get('fecha_nacimiento')
@@ -250,90 +317,133 @@ class PropositosForm(ModelForm):
             raise forms.ValidationError("La fecha de nacimiento no puede ser en el futuro.")
         return fecha
 
-    def clean_edad(self):
-        edad = self.cleaned_data.get('edad')
-        if edad is not None and (edad < 0 or edad > 120):
-            raise forms.ValidationError("Por favor, ingrese una edad válida (0-120 años).")
-        return edad
-
-    def clean_identificacion(self):
-        """
-        Esta es la validación clave, similar a la de HistoriasForm.
-        """
-        identificacion = self.cleaned_data.get('identificacion')
-        if not identificacion:
-            raise forms.ValidationError("La identificación es obligatoria.")
-
-        query = Propositos.objects.filter(identificacion=identificacion)
-        
-        # Si el formulario está en modo edición (tiene una instancia),
-        # excluimos a esa propia instancia de la búsqueda.
-        if self.instance and self.instance.pk:
-            query = query.exclude(pk=self.instance.pk)
-        
-        # Si después de excluirla, todavía existe un resultado,
-        # significa que OTRO propósito tiene esa identificación.
-        if query.exists():
-            raise forms.ValidationError("Ya existe un propósito con esta identificación.")
-            
-        return identificacion
-
     def save(self, commit=True, historia=None):
-        """
-        Sobrescribimos el save para asociar la historia clínica.
-        """
         proposito = super().save(commit=False)
         
+        # Asignar los valores compuestos al modelo
+        proposito.identificacion = self.cleaned_data.get('identificacion')
+        proposito.telefono = self.cleaned_data.get('telefono')
+        proposito.grupo_sanguineo = self.cleaned_data.get('grupo_sanguineo')
+        proposito.factor_rh = self.cleaned_data.get('factor_rh')
+
         if historia:
             proposito.historia = historia
             
         if commit:
-            proposito.save()
+            proposito.save() # El método save() del modelo calculará la edad
             
         return proposito
 
+
+# Remplaza la clase ParejaPropositosForm existente con esta:
+# Reemplaza esta clase completa en forms.py
+
 class ParejaPropositosForm(forms.Form):
-    # (Este formulario no cambia, ya que su vista 'crear_pareja' no tiene un modo de edición explícito.
-    # La lógica de "editar" se maneja con `update_or_create` en la vista, lo cual es correcto para
-    # encontrar y asociar propósitos existentes a una nueva pareja.)
-    # Se deja el código original.
-    nombres_1 = forms.CharField(max_length=100, label="Nombres (Primer Cónyuge)", strip=True)
-    apellidos_1 = forms.CharField(max_length=100, label="Apellidos (Primer Cónyuge)", strip=True)
-    sexo_1 = forms.ChoiceField(
-        choices=[('', 'Seleccione')] + Propositos.SEXO_CHOICES,
-        required=True, label="Sexo"
-    )
-    lugar_nacimiento_1 = forms.CharField(max_length=100, required=False, label="Lugar de Nacimiento", strip=True)
-    fecha_nacimiento_1 = forms.DateField(required=False, widget=DateInput(attrs={'type': 'date', 'class': 'form-control'}), label="Fecha de Nacimiento")
-    escolaridad_1 = forms.CharField(max_length=100, required=False, label="Escolaridad", strip=True)
-    ocupacion_1 = forms.CharField(max_length=100, required=False, label="Ocupación", strip=True)
-    edad_1 = forms.IntegerField(required=False, label="Edad (años)", widget=forms.NumberInput(attrs={'min':'0', 'max':'120'}))
-    identificacion_1 = forms.CharField(max_length=20, label="Identificación", strip=True)
-    direccion_1 = forms.CharField(max_length=200, required=False, label="Dirección", strip=True)
-    telefono_1 = forms.CharField(max_length=15, required=False, label="Teléfono", strip=True)
+    # --- Campos para Cónyuge 1 (sin cambios en la definición) ---
+    nombres_1 = forms.CharField(max_length=100, label="Nombres*", strip=True)
+    apellidos_1 = forms.CharField(max_length=100, label="Apellidos*", strip=True)
+    sexo_1 = forms.ChoiceField(choices=[('', 'Seleccione')] + Propositos.SEXO_CHOICES, label="Sexo*")
+    lugar_nacimiento_1 = forms.CharField(max_length=100, label="Lugar de Nacimiento*", strip=True)
+    fecha_nacimiento_1 = forms.DateField(widget=DateInput(attrs={'type': 'date', 'class': 'form-control'}), label="Fecha de Nacimiento*")
+    escolaridad_1 = forms.CharField(max_length=100, label="Escolaridad*", strip=True)
+    ocupacion_1 = forms.CharField(max_length=100, label="Ocupación*", strip=True)
+    identificacion_prefijo_1 = forms.ChoiceField(choices=PREFIJOS_ID, label="ID*")
+    identificacion_numero_1 = forms.CharField(max_length=11, label="Número ID*", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}))
+    direccion_1 = forms.CharField(max_length=200, label="Dirección*", strip=True)
+    telefono_prefijo_1 = forms.ChoiceField(choices=PREFIJOS_TELEFONO, label="Telf.*")
+    telefono_numero_1 = forms.CharField(max_length=7, label="Número Telf.*", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}))
     email_1 = forms.EmailField(max_length=100, required=False, label="Email")
-    grupo_sanguineo_1 = forms.ChoiceField(choices=[('', 'Seleccione')] + Propositos._meta.get_field('grupo_sanguineo').choices, required=False, label="Grupo Sanguíneo")
-    factor_rh_1 = forms.ChoiceField(choices=[('', 'Seleccione')] + Propositos._meta.get_field('factor_rh').choices, required=False, label="Factor RH")
+    grupo_rh_combinado_1 = forms.ChoiceField(choices=GRUPOS_RH_CHOICES, label="Grupo Sanguíneo y RH*")
     foto_1 = forms.ImageField(required=False, widget=ClearableFileInput(attrs={'accept': 'image/*'}), label="Foto (Opcional)")
 
-    nombres_2 = forms.CharField(max_length=100, label="Nombres (Segundo Cónyuge)", strip=True)
-    apellidos_2 = forms.CharField(max_length=100, label="Apellidos (Segundo Cónyuge)", strip=True)
-    sexo_2 = forms.ChoiceField(
-        choices=[('', 'Seleccione')] + Propositos.SEXO_CHOICES,
-        required=True, label="Sexo"
-    )
-    lugar_nacimiento_2 = forms.CharField(max_length=100, required=False, label="Lugar de Nacimiento", strip=True)
-    fecha_nacimiento_2 = forms.DateField(required=False, widget=DateInput(attrs={'type': 'date', 'class': 'form-control'}), label="Fecha de Nacimiento")
-    escolaridad_2 = forms.CharField(max_length=100, required=False, label="Escolaridad", strip=True)
-    ocupacion_2 = forms.CharField(max_length=100, required=False, label="Ocupación", strip=True)
-    edad_2 = forms.IntegerField(required=False, label="Edad (años)", widget=forms.NumberInput(attrs={'min':'0', 'max':'120'}))
-    identificacion_2 = forms.CharField(max_length=20, label="Identificación", strip=True)
-    direccion_2 = forms.CharField(max_length=200, required=False, label="Dirección", strip=True)
-    telefono_2 = forms.CharField(max_length=15, required=False, label="Teléfono", strip=True)
+    # --- Campos para Cónyuge 2 (sin cambios en la definición) ---
+    nombres_2 = forms.CharField(max_length=100, label="Nombres*", strip=True)
+    apellidos_2 = forms.CharField(max_length=100, label="Apellidos*", strip=True)
+    sexo_2 = forms.ChoiceField(choices=[('', 'Seleccione')] + Propositos.SEXO_CHOICES, label="Sexo*")
+    lugar_nacimiento_2 = forms.CharField(max_length=100, label="Lugar de Nacimiento*", strip=True)
+    fecha_nacimiento_2 = forms.DateField(widget=DateInput(attrs={'type': 'date', 'class': 'form-control'}), label="Fecha de Nacimiento*")
+    escolaridad_2 = forms.CharField(max_length=100, label="Escolaridad*", strip=True)
+    ocupacion_2 = forms.CharField(max_length=100, label="Ocupación*", strip=True)
+    identificacion_prefijo_2 = forms.ChoiceField(choices=PREFIJOS_ID, label="ID*")
+    identificacion_numero_2 = forms.CharField(max_length=11, label="Número ID*", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}))
+    direccion_2 = forms.CharField(max_length=200, label="Dirección*", strip=True)
+    telefono_prefijo_2 = forms.ChoiceField(choices=PREFIJOS_TELEFONO, label="Telf.*")
+    telefono_numero_2 = forms.CharField(max_length=7, label="Número Telf.*", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}))
     email_2 = forms.EmailField(max_length=100, required=False, label="Email")
-    grupo_sanguineo_2 = forms.ChoiceField(choices=[('', 'Seleccione')] + Propositos._meta.get_field('grupo_sanguineo').choices, required=False, label="Grupo Sanguíneo")
-    factor_rh_2 = forms.ChoiceField(choices=[('', 'Seleccione')] + Propositos._meta.get_field('factor_rh').choices, required=False, label="Factor RH")
+    grupo_rh_combinado_2 = forms.ChoiceField(choices=GRUPOS_RH_CHOICES, label="Grupo Sanguíneo y RH*")
     foto_2 = forms.ImageField(required=False, widget=ClearableFileInput(attrs={'accept': 'image/*'}), label="Foto (Opcional)")
+
+    def __init__(self, *args, **kwargs):
+        self.conyuge1_instance = kwargs.pop('conyuge1_instance', None)
+        self.conyuge2_instance = kwargs.pop('conyuge2_instance', None)
+        super().__init__(*args, **kwargs)
+
+        if not self.is_bound:
+            if self.conyuge1_instance:
+                self._populate_fields_from_instance(self.conyuge1_instance, '1')
+            if self.conyuge2_instance:
+                self._populate_fields_from_instance(self.conyuge2_instance, '2')
+
+    def _populate_fields_from_instance(self, instance, suffix):
+        for field in instance._meta.fields:
+            if hasattr(instance, field.name):
+                self.initial[f'{field.name}_{suffix}'] = getattr(instance, field.name, None)
+
+        if instance.identificacion and '-' in instance.identificacion:
+            prefijo, numero = instance.identificacion.split('-', 1)
+            self.initial[f'identificacion_prefijo_{suffix}'] = prefijo
+            self.initial[f'identificacion_numero_{suffix}'] = numero
+        
+        if instance.telefono and '-' in instance.telefono:
+            prefijo, numero = instance.telefono.split('-', 1)
+            self.initial[f'telefono_prefijo_{suffix}'] = prefijo
+            self.initial[f'telefono_numero_{suffix}'] = numero
+
+        if instance.grupo_sanguineo and instance.factor_rh:
+            self.initial[f'grupo_rh_combinado_{suffix}'] = f"{instance.grupo_sanguineo}-{instance.factor_rh}"
+
+    def _clean_composite_fields_for_conyuge(self, cleaned_data, suffix):
+        id_prefijo = cleaned_data.get(f'identificacion_prefijo_{suffix}')
+        id_numero = cleaned_data.get(f'identificacion_numero_{suffix}', '').strip()
+        if not id_numero: self.add_error(f'identificacion_numero_{suffix}', "Este campo es obligatorio.")
+        elif not id_numero.isdigit() or len(id_numero) > 11: self.add_error(f'identificacion_numero_{suffix}', "Debe ser un número de hasta 11 dígitos.")
+        else: cleaned_data[f'identificacion_{suffix}'] = f"{id_prefijo}-{id_numero}"
+        
+        tel_prefijo = cleaned_data.get(f'telefono_prefijo_{suffix}')
+        tel_numero = cleaned_data.get(f'telefono_numero_{suffix}', '').strip()
+        if not tel_numero: self.add_error(f'telefono_numero_{suffix}', "Este campo es obligatorio.")
+        elif not tel_numero.isdigit() or len(tel_numero) != 7: self.add_error(f'telefono_numero_{suffix}', "Debe ser un número de 7 dígitos.")
+        else: cleaned_data[f'telefono_{suffix}'] = f"{tel_prefijo}-{tel_numero}"
+
+        grupo_rh = cleaned_data.get(f'grupo_rh_combinado_{suffix}')
+        if not grupo_rh: self.add_error(f'grupo_rh_combinado_{suffix}', "Este campo es obligatorio.")
+        elif '-' in grupo_rh:
+            grupo, rh = grupo_rh.split('-', 1)
+            cleaned_data[f'grupo_sanguineo_{suffix}'] = grupo
+            cleaned_data[f'factor_rh_{suffix}'] = rh
+
+    def clean(self):
+        cleaned_data = super().clean()
+        self._clean_composite_fields_for_conyuge(cleaned_data, '1')
+        self._clean_composite_fields_for_conyuge(cleaned_data, '2')
+        
+        id_1 = cleaned_data.get('identificacion_1')
+        id_2 = cleaned_data.get('identificacion_2')
+
+        if id_1 and id_2 and id_1 == id_2:
+            self.add_error('identificacion_numero_2', "Las identificaciones de los cónyuges deben ser diferentes.")
+        
+        ### --- INICIO DE LA NUEVA VALIDACIÓN --- ###
+        sexo_1 = cleaned_data.get('sexo_1')
+        sexo_2 = cleaned_data.get('sexo_2')
+
+        if sexo_1 and sexo_2 and sexo_1 == sexo_2:
+            error_msg = "Los cónyuges no pueden tener el mismo sexo. Uno debe ser Masculino y el otro Femenino."
+            self.add_error('sexo_1', error_msg)
+            self.add_error('sexo_2', error_msg)
+        ### --- FIN DE LA NUEVA VALIDACIÓN --- ###
+
+        return cleaned_data
 
     def clean_fecha_nacimiento_1(self):
         fecha = self.cleaned_data.get('fecha_nacimiento_1')
@@ -346,51 +456,6 @@ class ParejaPropositosForm(forms.Form):
         if fecha and fecha > timezone.now().date():
             raise forms.ValidationError("La fecha de nacimiento no puede ser en el futuro.")
         return fecha
-
-    def clean_edad_1(self):
-        edad = self.cleaned_data.get('edad_1')
-        if edad is not None and (edad < 0 or edad > 120):
-            raise forms.ValidationError("Por favor, ingrese una edad válida (0-120 años).")
-        return edad
-
-    def clean_edad_2(self):
-        edad = self.cleaned_data.get('edad_2')
-        if edad is not None and (edad < 0 or edad > 120):
-            raise forms.ValidationError("Por favor, ingrese una edad válida (0-120 años).")
-        return edad
-
-    def clean_identificacion_1(self):
-        ident = self.cleaned_data.get('identificacion_1')
-        if not ident:
-            raise forms.ValidationError("La identificación del primer cónyuge es obligatoria.")
-        return ident
-
-    def clean_identificacion_2(self):
-        ident = self.cleaned_data.get('identificacion_2')
-        if not ident:
-            raise forms.ValidationError("La identificación del segundo cónyuge es obligatoria.")
-        return ident
-
-    def clean(self):
-        cleaned_data = super().clean()
-        id_1 = cleaned_data.get('identificacion_1')
-        id_2 = cleaned_data.get('identificacion_2')
-
-        if id_1 and id_2 and id_1 == id_2:
-            self.add_error('identificacion_2', "Las identificaciones de los cónyuges deben ser diferentes.")
-        
-        # Validación de unicidad para cada cónyuge, ya que la vista usa `update_or_create`.
-        # Esto previene sobrescribir un propósito existente con datos nuevos si se ingresa su ID por error.
-        # NOTA: Esto asume que si se ingresa una ID existente, los nombres deben coincidir.
-        # Es una simplificación. La lógica robusta está en la vista.
-        if id_1:
-            if Propositos.objects.filter(identificacion=id_1).exists():
-                pass # La vista se encargará de actualizar (update_or_create)
-        if id_2:
-            if Propositos.objects.filter(identificacion=id_2).exists():
-                pass # La vista se encargará de actualizar (update_or_create)
-                
-        return cleaned_data
 
 class AntecedentesDesarrolloNeonatalForm(forms.Form):
     fur = forms.DateField(required=False, widget=DateInput(attrs={'type': 'date', 'class':'form-control'}), label="Fecha de Última Regla (FUR)")

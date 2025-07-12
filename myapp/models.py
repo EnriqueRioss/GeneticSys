@@ -10,6 +10,7 @@ import os
 # Create your models here.
 
 class Project(models.Model):
+
     name = models.CharField(max_length=200)
 
     def __str__(self):
@@ -755,19 +756,19 @@ class InformacionPadres(models.Model):
     padre_id = models.AutoField(primary_key=True)
     proposito = models.ForeignKey('Propositos', on_delete=models.CASCADE, null=True, blank=True)
     tipo = models.CharField(max_length=10, choices=[('Padre', 'Padre'), ('Madre', 'Madre')])
-    escolaridad = models.CharField(max_length=100, null=True, blank=True)
-    ocupacion = models.CharField(max_length=100, null=True, blank=True)
+    escolaridad = models.CharField(max_length=100)
+    ocupacion = models.CharField(max_length=100)
     nombres = models.CharField(max_length=100)
     apellidos = models.CharField(max_length=100)
-    lugar_nacimiento = models.CharField(max_length=100, null=True, blank=True)
-    fecha_nacimiento = models.DateField(null=True, blank=True)
-    edad = models.IntegerField(null=True, blank=True)
-    identificacion = models.CharField(max_length=20, null=True, blank=True,unique=True)
-    grupo_sanguineo = models.CharField(max_length=2, choices=[('A', 'A'), ('B', 'B'), ('AB', 'AB'), ('O', 'O')], null=True, blank=True)
-    factor_rh = models.CharField(max_length=10, choices=[('Positivo', 'Positivo'), ('Negativo', 'Negativo')], null=True, blank=True)
-    telefono = models.CharField(max_length=15, null=True, blank=True)
+    lugar_nacimiento = models.CharField(max_length=100)
+    fecha_nacimiento = models.DateField()
+    edad = models.IntegerField(null=True, blank=True, editable=False)
+    identificacion = models.CharField(max_length=20, unique=True)
+    grupo_sanguineo = models.CharField(max_length=2, choices=[('A', 'A'), ('B', 'B'), ('AB', 'AB'), ('O', 'O')])
+    factor_rh = models.CharField(max_length=10, choices=[('Positivo', 'Positivo'), ('Negativo', 'Negativo')])
+    telefono = models.CharField(max_length=15)
     email = models.EmailField(max_length=100, null=True, blank=True)
-    direccion = models.CharField(max_length=200, null=True, blank=True)
+    direccion = models.CharField(max_length=200)
 
     class Meta:
         constraints = [
@@ -792,13 +793,19 @@ class InformacionPadres(models.Model):
 
 
     def save(self, *args, **kwargs):
+        """
+        Calcula la edad automáticamente y ejecuta la validación clean.
+        """
+        if self.fecha_nacimiento:
+            today = date.today()
+            self.edad = today.year - self.fecha_nacimiento.year - ((today.month, today.day) < (self.fecha_nacimiento.month, self.fecha_nacimiento.day))
+        
         self.clean()
         super().save(*args, **kwargs)
 
     def __str__(self):
         proposito_str = self.proposito_id if not self.proposito else self.proposito.identificacion
         return f"Informacion {self.tipo}: {self.nombres} {self.apellidos} (Propósito: {proposito_str})"
-
 
 class PeriodoNeonatal(models.Model):
     TIPO_ALIMENTACION_CHOICES = [
@@ -907,20 +914,19 @@ class Propositos(models.Model):
     sexo = models.CharField(
         max_length=1,
         choices=SEXO_CHOICES,
-        verbose_name="Sexo",
-        null=True, blank=True # Nullable para registros existentes, se hará requerido en los forms.
+        verbose_name="Sexo"
     )
-    lugar_nacimiento = models.CharField(max_length=100, null=True, blank=True)
-    fecha_nacimiento = models.DateField(null=True, blank=True)
-    escolaridad = models.CharField(max_length=100, null=True, blank=True)
-    ocupacion = models.CharField(max_length=100, null=True, blank=True)
-    edad = models.IntegerField(null=True, blank=True)
+    lugar_nacimiento = models.CharField(max_length=100)
+    fecha_nacimiento = models.DateField()
+    escolaridad = models.CharField(max_length=100)
+    ocupacion = models.CharField(max_length=100)
+    edad = models.IntegerField(null=True, blank=True, editable=False)
     identificacion = models.CharField(max_length=20, unique=True)
-    direccion = models.CharField(max_length=200, null=True, blank=True)
-    telefono = models.CharField(max_length=15, null=True, blank=True)
+    direccion = models.CharField(max_length=200)
+    telefono = models.CharField(max_length=15)
     email = models.EmailField(max_length=100, null=True, blank=True)
-    grupo_sanguineo = models.CharField(max_length=2, choices=[('A', 'A'), ('B', 'B'), ('AB', 'AB'), ('O', 'O')], null=True, blank=True)
-    factor_rh = models.CharField(max_length=10, choices=[('Positivo', 'Positivo'), ('Negativo', 'Negativo')], null=True, blank=True)
+    grupo_sanguineo = models.CharField(max_length=2, choices=[('A', 'A'), ('B', 'B'), ('AB', 'AB'), ('O', 'O')])
+    factor_rh = models.CharField(max_length=10, choices=[('Positivo', 'Positivo'), ('Negativo', 'Negativo')])
     foto = models.ImageField(upload_to='propositos_fotos/', null=True, blank=True)
     
     # --- CAMPO AÑADIDO ---
@@ -930,6 +936,15 @@ class Propositos(models.Model):
         default=ESTADO_SEGUIMIENTO, # Por defecto ahora es 'En Seguimiento'
         verbose_name="Estado del Propósito"
     )
+
+    def save(self, *args, **kwargs):
+        """
+        Calcula la edad automáticamente antes de guardar.
+        """
+        if self.fecha_nacimiento:
+            today = date.today()
+            self.edad = today.year - self.fecha_nacimiento.year - ((today.month, today.day) < (self.fecha_nacimiento.month, self.fecha_nacimiento.day))
+        super().save(*args, **kwargs)
 
     def is_minor(self):
         """
@@ -945,11 +960,12 @@ class Propositos(models.Model):
     def __str__(self):
         # Actualizamos el __str__ para que muestre el estado
         return f"{self.nombres} {self.apellidos} (ID: {self.identificacion}) - {self.get_estado_display()}"
-
+    
 # ===== INICIO DE CÓDIGO A AÑADIR AL FINAL DEL ARCHIVO models.py =====
 def update_proposito_status(evaluacion):
     """
-    Función auxiliar para actualizar el estado de los Propósitos basándose en sus Planes de Estudio.
+    Función auxiliar para actualizar el estado de los Propósitos basándose en si
+    tienen un diagnóstico final.
     """
     if not evaluacion:
         return
@@ -967,17 +983,11 @@ def update_proposito_status(evaluacion):
     if not propositos_to_update:
         return
 
-    # Obtiene los conteos de planes
-    total_plans = evaluacion.planes_estudio.count()
-    completed_plans = evaluacion.planes_estudio.filter(completado=True).count()
-
-    # Determina el nuevo estado
-    new_status = Propositos.ESTADO_SEGUIMIENTO # Por defecto
-    if total_plans > 0:
-        if total_plans == completed_plans:
-            new_status = Propositos.ESTADO_CERRADO
-        else:
-            new_status = Propositos.ESTADO_SEGUIMIENTO
+    # Determina el nuevo estado basado en el diagnóstico final
+    if evaluacion.diagnostico_final and evaluacion.diagnostico_final.strip():
+        new_status = Propositos.ESTADO_CERRADO
+    else:
+        new_status = Propositos.ESTADO_SEGUIMIENTO
     
     # Actualiza todos los propósitos relacionados que no estén inactivados manualmente
     for p in propositos_to_update:
@@ -988,13 +998,14 @@ def update_proposito_status(evaluacion):
                 p.save(update_fields=['estado'])
 
 
-@receiver([post_save, post_delete], sender=PlanEstudio)
-def on_plan_estudio_change(sender, instance, **kwargs):
+@receiver(post_save, sender=EvaluacionGenetica)
+def on_evaluacion_genetica_change(sender, instance, **kwargs):
     """
-    Cuando un PlanEstudio se guarda o elimina, re-evalúa el estado del/los Propósito(s) relacionados.
+    Cuando una EvaluacionGenetica se guarda (especialmente el diagnóstico final),
+    re-evalúa el estado del/los Propósito(s) relacionados.
     """
-    update_proposito_status(instance.evaluacion)
-
+    # Se llama a la función aquí para que se ejecute después de guardar el diagnóstico final
+    update_proposito_status(instance)
 
 
 

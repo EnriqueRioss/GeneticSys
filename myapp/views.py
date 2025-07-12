@@ -513,6 +513,8 @@ def edit_plan_estudio(request, plan_id):
 
 
 
+# Reemplaza esta función completa en views.py
+
 @login_required
 @genetista_or_admin_required
 @never_cache
@@ -525,7 +527,6 @@ def crear_pareja(request, historia_id):
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
     from_gestion = request.GET.get('from_gestion') == 'true'
 
-    # Buscamos si ya existe una pareja para esta historia.
     propositos_en_historia = Propositos.objects.filter(historia=historia)
     pareja_existente = Parejas.objects.filter(
         proposito_id_1__in=propositos_en_historia,
@@ -533,35 +534,45 @@ def crear_pareja(request, historia_id):
     ).select_related('proposito_id_1', 'proposito_id_2').first()
 
     editing = bool(pareja_existente)
-    
-    # --- CORRECCIÓN PARA EL PROBLEMA 2: ELIMINAMOS EL REDIRECT AUTOMÁTICO ---
-    # Ya no redirigimos si la pareja existe. Simplemente mostraremos el formulario
-    # pre-rellenado, permitiendo al usuario retroceder y editar.
 
     if request.method == 'POST':
+        # La lógica POST no necesita cambios, ya que depende del form.is_valid()
+        # y el form.clean() que ya estaban bien.
         form = ParejaPropositosForm(request.POST, request.FILES)
         if form.is_valid():
             try:
                 with transaction.atomic():
-                    # La función auxiliar para obtener/crear Propositos se mantiene igual, es correcta.
                     def get_or_create_proposito_from_form(form_cleaned_data, prefix_num, historia_obj, files_data):
                         identificacion = form_cleaned_data[f'identificacion_{prefix_num}']
+                        
+                        # Corrección: El modelo ya no tiene edad editable, se calcula en save()
                         proposito_data = {
-                            'nombres': form_cleaned_data[f'nombres_{prefix_num}'], 'apellidos': form_cleaned_data[f'apellidos_{prefix_num}'],
-                            'sexo': form_cleaned_data.get(f'sexo_{prefix_num}'), 'lugar_nacimiento': form_cleaned_data.get(f'lugar_nacimiento_{prefix_num}'),
-                            'fecha_nacimiento': form_cleaned_data.get(f'fecha_nacimiento_{prefix_num}'), 'escolaridad': form_cleaned_data.get(f'escolaridad_{prefix_num}'),
-                            'ocupacion': form_cleaned_data.get(f'ocupacion_{prefix_num}'), 'edad': form_cleaned_data.get(f'edad_{prefix_num}'),
-                            'direccion': form_cleaned_data.get(f'direccion_{prefix_num}'), 'telefono': form_cleaned_data.get(f'telefono_{prefix_num}'),
-                            'email': form_cleaned_data.get(f'email_{prefix_num}'), 'grupo_sanguineo': form_cleaned_data.get(f'grupo_sanguineo_{prefix_num}') or None,
-                            'factor_rh': form_cleaned_data.get(f'factor_rh_{prefix_num}') or None,
+                            'nombres': form_cleaned_data[f'nombres_{prefix_num}'],
+                            'apellidos': form_cleaned_data[f'apellidos_{prefix_num}'],
+                            'sexo': form_cleaned_data.get(f'sexo_{prefix_num}'),
+                            'lugar_nacimiento': form_cleaned_data.get(f'lugar_nacimiento_{prefix_num}'),
+                            'fecha_nacimiento': form_cleaned_data.get(f'fecha_nacimiento_{prefix_num}'),
+                            'escolaridad': form_cleaned_data.get(f'escolaridad_{prefix_num}'),
+                            'ocupacion': form_cleaned_data.get(f'ocupacion_{prefix_num}'),
+                            'direccion': form_cleaned_data.get(f'direccion_{prefix_num}'),
+                            'telefono': form_cleaned_data.get(f'telefono_{prefix_num}'),
+                            'email': form_cleaned_data.get(f'email_{prefix_num}'),
+                            'grupo_sanguineo': form_cleaned_data.get(f'grupo_sanguineo_{prefix_num}'),
+                            'factor_rh': form_cleaned_data.get(f'factor_rh_{prefix_num}'),
                         }
+                        
                         proposito_defaults = {k: v for k, v in proposito_data.items() if v is not None}
                         proposito_defaults['historia'] = historia_obj
+                        
                         proposito, created = Propositos.objects.update_or_create(identificacion=identificacion, defaults=proposito_defaults)
+                        
                         foto_file = files_data.get(f'foto_{prefix_num}')
                         if foto_file:
                             proposito.foto = foto_file
-                        proposito.save()
+                        
+                        # Si se usa update_or_create, el save del modelo no se llama si no hay cambios.
+                        # Forzamos un save para asegurar que la edad se recalcule si la fecha de nacimiento cambió.
+                        proposito.save() 
                         return proposito
 
                     proposito1 = get_or_create_proposito_from_form(form.cleaned_data, '1', historia, request.FILES)
@@ -570,35 +581,25 @@ def crear_pareja(request, historia_id):
                     if proposito1.pk == proposito2.pk:
                         raise IntegrityError("Los dos miembros de la pareja no pueden ser la misma persona.")
 
-                    # --- INICIO DE LA CORRECCIÓN PARA EL PROBLEMA 1 ---
-                    # Lógica de "buscar y actualizar" en lugar de "eliminar y crear".
-                    
                     p_min, p_max = sorted([proposito1, proposito2], key=lambda p: p.pk)
                     
                     if pareja_existente:
-                        # Si ya existía una pareja, actualizamos sus miembros.
                         pareja_existente.proposito_id_1 = p_min
                         pareja_existente.proposito_id_2 = p_max
                         pareja_existente.save()
                         pareja = pareja_existente
                         pareja_created = False
                     else:
-                        # Si no existía, la creamos.
                         pareja, pareja_created = Parejas.objects.get_or_create(
                             proposito_id_1=p_min,
                             proposito_id_2=p_max
                         )
 
-                    # Limpieza de Propositos "huérfanos" en esta historia.
-                    # Esto ocurre si se cambió una identificación. El `Proposito` antiguo
-                    # debe ser eliminado de la base de datos.
                     ids_correctos = {proposito1.pk, proposito2.pk}
                     Propositos.objects.filter(historia=historia).exclude(pk__in=ids_correctos).delete()
-                    # --- FIN DE LA CORRECCIÓN PARA EL PROBLEMA 1 ---
 
                 request.session.pop('form_data', None)
 
-                # La lógica de redirección se mantiene igual
                 if from_gestion:
                     messages.success(request, f"Datos de la pareja ({proposito1.nombres} y {proposito2.nombres}) actualizados exitosamente.")
                     redirect_url = reverse('gestion_pacientes')
@@ -625,23 +626,31 @@ def crear_pareja(request, historia_id):
             messages.error(request, "No se pudo guardar la pareja. Corrija los errores.")
             request.session['form_data'] = request.POST.copy()
             return redirect(request.path_info)
-    else: # Lógica GET (CARGAR PÁGINA)
+            
+    else:  # Lógica GET (CARGAR PÁGINA)
         form_data = request.session.pop('form_data', None)
-        initial_data = {}
-        
+        form_kwargs = {}
+
+        ### --- INICIO DE LA CORRECCIÓN --- ###
+        # Si estamos editando y no hay datos de un POST fallido,
+        # pasamos las instancias al formulario.
         if editing and not form_data:
             p1 = pareja_existente.proposito_id_1
             p2 = pareja_existente.proposito_id_2
             
-            # Campos del primer cónyuge
-            field_names = [f.name for f in Propositos._meta.get_fields()]
-            for field_name in field_names:
-                if hasattr(p1, field_name): initial_data[f'{field_name}_1'] = getattr(p1, field_name)
-                if hasattr(p2, field_name): initial_data[f'{field_name}_2'] = getattr(p2, field_name)
-
+            # Pasamos las instancias completas al constructor del formulario
+            form_kwargs['conyuge1_instance'] = p1
+            form_kwargs['conyuge2_instance'] = p2
+            
             messages.info(request, f"Editando información para la pareja: {p1.nombres} y {p2.nombres}.")
-
-        form = ParejaPropositosForm(form_data or initial_data or None)
+        
+        # Si hay datos de un post fallido, se los pasamos al formulario,
+        # de lo contrario, pasamos los kwargs con las instancias.
+        if form_data:
+            form = ParejaPropositosForm(form_data)
+        else:
+            form = ParejaPropositosForm(**form_kwargs)
+        ### --- FIN DE LA CORRECCIÓN --- ###
         
     context = {
         'form': form,
@@ -650,7 +659,6 @@ def crear_pareja(request, historia_id):
         'editing': editing
     }
     return render(request, 'Crear_pareja.html', context)
-
 @login_required
 @genetista_or_admin_required
 @never_cache
@@ -672,36 +680,68 @@ def padres_proposito(request, historia_id, proposito_id):
         if form.is_valid():
             try:
                 with transaction.atomic():
-                    padre_defaults = {k[len('padre_'):]: v for k, v in form.cleaned_data.items() if k.startswith('padre_')}
-                    padre_defaults_clean = {k:v for k,v in padre_defaults.items() if v is not None or k in ['nombres','apellidos']}
-                    padre_defaults_clean['grupo_sanguineo'] = padre_defaults_clean.get('grupo_sanguineo') or None
-                    padre_defaults_clean['factor_rh'] = padre_defaults_clean.get('factor_rh') or None
-                    InformacionPadres.objects.update_or_create(proposito=proposito, tipo='Padre', defaults=padre_defaults_clean)
+                    # --- INICIO DE LA CORRECCIÓN --- ### <<<
+                    # Construimos el diccionario para el padre explícitamente con los nombres de campo del MODELO
+                    padre_defaults = {
+                        'nombres': form.cleaned_data.get('padre_nombres'),
+                        'apellidos': form.cleaned_data.get('padre_apellidos'),
+                        'escolaridad': form.cleaned_data.get('padre_escolaridad'),
+                        'ocupacion': form.cleaned_data.get('padre_ocupacion'),
+                        'lugar_nacimiento': form.cleaned_data.get('padre_lugar_nacimiento'),
+                        'fecha_nacimiento': form.cleaned_data.get('padre_fecha_nacimiento'),
+                        'identificacion': form.cleaned_data.get('padre_identificacion'),
+                        'grupo_sanguineo': form.cleaned_data.get('padre_grupo_sanguineo'),
+                        'factor_rh': form.cleaned_data.get('padre_factor_rh'),
+                        'telefono': form.cleaned_data.get('padre_telefono'),
+                        'email': form.cleaned_data.get('padre_email'),
+                        'direccion': form.cleaned_data.get('padre_direccion'),
+                    }
 
-                    madre_defaults = {k[len('madre_'):]: v for k, v in form.cleaned_data.items() if k.startswith('madre_')}
-                    madre_defaults_clean = {k:v for k,v in madre_defaults.items() if v is not None or k in ['nombres','apellidos']}
-                    madre_defaults_clean['grupo_sanguineo'] = madre_defaults_clean.get('grupo_sanguineo') or None
-                    madre_defaults_clean['factor_rh'] = madre_defaults_clean.get('factor_rh') or None
-                    InformacionPadres.objects.update_or_create(proposito=proposito, tipo='Madre', defaults=madre_defaults_clean)
+                    # Construimos el diccionario para la madre explícitamente
+                    madre_defaults = {
+                        'nombres': form.cleaned_data.get('madre_nombres'),
+                        'apellidos': form.cleaned_data.get('madre_apellidos'),
+                        'escolaridad': form.cleaned_data.get('madre_escolaridad'),
+                        'ocupacion': form.cleaned_data.get('madre_ocupacion'),
+                        'lugar_nacimiento': form.cleaned_data.get('madre_lugar_nacimiento'),
+                        'fecha_nacimiento': form.cleaned_data.get('madre_fecha_nacimiento'),
+                        'identificacion': form.cleaned_data.get('madre_identificacion'),
+                        'grupo_sanguineo': form.cleaned_data.get('madre_grupo_sanguineo'),
+                        'factor_rh': form.cleaned_data.get('madre_factor_rh'),
+                        'telefono': form.cleaned_data.get('madre_telefono'),
+                        'email': form.cleaned_data.get('madre_email'),
+                        'direccion': form.cleaned_data.get('madre_direccion'),
+                    }
+
+                    # Usamos update_or_create con los diccionarios corregidos
+                    InformacionPadres.objects.update_or_create(
+                        proposito=proposito, tipo='Padre', 
+                        defaults={k: v for k, v in padre_defaults.items() if v is not None}
+                    )
+                    InformacionPadres.objects.update_or_create(
+                        proposito=proposito, tipo='Madre', 
+                        defaults={k: v for k, v in madre_defaults.items() if v is not None}
+                    )
+                    # --- FIN DE LA CORRECCIÓN --- ### <<<
 
                 request.session.pop('form_data', None)
                 
-                # MODIFICADO: Lógica para "Guardar Borrador"
                 if 'save_draft' in request.POST:
                     request.session.pop('historia_en_progreso_id', None)
                     messages.success(request, "Borrador de información de padres guardado exitosamente.")
-                    redirect_url = reverse('index')
+                    redirect_url = reverse('ver_historias')
                     if is_ajax:
                         return JsonResponse({'success': True, 'redirect_url': redirect_url})
                     return redirect(redirect_url)
                     
-                # Lógica para "Siguiente"
                 messages.success(request, "Información de los padres guardada/actualizada.")
                 redirect_url = reverse('enfermedad_actual_crear', kwargs={'historia_id': historia_id, 'tipo': 'proposito', 'objeto_id': proposito_id})
                 if is_ajax:
                     return JsonResponse({'success': True, 'redirect_url': redirect_url})
                 return redirect(redirect_url)
+
             except Exception as e:
+                # El error que recibiste se captura aquí y se muestra
                 error_msg = f"Error al guardar información de padres: {e}"
                 if is_ajax: return JsonResponse({'success': False, 'errors': {'__all__': [error_msg]}}, status=400)
                 messages.error(request, error_msg)
@@ -713,6 +753,7 @@ def padres_proposito(request, historia_id, proposito_id):
             request.session['form_data'] = request.POST.copy()
             return redirect(request.path_info)
     else:
+        # La lógica GET no necesita cambios, ya que el __init__ del formulario maneja los datos iniciales
         form_data = request.session.pop('form_data', None)
         form_kwargs = {'padre_instance': padre_instance, 'madre_instance': madre_instance}
         
@@ -720,6 +761,7 @@ def padres_proposito(request, historia_id, proposito_id):
             form = PadresPropositoForm(form_data, **form_kwargs)
         else:
             initial_data = {}
+            # Llenar initial_data para el modo de edición (la lógica del form ahora hace esto, pero lo mantenemos por si acaso)
             if padre_instance: initial_data.update({f'padre_{f.name}': getattr(padre_instance, f.name) for f in InformacionPadres._meta.fields if f.name not in ['padre_id', 'proposito', 'tipo'] and hasattr(padre_instance, f.name)})
             if madre_instance: initial_data.update({f'madre_{f.name}': getattr(madre_instance, f.name) for f in InformacionPadres._meta.fields if f.name not in ['padre_id', 'proposito', 'tipo'] and hasattr(madre_instance, f.name)})
             
@@ -728,7 +770,6 @@ def padres_proposito(request, historia_id, proposito_id):
             if editing and not form_data: messages.info(request, "Editando información de padres.")
 
     return render(request, "Padres_proposito.html", {'form': form, 'historia': historia, 'proposito': proposito, 'editing': editing})
-
 @login_required
 @genetista_or_admin_required
 @never_cache
@@ -1972,7 +2013,7 @@ def index_view(request):
     user_gen_profile = request.user.genetistas
     role = user_gen_profile.rol
     
-    stats = {'historias': 0, 'pacientes': 0, 'consultas_completadas': 0, 'diagnosticos_completados': 100}
+    stats = {'historias': 0, 'pacientes': 0, 'consultas_completadas': 0, 'diagnosticos_completados': 0}
     
     target_genetista = None
     if role == 'GEN':
@@ -1984,12 +2025,23 @@ def index_view(request):
         stats['historias'] = HistoriasClinicas.objects.count()
         stats['pacientes'] = Propositos.objects.count()
         stats['consultas_completadas'] = PlanEstudio.objects.filter(completado=True).count()
+        stats['diagnosticos_completados'] = EvaluacionGenetica.objects.filter(diagnostico_final__isnull=False).exclude(diagnostico_final__exact='').count()
+
     elif target_genetista:
         stats['historias'] = HistoriasClinicas.objects.filter(genetista=target_genetista).count()
         stats['pacientes'] = Propositos.objects.filter(historia__genetista=target_genetista).count()
-        q_proposito = Q(evaluacion__proposito__historia__genetista=target_genetista)
-        q_pareja = Q(evaluacion__pareja__proposito_id_1__historia__genetista=target_genetista) | Q(evaluacion__pareja__proposito_id_2__historia__genetista=target_genetista)
-        stats['consultas_completadas'] = PlanEstudio.objects.filter(completado=True).filter(q_proposito | q_pareja).distinct().count()
+        
+        q_proposito_plan = Q(evaluacion__proposito__historia__genetista=target_genetista)
+        q_pareja_plan = Q(evaluacion__pareja__proposito_id_1__historia__genetista=target_genetista) | Q(evaluacion__pareja__proposito_id_2__historia__genetista=target_genetista)
+        stats['consultas_completadas'] = PlanEstudio.objects.filter(completado=True).filter(q_proposito_plan | q_pareja_plan).distinct().count()
+
+        q_proposito_diag = Q(proposito__historia__genetista=target_genetista)
+        q_pareja_diag = Q(pareja__proposito_id_1__historia__genetista=target_genetista) | Q(pareja__proposito_id_2__historia__genetista=target_genetista)
+        stats['diagnosticos_completados'] = EvaluacionGenetica.objects.filter(
+            diagnostico_final__isnull=False
+        ).exclude(diagnostico_final__exact='').filter(
+            q_proposito_diag | q_pareja_diag
+        ).distinct().count()
 
     recent_activities = []
     historias_qs = HistoriasClinicas.objects.select_related('genetista__user')
@@ -2002,14 +2054,13 @@ def index_view(request):
         last_planes_completados = planes_completados_qs.order_by('-fecha_visita')[:5]
     elif target_genetista:
         last_historias = historias_qs.filter(genetista=target_genetista).order_by('-fecha_ingreso')[:5]
-        q_proposito_plan = Q(evaluacion__proposito__historia__genetista=target_genetista)
-        q_pareja_plan = Q(evaluacion__pareja__proposito_id_1__historia__genetista=target_genetista) | Q(evaluacion__pareja__proposito_id_2__historia__genetista=target_genetista)
-        last_planes_completados = planes_completados_qs.filter(q_proposito_plan | q_pareja_plan).distinct().order_by('-fecha_visita')[:5]
+        q_proposito_plan_recent = Q(evaluacion__proposito__historia__genetista=target_genetista)
+        q_pareja_plan_recent = Q(evaluacion__pareja__proposito_id_1__historia__genetista=target_genetista) | Q(evaluacion__pareja__proposito_id_2__historia__genetista=target_genetista)
+        last_planes_completados = planes_completados_qs.filter(q_proposito_plan_recent | q_pareja_plan_recent).distinct().order_by('-fecha_visita')[:5]
 
     for historia in last_historias:
         proposito = Propositos.objects.filter(historia=historia).first()
         paciente_name = f"{proposito.nombres} {proposito.apellidos}" if proposito else f"Historia N° {historia.numero_historia}"
-        # historia.fecha_ingreso ya es "aware" gracias a Django y USE_TZ=True.
         recent_activities.append({'title': 'Nueva historia clínica creada', 'meta': f'Paciente: {paciente_name}', 'timestamp': historia.fecha_ingreso, 'indicator_class': 'success'})
     
     for plan in last_planes_completados:
@@ -2021,13 +2072,10 @@ def index_view(request):
             paciente_name = f"Pareja: {p1.nombres} y {p2.nombres}"
         
         if plan.fecha_visita:
-            # 1. Creamos un datetime "naive" (sin zona horaria)
             naive_datetime = datetime.combine(plan.fecha_visita, time.min)
-            # 2. Usamos timezone.make_aware para hacerlo "aware" con la zona horaria del proyecto
             aware_datetime = timezone.make_aware(naive_datetime)
             recent_activities.append({'title': 'Análisis genético completado', 'meta': f'Paciente: {paciente_name}', 'timestamp': aware_datetime, 'indicator_class': 'info'})
     
-    # Esta línea ahora comparará solo datetimes "aware", funcionando correctamente.
     recent_activities = sorted([act for act in recent_activities if act['timestamp']], key=lambda x: x['timestamp'], reverse=True)[:5]
     
     page_title = f"Inicio ({user_gen_profile.get_rol_display()})" if user_gen_profile else "Inicio"
