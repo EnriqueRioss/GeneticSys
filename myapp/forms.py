@@ -83,7 +83,19 @@ class HistoriasForm(ModelForm):
             'centro_referencia': "Centro de Referencia (Si aplica)",
         }
 
+    # --- INICIO DE LA MODIFICACIÓN ---
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Si la historia ya tiene un 'pk', significa que ya fue creada y estamos en modo edición.
+        if self.instance and self.instance.pk:
+            # Deshabilitamos los campos para que no puedan ser modificados.
+            self.fields['numero_historia'].disabled = True
+            self.fields['motivo_tipo_consulta'].disabled = True
+    # --- FIN DE LA MODIFICACIÓN ---
+
     def clean_numero_historia(self):
+        # No se necesita ningún cambio en este método.
+        # La lógica actual ya maneja correctamente el caso de la edición.
         numero_historia = self.cleaned_data.get('numero_historia')
         if numero_historia is not None and numero_historia <= 0:
             raise forms.ValidationError("El número de historia debe ser un valor positivo.")
