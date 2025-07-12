@@ -329,7 +329,6 @@ a i{
 .patients-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 1rem;
 }
 
 .patients-table th {
@@ -351,6 +350,12 @@ a i{
   border-bottom: 1px solid var(--border-gray);
 }
 
+/* Aplicamos un ancho máximo a la columna del paciente para que sepa cuándo romperse */
+.patients-table th:first-child,
+.patients-table td:first-child {
+  width: 10%; /* Ajusta este valor según necesites */
+}
+
 .patients-table tr:last-child td {
   border-bottom: none;
 }
@@ -365,20 +370,22 @@ a i{
 .patient-info {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.8rem;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .patient-avatar {
   position: relative;
-  width: 2rem;
-  height: 2rem;
+  width: 6rem;
+  height: 6rem;
   border-radius: 50%;
   overflow: hidden;
 }
 
 .patient-avatar.large {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 8rem;
+  height: 8rem;
 }
 
 .avatar-img {
@@ -439,7 +446,6 @@ a i{
   display: inline-flex;
   align-items: center;
   padding: 0.1rem 1rem;
-  font-size: 0.55rem;
   border-radius: 1.5rem;
   border: 1px solid var(--medium-gray);
   background-color: none;
@@ -472,6 +478,81 @@ a i{
   align-items: center;
   gap: 0.5rem;
 }
+
+
+/*======= RESPONSIVIDAD PARA LA TABLA =======*/
+
+/*
+@media (max-width: 992px) {
+  .hide-on-tablet {
+    display: none;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .hide-on-mobile {
+    display: none;
+  }
+  
+  .patients-table thead {
+    display: none;
+  }
+
+  .patients-table, .patients-table tbody, .patients-table tr, .patients-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .patients-table tr {
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border-gray);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .patients-table td {
+    text-align: right; 
+    position: relative;
+    padding-left: 50%;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .patients-table td:last-child {
+    border-bottom: none;
+  }
+
+  .patients-table td::before {
+    content: attr(data-label); 
+    position: absolute;
+    left: 1rem;
+    width: calc(50% - 2rem);
+    text-align: left;
+    font-weight: 600;
+    color: var(--primary-darkerblue);
+  }
+
+ 
+  .patients-table td .patient-info {
+    justify-content: flex-end; 
+  }
+  
+  .patients-table td .action-buttons {
+    justify-content: flex-end;
+  }
+}*/
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 /* ----------- Modal ------------*/
