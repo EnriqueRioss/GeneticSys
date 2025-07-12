@@ -8,40 +8,7 @@
 
     <style>
   
-        
-
-        /* --- Estilos para cabeceras de modales con colores --- */
-        .modal .modal-header.modal-header-warning { background-color: #fff3cd; color: #856404; border-bottom: 1px solid #ffeeba; }
-        .modal .modal-header.modal-header-warning h3, .modal .modal-header.modal-header-warning i { color: #856404; }
-        .modal .modal-header.modal-header-success { background-color: #d4edda; color: #155724; border-bottom: 1px solid #c3e6cb; }
-        .modal .modal-header.modal-header-success h3, .modal .modal-header.modal-header-success i { color: #155724; }
-
-        /* --- Estilos para estado y motivo en modal de detalles --- */
-        .modal-status-container {
-            margin-top: 8px; display: flex; flex-direction: column;
-            align-items: flex-start; gap: 8px;
-        }
-        .modal-status-container .badge {
-            padding: .3em .6em; font-size: 85%; font-weight: 700;
-            line-height: 1; color: #fff; text-align: center; border-radius: .25rem;
-        }
-        .modal-status-container .badge.default { background-color: #28a745; }
-        .modal-status-container .badge.secondary { background-color: #6c757d; }
-        .modal-status-container .badge.archived { background-color: #dc3545; }
-        .modal-status-container .status-reason {
-            font-size: 0.9em; color: #555; padding: 5px 10px;
-            background-color: #f8f9fa; border-left: 3px solid #dee2e6; width: 100%;
-        }
-        .modal-status-container .status-reason strong { color: #343a40; }
-
-  
-        .spinner {
-            border: 4px solid rgba(0,0,0,0.1); width: 36px; height: 36px;
-            border-radius: 50%; border-left-color: #0d6efd;
-            animation: spin 1s linear infinite; margin: 40px auto;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        #modal-body-content { min-height: 200px; }
+      
     </style>
 </head>
 
@@ -155,7 +122,7 @@
 
 <!-- Modal para archivar -->
 <div class="modal" id="archiveHistoriaModal">
-    <div class="modal-content" style="max-width: 500px;">
+    <div class="modal-content-archive" style="max-width: 50rem;">
         <div class="modal-header modal-header-warning">
             <h3><i class="fas fa-triangle-exclamation"></i> Confirmar Archivamiento</h3>
             <button type="button" class="modal-close" id="closeArchiveModalBtn">×</button>
@@ -181,7 +148,7 @@
 
 <!-- Modal para Desarchivar -->
 <div class="modal" id="unarchiveHistoriaModal">
-    <div class="modal-content" style="max-width: 500px;">
+    <div class="modal-content-unarchive" style="max-width: 500px;">
         <div class="modal-header modal-header-success">
             <h3><i class="fas fa-box-open"></i> Confirmar Desarchivamiento</h3>
             <button type="button" class="modal-close" id="closeUnarchiveModalBtn">×</button>
