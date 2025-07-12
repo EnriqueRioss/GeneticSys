@@ -63,7 +63,7 @@
     }
 
     .analysis-item {
-        background-color: #f0f2f5; 
+        background-color: #e9f1f7; 
         border-radius: 6px;
         padding: 10px 15px;
         display: flex;
@@ -72,7 +72,7 @@
     }
 
     .analysis-item .analysis-name {
-        color: #333;
+        color: #3f5c74;
         font-weight: 500;
     }
 
@@ -394,137 +394,148 @@
                 <!--<button class="tab-btn" data-tab="tests">Análisis y Pruebas</button>-->
             </div>
 
-            <div class="tab-content active" id="personal-info">
-                <div class="info-grid">
-                    <div class="info-card">
-                        <div class="card-header">
-                            <h3 class="card-title">Datos Personales</h3>
+        
+            <div class="contenido-tabs">
+                <div class="tab-content active" id="personal-info">
+                    <div class="info-grid">
+                        <div class="info-card">
+                            <div class="card-header">
+                                <h3 class="card-title">Datos Personales</h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="info-item">
+                                    <i class="fas fa-calendar"></i>
+                                    <span class="info-text" id="modal-info-edad"></span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-phone"></i>
+                                    <span class="info-text" id="modal-info-telefono"></span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-envelope"></i>
+                                    <span class="info-text" id="modal-info-email"></span>
+                                </div>
+                                <div class="info-item">
+                                    <i class="fas fa-map-pin"></i>
+                                    <span class="info-text" id="modal-info-direccion"></span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="card-content">
-                            <div class="info-item">
-                                <i class="fas fa-calendar"></i>
-                                <span class="info-text" id="modal-info-edad"></span>
-                            </div>
-                            <div class="info-item">
-                                <i class="fas fa-phone"></i>
-                                <span class="info-text" id="modal-info-telefono"></span>
-                            </div>
-                            <div class="info-item">
-                                <i class="fas fa-envelope"></i>
-                                <span class="info-text" id="modal-info-email"></span>
-                            </div>
-                            <div class="info-item">
-                                <i class="fas fa-map-pin"></i>
-                                <span class="info-text" id="modal-info-direccion"></span>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="info-card">
-                        <div class="card-header">
-                            <h3 class="card-title">Información Médica</h3>
-                        </div>
-                        <div class="card-content">
-                            <div class="info-row">
-                                <span class="info-label">Genetista asignado:</span>
-                                <span class="badge" id="modal-info-genetista"></span>
+                        <div class="info-card">
+                            <div class="card-header">
+                                <h3 class="card-title">Información Médica</h3>
                             </div>
-                            <div class="info-row">
-                                <span class="info-label">Estado:</span>
-                                <span class="badge" id="modal-info-estado"></span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Última visita:</span>
-                                <span class="info-text" id="modal-info-ultima-visita"></span>
-                            </div>
-                            <div class="info-row">
-                                <span class="info-label">Evoluciones:</span>
-                                <span class="badge">2</span>
+                            <div class="card-content">
+                                <div class="info-row">
+                                    <span class="info-label">Genetista asignado:</span>
+                                    <span class="badge" id="modal-info-genetista"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Estado:</span>
+                                    <span class="badge" id="modal-info-estado"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Última visita:</span>
+                                    <span class="info-text" id="modal-info-ultima-visita"></span>
+                                </div>
+                                <div class="info-row">
+                                    <span class="info-label">Evoluciones:</span>
+                                    <span class="badge">2</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Tab: Historia Clínica -->
-            <div class="tab-content" id="medical-record">
-                <div class="tab-content-header">
-                    <h3 class="tab-main-title">Historia Clínica Genética</h3>
-                    <a href="#" id="btn-nueva-consulta" class="btn-primary" style="display: none;">
-                        <i class="fas fa-plus" class="btn-icon"></i>
-                        Nueva Consulta
-                    </a>
-                </div>
-
-                
-                     <!-- Contenedor para Diagnósticos Presuntivos -->
-                    <div class="analysis-card" id="diagnosticos-presuntivos-card">
-                        <div class="analysis-card-header">
-                            <i class="fas fa-notes-medical" class="analysis-card-icon"></i>
-                            <h4 class="analysis-card-title">Diagnósticos Presuntivos</h4>
-                        </div>
-                        <div class="analysis-list" id="diagnosticos-presuntivos-list">
-                        
-                        </div>
+                <!-- Tab: Historia Clínica -->
+                <div class="tab-content" id="medical-record">
+                    <div class="cuadro-resumen">
+                        <h2>Resumen Historia</h2>
+                        <p>Motivo de consulta Proposito diagnostico</p>
+                        <p>El paciente acude a consukta por problemas de vista, y mareos frecuentes.
+                            Se solicita realizar una evaluación oftamológica
+                        </p>                
                     </div>
-                
-                
-                    <div id="diagnostico-final-container" data-evaluacion-id="" style="margin-top: 20px;">
-                
-                        <div id="diagnostico-final-view" class="analysis-card final-diagnosis-view" style="display: none;">
+
+                    <div class="tab-content-header">
+                        <h3 class="tab-main-title">Historia Clínica Genética</h3>
+                        <a href="#" id="btn-nueva-consulta" class="btn-primary" style="display: none;">
+                            <i class="fas fa-plus" class="btn-icon"></i>
+                            Nueva Consulta
+                        </a>
+                    </div>
+
+                    
+                        <!-- Contenedor para Diagnósticos Presuntivos -->
+                        <div class="analysis-card" id="diagnosticos-presuntivos-card">
                             <div class="analysis-card-header">
-                                <i class="fas fa-gavel" class="analysis-card-icon"></i>
-                                <h4 class="analysis-card-title">Diagnóstico Final y Conclusiones</h4>
+                                <i class="fas fa-notes-medical" class="analysis-card-icon"></i>
+                                <h4 class="analysis-card-title">Diagnósticos Presuntivos</h4>
                             </div>
-                            <div class="final-diagnosis-content">
-                                <p class="history-subtitle" id="diagnostico-final-text" style="white-space: pre-wrap;"></p>
-                                <button class="btn-editar" id="btn-edit-diagnostico-final" title="Editar Diagnóstico Final">
-                                    <i class="fas fa-edit"></i>
-                                </button>
+                            <div class="analysis-list" id="diagnosticos-presuntivos-list">
+                            
                             </div>
                         </div>
-                        
-                        <!-- Formulario para editar/añadir el diagnóstico final -->
-                        <div id="diagnostico-final-edit" class="analysis-card" style="display: none;">
-                            <div class="analysis-card-header">
-                                <i class="fas fa-gavel" class="analysis-card-icon"></i>
-                                <h4 class="analysis-card-title">Añadir/Editar Diagnóstico Final</h4>
+                    
+                    
+                        <div id="diagnostico-final-container" data-evaluacion-id="" style="margin-top: 20px;">
+                    
+                            <div id="diagnostico-final-view" class="analysis-card final-diagnosis-view" style="display: none;">
+                                <div class="analysis-card-header">
+                                    <i class="fas fa-gavel" class="analysis-card-icon"></i>
+                                    <h4 class="analysis-card-title">Diagnóstico Final y Conclusiones</h4>
+                                </div>
+                                <div class="final-diagnosis-content">
+                                    <p class="history-subtitle" id="diagnostico-final-text" style="white-space: pre-wrap;"></p>
+                                    <button class="btn-editar" id="btn-edit-diagnostico-final" title="Editar Diagnóstico Final">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                </div>
                             </div>
-                            <div class="form-group" style="padding: 15px;">
-                                <textarea id="diagnostico-final-textarea" rows="4" placeholder="Ingrese el diagnóstico final o las conclusiones de la evaluación..."></textarea>
-                            </div>
-                            <div class="card-actions edit-actions" style="justify-content: flex-end; padding: 0 15px 15px;">
-                                <button type="button" class="btn btn-secondary" id="btn-cancel-diagnostico-final">Cancelar</button>
-                                <button type="button" class="btn btn-primary" id="btn-save-diagnostico-final">Guardar Diagnóstico</button>
+                            
+                            <!-- Formulario para editar/añadir el diagnóstico final -->
+                            <div id="diagnostico-final-edit" class="analysis-card" style="display: none;">
+                                <div class="analysis-card-header">
+                                    <i class="fas fa-gavel" class="analysis-card-icon"></i>
+                                    <h4 class="analysis-card-title">Añadir/Editar Diagnóstico Final</h4>
+                                </div>
+                                <div class="form-group" style="padding: 15px;">
+                                    <textarea id="diagnostico-final-textarea" rows="4" placeholder="Ingrese el diagnóstico final o las conclusiones de la evaluación..."></textarea>
+                                </div>
+                                <div class="card-actions edit-actions" style="justify-content: flex-end; padding: 0 15px 15px;">
+                                    <button type="button" class="btn btn-secondary" id="btn-cancel-diagnostico-final">Cancelar</button>
+                                    <button type="button" class="btn btn-primary" id="btn-save-diagnostico-final">Guardar Diagnóstico</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    
+                    
+                        <div class="add-final-diagnosis-container" style="text-align: center; margin-top: 20px;">
+                            <button class="btn-outline" id="btn-add-diagnostico-final" style="display: none;">
+                                <i class="fas fa-plus"></i> Añadir Diagnóstico Final
+                            </button>
+                        </div>
                 
-                
-                    <div class="add-final-diagnosis-container" style="text-align: center; margin-top: 20px;">
-                        <button class="btn-outline" id="btn-add-diagnostico-final" style="display: none;">
-                            <i class="fas fa-plus"></i> Añadir Diagnóstico Final
-                        </button>
-                    </div>
-            
 
-                <div class="history-list" id="history-list-container">
-                    <div class="spinner"></div>
+                    <div class="history-list" id="history-list-container">
+                        <div class="spinner"></div>
+                    </div>
                 </div>
+
+                <!--
+                <div class="tab-content" id="tests">
+                    <div class="tab-content-header">
+                        <h3 class="tab-main-title">Diagnósticos</h3>
+                        <a href="#" id="btn-nuevo-diagnostico" class="btn-primary" style="display: none;">
+                            <i class="fas fa-plus" class="btn-icon"></i>
+                            Nuevo Diagnóstico
+                        </a>
+                    </div>
+                
+                
+                </div>-->
             </div>
-
-            <!--
-            <div class="tab-content" id="tests">
-                <div class="tab-content-header">
-                    <h3 class="tab-main-title">Diagnósticos</h3>
-                    <a href="#" id="btn-nuevo-diagnostico" class="btn-primary" style="display: none;">
-                        <i class="fas fa-plus" class="btn-icon"></i>
-                        Nuevo Diagnóstico
-                    </a>
-                </div>
-            
-               
-            </div>-->
         </div>
 
         <button type="button" class="modal-close" id="closeVerPacienteModalBtn">×</button>
@@ -735,20 +746,24 @@
                                 <input type="date" name="fecha_visita" id="fecha_visita_${plan.id}" value="${plan.fecha_visita || ''}">
                             </div>
                             <div class="form-group">
-                                <label>
-                                    <input type="checkbox" name="completado" ${plan.completado ? 'checked' : ''}>
-                                    Marcar como Completado
-                                </label>
-                            </div>
-                            <div class="form-group">
                                 <label for="archivos_nuevos_${plan.id}">Añadir nuevos archivos</label>
                                 <input type="file" name="archivos_nuevos" id="archivos_nuevos_${plan.id}" multiple>
                             </div>
-                            ${plan.archivos.length > 0 ? `
-                            <div class="form-group">
-                                <label>Eliminar archivos existentes</label>
-                                <ul class="file-delete-list">${archivosEliminarHtml}</ul>
+                            <div class="form-group-medio">
+                                <div class="half-width">
+                                    <label>Eliminar archivos existentes</label>
+                                    <ul class="file-delete-list">${archivosEliminarHtml}</ul>
+                                </div>
+                                <div class="half-width">
+                                    <label>
+                                        Marcar como Completado
+                                        <br>
+                                        <input type="checkbox" name="completado" ${plan.completado ? 'checked' : ''}>
+                                    </label>
+                                </div>
                             </div>
+                            ${plan.archivos.length > 0 ? `
+                            
                             ` : ''}
                             <div class="card-actions edit-actions">
                                 <button type="button" class="btn btn-secondary js-cancel-btn">Cancelar</button>
