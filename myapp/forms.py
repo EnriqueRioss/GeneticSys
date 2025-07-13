@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from datetime import datetime
 from django.forms import inlineformset_factory, DateInput
+from django.forms.widgets import DateInput
 import os
 
 
@@ -681,17 +682,49 @@ class AntecedentesDesarrolloNeonatalForm(forms.Form):
             )
         return antecedentes, desarrollo, neonatal
 
-class AntecedentesPreconcepcionalesForm(forms.Form):
-    antecedentes_padre = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 2}), label="Antecedentes Familiares Paternos Relevantes", strip=True)
-    antecedentes_madre = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 2}), label="Antecedentes Familiares Maternos Relevantes", strip=True)
-    estado_salud_padre = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 2}), label="Estado de Salud Actual del Padre", strip=True)
-    estado_salud_madre = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 2}), label="Estado de Salud Actual de la Madre", strip=True)
-    fecha_union_pareja = forms.DateField(required=False, widget=DateInput(attrs={'type': 'date', 'class':'form-control'}), label="Fecha de Unión de la Pareja (si aplica)")
+class AntecedentesPreconcepcionalesForm(forms.ModelForm):
+    
     consanguinidad = forms.ChoiceField(
         choices=[('', '---------'), ('Sí', 'Sí'), ('No', 'No')],
         required=False, label="Consanguinidad entre los padres"
     )
-    grado_consanguinidad = forms.CharField(max_length=50, required=False, label="Grado de Consanguinidad (si aplica)", strip=True)
+    
+    # en /myapp/forms.py, dentro de AntecedentesPreconcepcionalesForm
+
+    class Meta:
+        # 1. Especificas el modelo (esto ya lo tienes bien)
+        model = AntecedentesFamiliaresPreconcepcionales
+
+        # 2. Le dices a Django QUÉ campos del modelo usar
+        fields = [
+            'antecedentes_padre',
+            'antecedentes_madre',
+            'estado_salud_padre',
+            'estado_salud_madre',
+            'fecha_union_pareja',
+            'grado_consanguinidad'
+        ]
+
+        # 3. (Opcional pero recomendado) Le dices CÓMO deben verse esos campos
+        widgets = {
+            'antecedentes_padre': forms.Textarea(attrs={'rows': 2}),
+            'antecedentes_madre': forms.Textarea(attrs={'rows': 2}),
+            'estado_salud_padre': forms.Textarea(attrs={'rows': 2}),
+            'estado_salud_madre': forms.Textarea(attrs={'rows': 2}),
+            'fecha_union_pareja': DateInput(attrs={'type': 'date'}),
+        }
+
+        # 4. (Opcional pero recomendado) Le dices qué ETIQUETAS (labels) deben tener
+        labels = {
+            'antecedentes_padre': "Antecedentes Familiares Paternos Relevantes",
+            'antecedentes_madre': "Antecedentes Familiares Maternos Relevantes",
+            'estado_salud_padre': "Estado de Salud Actual del Padre",
+            'estado_salud_madre': "Estado de Salud Actual de la Madre",
+            'fecha_union_pareja': "Fecha de Unión de la Pareja (si aplica)",
+            'grado_consanguinidad': "Grado de Consanguinidad (si aplica)",
+            # No necesitas definir el label de 'consanguinidad' aquí porque ya lo hiciste
+            # en el campo personalizado fuera de la clase Meta.
+        }
 
     def clean_fecha_union_pareja(self):
         fecha = self.cleaned_data.get('fecha_union_pareja')
@@ -710,39 +743,14 @@ class AntecedentesPreconcepcionalesForm(forms.Form):
             cleaned_data['grado_consanguinidad'] = ''
         return cleaned_data
 
-    def save(self, proposito=None, pareja=None, tipo=None):
-        if tipo not in ['proposito', 'pareja']:
-            raise ValueError("Tipo debe ser 'proposito' o 'pareja'")
+    def save(self, commit=True):
 
-        if tipo == 'proposito' and not proposito:
-            raise ValueError("Debe proporcionar un propósito para el tipo 'proposito'")
-        if tipo == 'pareja' and not pareja:
-            raise ValueError("Debe proporcionar una pareja para el tipo 'pareja'")
-
-        afp_defaults = {
-            'antecedentes_padre': self.cleaned_data.get('antecedentes_padre'),
-            'antecedentes_madre': self.cleaned_data.get('antecedentes_madre'),
-            'estado_salud_padre': self.cleaned_data.get('estado_salud_padre'),
-            'estado_salud_madre': self.cleaned_data.get('estado_salud_madre'),
-            'fecha_union_pareja': self.cleaned_data.get('fecha_union_pareja'),
-            'consanguinidad': self.cleaned_data.get('consanguinidad') or None,
-            'grado_consanguinidad': self.cleaned_data.get('grado_consanguinidad')
-        }
-        if afp_defaults['consanguinidad'] != 'Sí':
-            afp_defaults['grado_consanguinidad'] = ''
-
-        afp_defaults_clean = {k:v for k,v in afp_defaults.items() if v is not None or (k == 'grado_consanguinidad' and afp_defaults['consanguinidad'] == 'Sí')}
+        instance = super().save(commit=commit)
 
 
-        if tipo == 'proposito':
-            antecedentespre, _ = AntecedentesFamiliaresPreconcepcionales.objects.update_or_create(
-                proposito=proposito, defaults=afp_defaults_clean
-            )
-        else:
-            antecedentespre, _ = AntecedentesFamiliaresPreconcepcionales.objects.update_or_create(
-                pareja=pareja, defaults=afp_defaults_clean
-            )
-        return antecedentespre
+        
+        return instance
+
 
 class ExamenFisicoForm(ModelForm):
     class Meta:

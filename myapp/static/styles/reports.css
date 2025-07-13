@@ -201,6 +201,17 @@ li{
   color: var(--primary-darkerblue);
 }
 
+.specific-filter input{
+  width: 100%;
+  padding: 0.5rem 0.75rem 0.5rem 0.5 rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--border-gray);
+  background-color: var(--background-color);
+  color: var(--primary-darkerblue);
+  font-size: 1.3rem;
+  font-family: "Poppins", serif;
+}
+
 .search-input {
   position: relative;
   margin-top: 0.02rem;

@@ -1,5 +1,6 @@
 {% extends 'layouts/base.html' %}
 {% load static %}
+{% load workflow_tags %}
 
 {% block content %}
 
@@ -16,126 +17,59 @@
                     <h1>Historia Clínica Genética</h1>
                     <p>Complete todos los campos requeridos para crear la historia clínica</p>
                 </div>
-                <div class="step-indicator" id="stepIndicator">Paso 1 de 7</div>
-            </div>
-
-            <!--Barra de progreso-->
-
-            <!--DE MOMENTO ESTO QUEDARA EN STAND BY PORQUE DEBO VER COMO SE INCORPORA EN EL RESTO DE LOS FORMULARIOS-->
-            <div class="seccion-progreso">
-                <p class="progress-title">Progreso del formulario</p>
-                <div class="progress-bar-container">
-                    <div class="progress-bar"></div>
-                </div>
-                <p class="progress-percentage">17% completado</p>
-            </div>
-
-            <div class="stepper">
-                <!--Primer paso-->
-                <div class="stepper-item active" data-step="1">
-                    <div class="step-counter">
-                        <i class="fas fa-file"></i>
-                    </div>
-                    <div class="step-name">
-                        <p class="font-bold">Informacion General</p>
-                    </div>
-                </div>
-
-
-                <!--Segundo paso-->
-                <div class="stepper-item" data-step="2">
-                    <div class="step-counter">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="step-name">
-                        <p>Datos del Proposito</p>
-                    </div>
-                </div>
-
-                <!--Tercer Paso-->
-                <!--SOLO APARECE SI EL ES UN PROPOSITO, SON LOS DATOS DE LOS PADRES-->
-                <div class="stepper-item" data-step="3">
-                    <div class="step-counter">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="step-name">
-                        <p>Datos del Representante</p>
-                    </div>
-                </div>
-
-                <!--Cuarto paso-->
-                <div class="stepper-item" data-step="4">
-                    <div class="step-counter">
-                        <i class="fas fa-file-medical"></i>
-                    </div>
-                    <div class="step-name">
-                        <p>Antecedentes Personales</p>
-                    </div>
-                </div>
-
-                <!--Quinto paso-->
-                <div class="stepper-item" data-step="5">
-                    <div class="step-counter">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="step-name">
-                        <p>Datos preconcepcionales</p>
-                    </div>
-                </div>
-
-                <!--Sexto paso-->
-                <div class="stepper-item" data-step="6">
-                    <div class="step-counter">
-                        <i class="fas fa-stethoscope"></i>
-                    </div>
-                    <div class="step-name">
-                        <p>Examen Fisico</p>
-                    </div>
-                </div>
-
-                <!--Septimo paso-->
-                <div class="stepper-item" data-step="7">
-                    <div class="step-counter">
-                        <i class="fas fa-clipboard-check"></i>
-                    </div>
-                    <div class="step-name">
-                        <p>Diagnóstico Final</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- COMENTO ESTOS MENSAJES SOLO POR LAS PRUEBAS QUE SE ESTAN HACIENDO, CUALQUIER COSA
-             MAS ADELANTE SE DESCOMENTAN, PORQUE NO SE SI TE VAYA A OCASIONAR PROBLEMAS
-
-            <div class="main-content-area">
-                {% if messages %}
-                    <div class="messages-container">
-                        <ul class="messages">
-                            {% for message in messages %}
-                                <li{% if message.tags %} class="message-item {{ message.tags }}"{% endif %}>
-                                    {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
-                                        <i class="fas fa-times-circle"></i> Error:
-                                    {% elif message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
-                                        <i class="fas fa-check-circle"></i> Éxito:
-                                    {% elif message.level == DEFAULT_MESSAGE_LEVELS.WARNING %}
-                                        <i class="fas fa-exclamation-triangle"></i> Advertencia:
-                                    {% elif message.level == DEFAULT_MESSAGE_LEVELS.INFO and not 'POPUP:' in message.message %}
-                                        <i class="fas fa-info-circle"></i> Información:
-                                    {% endif %}
-                                    {% if not 'POPUP:' in message.message %}
-                                        {{ message }}
-                                    {% endif %}
-                                </li>
-                            {% endfor %}
-                        </ul>
-                    </div>
+                {% with workflow=request.session.historia_workflow %}
+                {% if workflow %}
+                    {% for node in workflow %}
+                        {% if node == current_node %}
+                            <div class="step-indicator" id="stepIndicator">Paso {{ forloop.counter }} de {{ workflow|length }}</div>
+                        {% endif %}
+                    {% endfor %}
                 {% endif %}
-                -->
-
-                    {% block form_content %}
-                    {% endblock form_content %}
+            {% endwith %}
             </div>
+
+            <!-- El indicador de paso ahora se calcula en la plantilla -->
+            
         </div>
+
+        <!-- La sección de progreso ahora se calcula aquí también -->
+        {% with workflow=request.session.historia_workflow %}
+            {% if workflow %}
+                {% for node in workflow %}
+                    {% if node == current_node %}
+                        <div class="seccion-progreso" data-current-step="{{ forloop.counter }}" data-total-steps="{{ workflow|length }}">
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- El stepper se dibuja basado en el workflow de la sesión -->
+        <div class="stepper">
+            {% with workflow=request.session.historia_workflow %}
+                {% if workflow %}
+                    {% for node_name in workflow %}
+                        {% with step_info=ALL_STEPS|get_item:node_name %}
+                            <div class="stepper-item 
+                                {% if node_name == current_node %}active{% endif %} 
+                                {% if forloop.counter < current_step_index %}completed{% endif %}"
+                                data-step="{{ forloop.counter }}">
+                                <div class="step-counter">
+                                    <i class="fas {% if forloop.counter < current_step_index %}fa-check{% else %}{{ step_info.icon|default:'fa-question-circle' }}{% endif %}"></i>
+                                </div>
+                                <div class="step-name">
+                                    <p {% if node_name == current_node %}class="font-bold"{% endif %}>{{ step_info.label }}</p>
+                                </div>
+                            </div>
+                        {% endwith %}
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+        </div>
+
+     {% block form_content %}
+     {% endblock form_content %}
+
     </div>
 </div>
 

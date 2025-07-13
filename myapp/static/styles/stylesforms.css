@@ -111,7 +111,7 @@ form{
     color: var(--primary-darkerblue);
     font-size: 1.2rem;
     font-weight: 700;
-    padding: 0.5rem 1rem;
+    padding: 0.5rem 2rem;
     border-radius: 99rem;
     border: 1px solid var(--primary-darkerblue);  
 }
@@ -153,23 +153,25 @@ form{
 .stepper{
     display: flex;
     justify-content: space-between;
+    align-items: flex-start;
     margin-top: 2rem;
-    position: relative;
+    /*position: relative;*/
     padding-bottom: 3.5rem;
 }
 
 .stepper-item{
-    display: inline-flex;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 1rem;
-    z-index: 2;
-    flex: 1;
+    flex-basis: 10rem;
+    flex-grow: 1;
+    text-align: center;
     color: var(--border-gray);
 }
 
 .step-counter{
-    width: 4rem;
-    height: 4rem;
+    height: 5rem;
+    width: 5rem;
     border-radius: 50%;
     background-color: var(--background-color);
     border: 2px solid var(--border-gray);
@@ -177,17 +179,24 @@ form{
     align-items: center;
     justify-content: center;
     transition: all 0.3s ease;
+    margin-bottom: 0.8rem;
 }
 
 .step-counter i{
-    font-size: 1.3rem;
+    font-size: 1.6rem;
     color: var(--border-gray);
 }
 
 
 .step-name .font-bold{
   font-family: 700;
-  font-size: 1.2rem;
+}
+
+.step-name p{
+    font-size: 1.3rem;
+    line-height: 1.4; /* Mejora la legibilidad si el texto se rompe en dos líneas */
+    max-width: 120px; /* Opcional: un ancho máximo para forzar el ajuste del texto antes */
+    margin: 0 auto; /* Ayuda a centrar el bloque de párrafo si tiene un max-width */
 }
 
 
@@ -205,6 +214,17 @@ form{
 .stepper-item.active .step-name{
     color: var(--primary-darkerblue);
     font-size: 1.2rem;
+}
+
+.stepper-item.completed .step-counter {
+    background-color: var(--background-color);
+    border-color: var(--success-color);
+}
+.stepper-item.completed .step-counter i {
+    color: var(--success-color);
+}
+.stepper-item.completed .step-name {
+    color: var(--success-color);
 }
 
 
