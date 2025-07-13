@@ -114,8 +114,6 @@ class PadresPropositoForm(forms.Form):
     # --- Campos del Padre ---
     padre_nombres = forms.CharField(max_length=100, label="Nombres del Padre*", strip=True)
     padre_apellidos = forms.CharField(max_length=100, label="Apellidos del Padre*", strip=True)
-    # --- AÑADIDO: Campo de sexo para los padres ---
-    
     padre_escolaridad = forms.CharField(max_length=100, label="Escolaridad del Padre*", strip=True)
     padre_ocupacion = forms.CharField(max_length=100, label="Ocupación del Padre*", strip=True)
     padre_lugar_nacimiento = forms.CharField(max_length=100, label="Lugar de Nacimiento del Padre*", strip=True)
@@ -123,16 +121,14 @@ class PadresPropositoForm(forms.Form):
     padre_identificacion_prefijo = forms.ChoiceField(choices=PREFIJOS_ID, label="ID*")
     padre_identificacion_numero = forms.CharField(max_length=11, label="Número ID*", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}))
     padre_grupo_rh_combinado = forms.ChoiceField(choices=GRUPOS_RH_CHOICES, label="Grupo Sanguíneo y RH*")
-    padre_telefono_prefijo = forms.ChoiceField(choices=PREFIJOS_TELEFONO, label="Telf.*")
-    padre_telefono_numero = forms.CharField(max_length=7, label="Número Telf.*", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}))
+    padre_telefono_prefijo = forms.ChoiceField(choices=PREFIJOS_TELEFONO, label="Telf.", required=False)
+    padre_telefono_numero = forms.CharField(max_length=7, label="Número Telf.", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}), required=False)
     padre_email = forms.EmailField(max_length=100, required=False, label="Email")
     padre_direccion = forms.CharField(max_length=200, label="Dirección del Padre*", strip=True)
 
     # --- Campos de la Madre ---
     madre_nombres = forms.CharField(max_length=100, label="Nombres de la Madre*", strip=True)
     madre_apellidos = forms.CharField(max_length=100, label="Apellidos de la Madre*", strip=True)
-    # --- AÑADIDO: Campo de sexo para los padres ---
-    
     madre_escolaridad = forms.CharField(max_length=100, label="Escolaridad de la Madre*", strip=True)
     madre_ocupacion = forms.CharField(max_length=100, label="Ocupación de la Madre*", strip=True)
     madre_lugar_nacimiento = forms.CharField(max_length=100, label="Lugar de Nacimiento de la Madre*", strip=True)
@@ -140,8 +136,8 @@ class PadresPropositoForm(forms.Form):
     madre_identificacion_prefijo = forms.ChoiceField(choices=PREFIJOS_ID, label="ID*")
     madre_identificacion_numero = forms.CharField(max_length=11, label="Número ID*", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}))
     madre_grupo_rh_combinado = forms.ChoiceField(choices=GRUPOS_RH_CHOICES, label="Grupo Sanguíneo y RH*")
-    madre_telefono_prefijo = forms.ChoiceField(choices=PREFIJOS_TELEFONO, label="Telf.*")
-    madre_telefono_numero = forms.CharField(max_length=7, label="Número Telf.*", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}))
+    madre_telefono_prefijo = forms.ChoiceField(choices=PREFIJOS_TELEFONO, label="Telf.", required=False)
+    madre_telefono_numero = forms.CharField(max_length=7, label="Número Telf.", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}), required=False)
     madre_email = forms.EmailField(max_length=100, required=False, label="Email")
     madre_direccion = forms.CharField(max_length=200, label="Dirección de la Madre*", strip=True)
 
@@ -155,7 +151,6 @@ class PadresPropositoForm(forms.Form):
             if self.madre_instance: self._populate_fields_from_instance(self.madre_instance, 'madre')
 
     def _populate_fields_from_instance(self, instance, prefix):
-        # Llenar campos simples
         for field in instance._meta.fields:
              if hasattr(instance, field.name):
                 self.initial[f'{prefix}_{field.name}'] = getattr(instance, field.name)
@@ -182,9 +177,13 @@ class PadresPropositoForm(forms.Form):
         
         tel_prefijo = data.get(f'{prefix}_telefono_prefijo')
         tel_numero = data.get(f'{prefix}_telefono_numero', '').strip()
-        if not tel_numero.isdigit() or len(tel_numero) != 7: self.add_error(f'{prefix}_telefono_numero', "El número de teléfono debe contener exactamente 7 dígitos.")
-        
-        data[f'{prefix}_telefono'] = f"{tel_prefijo}-{tel_numero}" if tel_prefijo and tel_numero else None
+        if tel_numero:  # Solo validar si se ingresó un número
+            if not tel_numero.isdigit() or len(tel_numero) != 7:
+                self.add_error(f'{prefix}_telefono_numero', "Si introduce un teléfono, debe contener 7 dígitos numéricos.")
+            else:
+                data[f'{prefix}_telefono'] = f"{tel_prefijo}-{tel_numero}"
+        else:
+            data[f'{prefix}_telefono'] = None
         
         grupo_rh = data.get(f'{prefix}_grupo_rh_combinado')
         if grupo_rh and '-' in grupo_rh:
@@ -212,8 +211,6 @@ class PadresPropositoForm(forms.Form):
         if padre_id and madre_id and padre_id == madre_id:
             self.add_error('madre_identificacion_numero', "La identificación de la madre no puede ser igual a la del padre.")
         
-     
-            
         return cleaned_data
 
     def clean_padre_fecha_nacimiento(self):
@@ -228,12 +225,11 @@ class PadresPropositoForm(forms.Form):
             raise forms.ValidationError("La fecha de nacimiento no puede ser en el futuro.")
         return fecha
 class PropositosForm(ModelForm):
-    # --- Nuevos campos para la UI ---
     identificacion_prefijo = forms.ChoiceField(choices=PREFIJOS_ID, label="ID*")
     identificacion_numero = forms.CharField(max_length=11, label="Número ID*", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}))
     
-    telefono_prefijo = forms.ChoiceField(choices=PREFIJOS_TELEFONO, label="Telf.*")
-    telefono_numero = forms.CharField(max_length=7, label="Número Telf.*", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}))
+    telefono_prefijo = forms.ChoiceField(choices=PREFIJOS_TELEFONO, label="Telf.", required=False)
+    telefono_numero = forms.CharField(max_length=7, label="Número Telf.", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}), required=False)
 
     grupo_rh_combinado = forms.ChoiceField(choices=GRUPOS_RH_CHOICES, label="Grupo Sanguíneo y RH*")
 
@@ -243,7 +239,6 @@ class PropositosForm(ModelForm):
         widgets = {
             'sexo': forms.Select,
             'fecha_nacimiento': DateInput(attrs={'type': 'date', 'class': 'form-control'}),
-            # --- CAMBIO CLAVE: Usamos un widget más simple ---
             'foto': forms.FileInput(attrs={'accept': 'image/*'}),
         }
         labels = {
@@ -259,7 +254,6 @@ class PropositosForm(ModelForm):
             'foto': 'Foto del Propósito (Opcional)'
         }
     
-    # El resto de la clase (init, clean, save) no necesita cambios.
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.pk:
@@ -292,10 +286,13 @@ class PropositosForm(ModelForm):
 
         tel_prefijo = cleaned_data.get('telefono_prefijo')
         tel_numero = cleaned_data.get('telefono_numero', '').strip()
-        if not tel_numero.isdigit() or len(tel_numero) != 7:
-            self.add_error('telefono_numero', "El número de teléfono debe contener exactamente 7 dígitos.")
+        if tel_numero:  # Solo validar si se ingresó un número
+            if not tel_numero.isdigit() or len(tel_numero) != 7:
+                self.add_error('telefono_numero', "Si introduce un teléfono, debe contener 7 dígitos numéricos.")
+            else:
+                cleaned_data['telefono'] = f"{tel_prefijo}-{tel_numero}"
         else:
-            cleaned_data['telefono'] = f"{tel_prefijo}-{tel_numero}"
+            cleaned_data['telefono'] = None
 
         grupo_rh = cleaned_data.get('grupo_rh_combinado')
         if grupo_rh and '-' in grupo_rh:
@@ -324,10 +321,6 @@ class PropositosForm(ModelForm):
             proposito.save()
         return proposito
 
-
-# Remplaza la clase ParejaPropositosForm existente con esta:
-# Reemplaza esta clase completa en forms.py
-
 class ParejaPropositosForm(forms.Form):
     # --- Campos para Cónyuge 1 ---
     nombres_1 = forms.CharField(max_length=100, label="Nombres*", strip=True)
@@ -340,11 +333,10 @@ class ParejaPropositosForm(forms.Form):
     identificacion_prefijo_1 = forms.ChoiceField(choices=PREFIJOS_ID, label="ID*")
     identificacion_numero_1 = forms.CharField(max_length=11, label="Número ID*", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}))
     direccion_1 = forms.CharField(max_length=200, label="Dirección*", strip=True)
-    telefono_prefijo_1 = forms.ChoiceField(choices=PREFIJOS_TELEFONO, label="Telf.*")
-    telefono_numero_1 = forms.CharField(max_length=7, label="Número Telf.*", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}))
+    telefono_prefijo_1 = forms.ChoiceField(choices=PREFIJOS_TELEFONO, label="Telf.", required=False)
+    telefono_numero_1 = forms.CharField(max_length=7, label="Número Telf.", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}), required=False)
     email_1 = forms.EmailField(max_length=100, required=False, label="Email")
     grupo_rh_combinado_1 = forms.ChoiceField(choices=GRUPOS_RH_CHOICES, label="Grupo Sanguíneo y RH*")
-    # --- CAMBIO CLAVE: Usamos un widget más simple ---
     foto_1 = forms.ImageField(required=False, widget=forms.FileInput(attrs={'accept': 'image/*'}), label="Foto (Opcional)")
 
     # --- Campos para Cónyuge 2 ---
@@ -358,14 +350,12 @@ class ParejaPropositosForm(forms.Form):
     identificacion_prefijo_2 = forms.ChoiceField(choices=PREFIJOS_ID, label="ID*")
     identificacion_numero_2 = forms.CharField(max_length=11, label="Número ID*", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}))
     direccion_2 = forms.CharField(max_length=200, label="Dirección*", strip=True)
-    telefono_prefijo_2 = forms.ChoiceField(choices=PREFIJOS_TELEFONO, label="Telf.*")
-    telefono_numero_2 = forms.CharField(max_length=7, label="Número Telf.*", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}))
+    telefono_prefijo_2 = forms.ChoiceField(choices=PREFIJOS_TELEFONO, label="Telf.", required=False)
+    telefono_numero_2 = forms.CharField(max_length=7, label="Número Telf.", widget=forms.TextInput(attrs={'pattern': '[0-9]*', 'inputmode': 'numeric'}), required=False)
     email_2 = forms.EmailField(max_length=100, required=False, label="Email")
     grupo_rh_combinado_2 = forms.ChoiceField(choices=GRUPOS_RH_CHOICES, label="Grupo Sanguíneo y RH*")
-    # --- CAMBIO CLAVE: Usamos un widget más simple ---
     foto_2 = forms.ImageField(required=False, widget=forms.FileInput(attrs={'accept': 'image/*'}), label="Foto (Opcional)")
 
-    # El resto de la clase (init, clean, etc.) no necesita cambios.
     def __init__(self, *args, **kwargs):
         self.conyuge1_instance = kwargs.pop('conyuge1_instance', None)
         self.conyuge2_instance = kwargs.pop('conyuge2_instance', None)
@@ -400,9 +390,13 @@ class ParejaPropositosForm(forms.Form):
         
         tel_prefijo = cleaned_data.get(f'telefono_prefijo_{suffix}')
         tel_numero = cleaned_data.get(f'telefono_numero_{suffix}', '').strip()
-        if not tel_numero: self.add_error(f'telefono_numero_{suffix}', "Este campo es obligatorio.")
-        elif not tel_numero.isdigit() or len(tel_numero) != 7: self.add_error(f'telefono_numero_{suffix}', "Debe ser un número de 7 dígitos.")
-        else: cleaned_data[f'telefono_{suffix}'] = f"{tel_prefijo}-{tel_numero}"
+        if tel_numero:  # Solo validar si se ingresó un número
+            if not tel_numero.isdigit() or len(tel_numero) != 7:
+                self.add_error(f'telefono_numero_{suffix}', "Si introduce un teléfono, debe contener 7 dígitos numéricos.")
+            else:
+                cleaned_data[f'telefono_{suffix}'] = f"{tel_prefijo}-{tel_numero}"
+        else:
+            cleaned_data[f'telefono_{suffix}'] = None
 
         grupo_rh = cleaned_data.get(f'grupo_rh_combinado_{suffix}')
         if not grupo_rh: self.add_error(f'grupo_rh_combinado_{suffix}', "Este campo es obligatorio.")
