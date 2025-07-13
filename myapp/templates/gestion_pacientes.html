@@ -260,7 +260,7 @@
                                         <th class="hide-on-mobile">Edad</th>
                                         <th class="hide-on-tablet">Contacto</th>
                                         <th class="hide-on-tablet">Genetista</th>
-                                        <th class="hide-on-mobile">Última Visita</th>
+                                        <th class="hide-on-mobile">Fecha Ingreso</th>
                                         <th>Estado</th>
                                         <th class="hide-on-mobile">Historia ID / Pendientes
                                         </th>
@@ -516,7 +516,7 @@
                                         <span class="badge" id="modal-info-estado"></span>
                                     </div>
                                     <div class="info-row">
-                                        <span class="info-label">Última visita:</span>
+                                        <span class="info-label">Fecha ingreso:</span>
                                         <span class="info-text" id="modal-info-ultima-visita"></span>
                                     </div>
                                 </div>
@@ -582,11 +582,10 @@
                 <div class="tab-content" id="medical-record">
                     <div class="cuadro-resumen">
                         <h2>Resumen Historia</h2>
-                        <p>Motivo de consulta Proposito diagnostico</p>
-                        <p>El paciente acude a consukta por problemas de vista, y mareos frecuentes.
-                            Se solicita realizar una evaluación oftamológica
-                        </p>                
+                        <p id="modal-motivo-consulta">Cargando motivo de consulta...</p>
+                        <p id="modal-enfermedad-actual" style="white-space: pre-wrap;">Cargando enfermedad actual...</p>
                     </div>
+
 
                     <div class="tab-content-header">
                         <h3 class="tab-main-title">Historia Clínica Genética</h3>
@@ -828,6 +827,13 @@
                 const finalEdit = document.getElementById('diagnostico-final-edit');
                 const finalAddBtn = document.getElementById('btn-add-diagnostico-final');
     
+                // ===== INICIO DE CÓDIGO AÑADIDO =====
+                const motivoConsultaElem = document.getElementById('modal-motivo-consulta');
+                const enfermedadActualElem = document.getElementById('modal-enfermedad-actual');
+                motivoConsultaElem.textContent = 'Cargando...';
+                enfermedadActualElem.textContent = 'Cargando...';
+                // ===== FIN DE CÓDIGO AÑADIDO =====
+
                 presuntivosList.innerHTML = '';
                 finalView.style.display = 'none';
                 finalEdit.style.display = 'none';
@@ -838,6 +844,12 @@
                     .then(response => response.json())
                     .then(data => {
                         historyListContainer.innerHTML = '';
+                        
+                        // ===== INICIO DE CÓDIGO AÑADIDO =====
+                        motivoConsultaElem.textContent = data.motivo_consulta || 'Motivo no registrado.';
+                        enfermedadActualElem.textContent = data.enfermedad_actual || 'Sin descripción de la enfermedad actual.';
+                        // ===== FIN DE CÓDIGO AÑADIDO =====
+
                         if (data.evaluacion_id) {
                             const urlNuevaConsulta = `/evaluacion/${data.evaluacion_id}/nueva-consulta/`;
                             nuevaConsultaBtn.href = urlNuevaConsulta;
@@ -885,9 +897,12 @@
                         console.error('Error fetching historia clinica:', error);
                         historyListContainer.innerHTML = '<p style="text-align:center; color: red;">Error al cargar el historial.</p>';
                         presuntivosList.innerHTML = '<p style="text-align:center; color: red;">Error al cargar los diagnósticos.</p>';
+                        // ===== INICIO DE CÓDIGO AÑADIDO =====
+                        motivoConsultaElem.textContent = 'Error al cargar datos.';
+                        enfermedadActualElem.textContent = 'Error al cargar datos.';
+                        // ===== FIN DE CÓDIGO AÑADIDO =====
                     });
             }
-    
             function createPlanEstudioCard(plan) {
                 const statusClass = plan.completado ? 'status-completed' : 'status-pending';
                 const statusText = plan.completado ? 'Completado' : 'Pendiente';

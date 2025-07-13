@@ -439,27 +439,27 @@ def get_historia_clinica_data(request, proposito_id):
     """
     proposito = get_object_or_404(_get_pacientes_queryset_for_role(request.user), pk=proposito_id)
 
-    evaluacion = EvaluacionGenetica.objects.filter(
-        Q(proposito=proposito) | 
-        Q(pareja__proposito_id_1=proposito) | 
-        Q(pareja__proposito_id_2=proposito)
-    ).prefetch_related('diagnosticos_presuntivos').first() # Añadimos prefetch
+    # El filtro Q se usará para varios modelos, así que lo definimos una vez
+    q_filter = Q(proposito=proposito) | Q(pareja__proposito_id_1=proposito) | Q(pareja__proposito_id_2=proposito)
+
+    evaluacion = EvaluacionGenetica.objects.filter(q_filter).prefetch_related('diagnosticos_presuntivos').first()
+    antecedentes_personales = AntecedentesPersonales.objects.filter(q_filter).first()
 
     data = {
         'planes_de_estudio': [],
-        # ===== CAMPOS NUEVOS A AÑADIR A LA RESPUESTA JSON =====
         'diagnosticos_presuntivos': [],
         'diagnostico_final': None,
         'evaluacion_id': None,
-        # ========================================================
+        # ===== CAMPOS NUEVOS AÑADIDOS =====
+        'motivo_consulta': proposito.historia.get_motivo_tipo_consulta_display() if proposito.historia else 'N/A',
+        'enfermedad_actual': antecedentes_personales.enfermedad_actual if antecedentes_personales and antecedentes_personales.enfermedad_actual else None,
+        # ==================================
     }
 
     if evaluacion:
         data['evaluacion_id'] = evaluacion.evaluacion_id
-        # ===== LÓGICA MODIFICADA PARA CARGAR DIAGNÓSTICOS =====
         data['diagnosticos_presuntivos'] = list(evaluacion.diagnosticos_presuntivos.values_list('descripcion', flat=True))
         data['diagnostico_final'] = evaluacion.diagnostico_final
-        # ======================================================
         
         planes = PlanEstudio.objects.filter(evaluacion=evaluacion).prefetch_related('archivos').order_by('fecha_visita', 'plan_id')
         
