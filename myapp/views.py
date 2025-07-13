@@ -659,6 +659,7 @@ def crear_pareja(request, historia_id):
         'editing': editing
     }
     return render(request, 'Crear_pareja.html', context)
+
 @login_required
 @genetista_or_admin_required
 @never_cache

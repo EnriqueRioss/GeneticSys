@@ -115,7 +115,7 @@ class PadresPropositoForm(forms.Form):
     padre_nombres = forms.CharField(max_length=100, label="Nombres del Padre*", strip=True)
     padre_apellidos = forms.CharField(max_length=100, label="Apellidos del Padre*", strip=True)
     # --- AÑADIDO: Campo de sexo para los padres ---
-    padre_sexo = forms.ChoiceField(choices=[('', 'Seleccione')] + Propositos.SEXO_CHOICES, label="Sexo del Padre*")
+    
     padre_escolaridad = forms.CharField(max_length=100, label="Escolaridad del Padre*", strip=True)
     padre_ocupacion = forms.CharField(max_length=100, label="Ocupación del Padre*", strip=True)
     padre_lugar_nacimiento = forms.CharField(max_length=100, label="Lugar de Nacimiento del Padre*", strip=True)
@@ -132,7 +132,7 @@ class PadresPropositoForm(forms.Form):
     madre_nombres = forms.CharField(max_length=100, label="Nombres de la Madre*", strip=True)
     madre_apellidos = forms.CharField(max_length=100, label="Apellidos de la Madre*", strip=True)
     # --- AÑADIDO: Campo de sexo para los padres ---
-    madre_sexo = forms.ChoiceField(choices=[('', 'Seleccione')] + Propositos.SEXO_CHOICES, label="Sexo de la Madre*")
+    
     madre_escolaridad = forms.CharField(max_length=100, label="Escolaridad de la Madre*", strip=True)
     madre_ocupacion = forms.CharField(max_length=100, label="Ocupación de la Madre*", strip=True)
     madre_lugar_nacimiento = forms.CharField(max_length=100, label="Lugar de Nacimiento de la Madre*", strip=True)
@@ -212,15 +212,7 @@ class PadresPropositoForm(forms.Form):
         if padre_id and madre_id and padre_id == madre_id:
             self.add_error('madre_identificacion_numero', "La identificación de la madre no puede ser igual a la del padre.")
         
-        ### --- INICIO DE LA NUEVA VALIDACIÓN --- ###
-        padre_sexo = cleaned_data.get('padre_sexo')
-        madre_sexo = cleaned_data.get('madre_sexo')
-
-        if padre_sexo and madre_sexo and padre_sexo == madre_sexo:
-            error_msg = "Los padres no pueden tener el mismo sexo. Uno debe ser Masculino y el otro Femenino."
-            self.add_error('padre_sexo', error_msg)
-            self.add_error('madre_sexo', error_msg)
-        ### --- FIN DE LA NUEVA VALIDACIÓN --- ###
+     
             
         return cleaned_data
 
