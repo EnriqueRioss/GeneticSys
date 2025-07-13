@@ -64,7 +64,7 @@ from .forms import (
     ExtendedUserCreationForm, HistoriasForm, PropositosForm, PadresPropositoForm,
     AntecedentesDesarrolloNeonatalForm, AntecedentesPreconcepcionalesForm,
     ExamenFisicoForm, ParejaPropositosForm, EvaluacionGeneticaForm,
-    LoginForm, CreateNewTask, CreateNewProject, ReportSearchForm, AdminUserCreationForm, EvaluacionGeneticaForm, DiagnosticoFormSet, PlanEstudioFormSet,PasswordResetAdminForm,AdminUserEditForm,AutorizacionForm,PlanEstudioEditForm,ArchivarHistoriaForm,PatientSearchForm,EnfermedadActualForm,
+    LoginForm, CreateNewTask, CreateNewProject, ReportSearchForm, AdminUserCreationForm, EvaluacionGeneticaForm, DiagnosticoFormSet, PlanEstudioFormSet,PasswordResetAdminForm,AdminUserEditForm,AutorizacionForm,PlanEstudioEditForm,ArchivarHistoriaForm,PatientSearchForm,EnfermedadActualForm,GenealogiaForm
 )
 
 from django.forms.models import model_to_dict
@@ -311,6 +311,8 @@ def crear_paciente(request, historia_id):
     return render(request, "Crear_paciente.html", {'form': form, 'historia': historia, 'editing': bool(existing_proposito), 'from_gestion': from_gestion})
 
 # En tu archivo views.py
+# In myapp/views.py
+
 @login_required
 @all_roles_required
 def get_historia_details_ajax(request, historia_id):
@@ -320,7 +322,7 @@ def get_historia_details_ajax(request, historia_id):
     """
     historia = get_object_or_404(HistoriasClinicas.objects.select_related('genetista__user'), pk=historia_id)
 
-    # Verificación de Permisos (sin cambios)
+    # ... (código de verificación de permisos y función format_value sin cambios) ...
     try:
         user_gen_profile = request.user.genetistas
         if user_gen_profile.rol == 'GEN' and historia.genetista != user_gen_profile:
@@ -331,27 +333,22 @@ def get_historia_details_ajax(request, historia_id):
     except Genetistas.DoesNotExist:
         return JsonResponse({'error': 'Perfil de usuario no encontrado.'}, status=403)
 
-    # Función auxiliar (sin cambios)
     def format_value(value, default='N/A'):
         if value is None or value == '':
             return default
-        # === CAMBIO: Formatear datetime con hora y minutos ===
         if isinstance(value, datetime):
-            return value.strftime('%d/%m/%Y %H:%M') # Formato con hora
+            return value.strftime('%d/%m/%Y %H:%M')
         if isinstance(value, date):
             return value.strftime('%d/%m/%Y')
         return str(value)
 
-    # ===== INICIO DE LA MODIFICACIÓN =====
     propositos_qs = Propositos.objects.filter(historia=historia)
     
-    # Determinar el nombre para la cabecera del modal
     if propositos_qs.exists():
         paciente_display_principal = ' y '.join([f"{p.nombres} {p.apellidos}" for p in propositos_qs])
     else:
         paciente_display_principal = "Sin Paciente Asignado"
 
-    # Recopilar datos de la historia
     data = {
         'numero_historia': format_value(historia.numero_historia),
         'paciente_display_principal': paciente_display_principal,
@@ -361,17 +358,36 @@ def get_historia_details_ajax(request, historia_id):
         'centro_referencia': format_value(historia.centro_referencia),
         'fecha_creacion': format_value(historia.fecha_ingreso),
         'fecha_ultima_modificacion': format_value(historia.fecha_ultima_modificacion),
-        # ===== CAMPOS NUEVOS AÑADIDOS =====
         'estado_display': historia.get_estado_display(),
         'estado_slug': historia.estado,
         'motivo_archivado': historia.motivo_archivado,
-        # ==================================
         'propositos': [],
         'is_pareja': propositos_qs.count() > 1,
     }
-    # ===== FIN DE LA MODIFICACIÓN =====
+    
+    # ===== INICIO DEL CÓDIGO A AÑADIR =====
+    # Añadimos la URL de la genealogía a la respuesta JSON
+    
+    # 1. Preparamos el filtro para buscar los antecedentes familiares
+    q_filter_antecedentes = Q()
+    if data['is_pareja']:
+        # Si es una pareja, buscamos el objeto Pareja
+        pareja = Parejas.objects.filter(proposito_id_1__in=propositos_qs, proposito_id_2__in=propositos_qs).first()
+        if pareja:
+            q_filter_antecedentes = Q(pareja=pareja)
+    elif propositos_qs.exists():
+        # Si es un solo propósito, lo usamos para el filtro
+        q_filter_antecedentes = Q(proposito=propositos_qs.first())
 
-    # Este bucle solo se ejecutará si existen propósitos
+    # 2. Buscamos el registro de antecedentes y obtenemos la URL de la foto
+    data['genealogia_url'] = None # Inicializamos por si no se encuentra
+    if q_filter_antecedentes: # Solo si pudimos construir un filtro válido
+        antecedente_familiar = AntecedentesFamiliaresPreconcepcionales.objects.filter(q_filter_antecedentes).first()
+        if antecedente_familiar and antecedente_familiar.genealogia_foto:
+            data['genealogia_url'] = antecedente_familiar.genealogia_foto.url
+    # ===== FIN DEL CÓDIGO A AÑADIR =====
+
+    # ... (el resto de la vista, incluyendo el bucle for p in propositos_qs, no necesita cambios) ...
     for p in propositos_qs:
         proposito_data = {
             'nombre_completo': f"{p.nombres} {p.apellidos}",
@@ -1046,7 +1062,11 @@ def diagnosticos_plan_estudio(request, historia_id, tipo, objeto_id):
             
             # Lógica para "Siguiente"
             messages.success(request, '¡Evaluación genética guardada exitosamente!')
-            redirect_url = reverse('autorizaciones_crear', kwargs={'historia_id': historia_id, 'tipo': tipo, 'objeto_id': objeto_id})
+            redirect_url = reverse('genealogia_crear_editar', kwargs={
+                    'historia_id': historia_id,
+                    'tipo': tipo,
+                    'objeto_id': objeto_id
+                })
             if request.headers.get('x-requested-with') == 'XMLHttpRequest':
                 return JsonResponse({'success': True, 'redirect_url': redirect_url})
             return redirect(redirect_url)
@@ -1478,6 +1498,83 @@ def ver_historias(request):
 @login_required
 @genetista_or_admin_required
 @never_cache
+def genealogia_view(request, historia_id, tipo, objeto_id):
+    """
+    Gestiona la carga y edición de la imagen de la genealogía.
+    """
+    historia = get_object_or_404(HistoriasClinicas, historia_id=historia_id)
+    context_object = None
+    context_object_name = ""
+    
+    # Obtener el objeto de contexto (propósito o pareja)
+    if tipo == 'proposito':
+        context_object = get_object_or_404(Propositos, proposito_id=objeto_id, historia=historia)
+        context_object_name = f"{context_object.nombres} {context_object.apellidos}"
+    elif tipo == 'pareja':
+        # Asegurarse que al menos uno de los propósitos de la pareja pertenece a la historia
+        pareja = get_object_or_404(Parejas, pareja_id=objeto_id)
+        if pareja.proposito_id_1.historia == historia or pareja.proposito_id_2.historia == historia:
+            context_object = pareja
+            p1_nombre = pareja.proposito_id_1.nombres if pareja.proposito_id_1 else "N/A"
+            p2_nombre = pareja.proposito_id_2.nombres if pareja.proposito_id_2 else "N/A"
+            context_object_name = f"Pareja: {p1_nombre} y {p2_nombre}"
+        else:
+            return JsonResponse({'success': False, 'errors': 'La pareja no corresponde a esta historia clínica.'}, status=403)
+
+    if not context_object:
+        return JsonResponse({'success': False, 'errors': 'Contexto no válido.'}, status=400)
+        
+    # Obtener o crear la instancia de antecedentes familiares
+    antecedente, created = AntecedentesFamiliaresPreconcepcionales.objects.get_or_create(
+        **{tipo: context_object}
+    )
+    
+    # El modo "edición" se activa si ya existe una foto.
+    editing = bool(antecedente.genealogia_foto)
+
+    if request.method == 'POST':
+        form = GenealogiaForm(request.POST, request.FILES, instance=antecedente)
+        if form.is_valid():
+            # Si se marca para eliminar una foto existente pero no se sube una nueva
+            if request.POST.get('genealogia_foto-clear') == 'on' and not request.FILES.get('genealogia_foto'):
+                antecedente.genealogia_foto.delete(save=False) # Elimina archivo
+                antecedente.genealogia_foto = None
+
+            form.save()
+
+            if 'save_draft' in request.POST:
+                redirect_url = reverse('gestion_pacientes')
+            else:
+                # El siguiente paso es 'Autorizaciones'. Este necesita un ID de propósito.
+                # Si el contexto actual es una pareja, usamos el ID del primer propósito de esa pareja.
+                proposito_id_para_siguiente_paso = objeto_id
+                if tipo == 'pareja':
+                    proposito_id_para_siguiente_paso = context_object.proposito_id_1.proposito_id
+                
+                # La URL de autorizaciones siempre usa 'proposito' como tipo.
+                redirect_url = reverse('autorizaciones_crear', kwargs={
+                    'historia_id': historia_id,
+                    'tipo': 'proposito',  # Correcto: autorizaciones es por propósito
+                    'objeto_id': proposito_id_para_siguiente_paso
+                })
+            
+            return JsonResponse({'success': True, 'redirect_url': redirect_url})
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
+    form = GenealogiaForm(instance=antecedente)
+
+    context = {
+        'form': form,
+        'historia': historia,
+        'context_object_name': context_object_name,
+        'editing': editing,
+    }
+    return render(request, 'genealogia.html', context)
+
+@login_required
+@genetista_or_admin_required
+@never_cache
 def enfermedad_actual(request, historia_id, tipo, objeto_id):
     historia = get_object_or_404(HistoriasClinicas, historia_id=historia_id)
     proposito_obj, pareja_obj, context_object_name = None, None, ""
@@ -1549,8 +1646,7 @@ def enfermedad_actual(request, historia_id, tipo, objeto_id):
     }
     return render(request, 'enfermedad_actual.html', context)
 
-def genealogia_view(request):
-    return render(request, 'genealogia.html')
+
 
 # views.py
 @require_POST

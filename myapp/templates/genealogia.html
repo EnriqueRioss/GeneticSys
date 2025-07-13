@@ -8,46 +8,50 @@
     <link rel="stylesheet" href="{% static '/styles/stylesforms.css' %}">
 
 <style>
-        /* Estilos para la carga de la genealogía */
-.photo-upload-container {
-    border: 2px dashed #ccc;
-    border-radius: 8px;
-    padding: 2rem;
-    text-align: center;
-}
+    /* Estilos para la carga de la genealogía */
+    .photo-upload-container {
+        border: 2px dashed #ccc;
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        min-height: 150px; /* Asegura un tamaño mínimo */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
-/* Oculta la sección de la foto actual por defecto */
-.current-photo-section {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
-}
+    /* Oculta la sección de la foto actual por defecto */
+    .current-photo-section {
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.5rem;
+    }
 
-.genealogia-preview {
-    max-width: 100%;
-    max-height: 400px; /* Limita la altura de la vista previa */
-    height: auto;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    object-fit: contain; /* Asegura que la imagen se vea completa */
-}
+    .genealogia-preview {
+        max-width: 100%;
+        max-height: 400px; /* Limita la altura de la vista previa */
+        height: auto;
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        object-fit: contain; /* Asegura que la imagen se vea completa */
+    }
 
 </style>
 </head>
 
 <div class="contenedor-formulario">
    
-    <form id="genealogia-form" method="post">
+    <form id="genealogia-form" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="form-step active">
             <div class="step-content-header">
-                <i class="fas fa-file-medical-alt"></i>
+                <i class="fas fa-sitemap"></i>
                 <h2>Genealogía del Paciente(s)</h2>
             </div>
 
             <!-- Contexto dinámico -->
-            <p class="step-subtitle">Ingrese el gráfico de la correspondiente Genealogía</p>
+            <p class="step-subtitle">Ingrese el gráfico de la correspondiente Genealogía.</p>
             <p class="historia-info">Nº de Historia Clínica: {{ historia.numero_historia }}</p>
             <p class="context-info">
                 Para: <strong>{{ context_object_name }}</strong>
@@ -58,27 +62,27 @@
             <div class="alert alert-danger non-field-errors"></div>
 
             <div class="form-group">
-                <label for="id_foto">Seleccione el archivo de la genealogía (Imagen)</label>
+                <label for="{{ form.genealogia_foto.id_for_label }}">Seleccione el archivo de la genealogía (Imagen)</label>
                 <div class="photo-upload-container">
                     
-                    <!-- El input real estará oculto, pero funcional -->
-                    <input type="file" name="foto" accept="image/*" id="id_foto" style="display: none;">
+                    <!-- El input real estará oculto pero funcional, renderizado por Django -->
+                    {{ form.genealogia_foto }}
 
                     <!-- Esta es la sección que el usuario ve primero -->
                     <div class="new-photo-section">
                         <!-- Este label activará el input de archivo -->
-                        <label for="id_foto" class="btn btn-secondary">
+                        <label for="{{ form.genealogia_foto.id_for_label }}" class="btn btn-secondary">
                             <i class="fas fa-upload"></i> Elegir imagen
                         </label>
                     </div>
 
-                    <!-- Esta sección aparecerá después de seleccionar una imagen -->
+                    <!-- Esta sección aparecerá después de seleccionar una imagen o si ya existe una -->
                     <div class="current-photo-section">
-                        <img src="" alt="Vista previa de la genealogía" class="genealogia-preview">
+                        <img src="{% if form.instance.genealogia_foto %}{{ form.instance.genealogia_foto.url }}{% endif %}" alt="Vista previa de la genealogía" class="genealogia-preview">
                         <button type="button" class="btn btn-secondary btn-sm replace-photo-btn">Reemplazar imagen</button>
                     </div>
                 </div>
-                <div class="field-errors" id="error_id_foto"></div> <!-- Corregido para errores de campo -->
+                <div class="field-errors" id="error_{{ form.genealogia_foto.id_for_label }}"></div>
             </div>
 
         </div>
@@ -96,42 +100,40 @@ document.addEventListener('DOMContentLoaded', function() {
     setupAjaxForm('genealogia-form');
 
     // 1. Obtener referencias a los elementos del DOM
-    const fileInput = document.getElementById('id_foto');
+    const fileInput = document.getElementById('{{ form.genealogia_foto.id_for_label }}');
     const newPhotoSection = document.querySelector('.new-photo-section');
     const currentPhotoSection = document.querySelector('.current-photo-section');
     const previewImage = document.querySelector('.genealogia-preview');
     const replaceBtn = document.querySelector('.replace-photo-btn');
     
-    const uploadLabel = document.querySelector('label[for="id_foto"].btn');
+    // Función para mostrar la vista previa
+    function showPreview(file) {
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                if (newPhotoSection) newPhotoSection.style.display = 'none';
+                if (currentPhotoSection) currentPhotoSection.style.display = 'flex';
+            };
+            reader.readAsDataURL(file);
+        }
+    }
 
+    // Comprobar si ya existe una imagen al cargar la página
+    if (previewImage.getAttribute('src')) {
+        if (newPhotoSection) newPhotoSection.style.display = 'none';
+        if (currentPhotoSection) currentPhotoSection.style.display = 'flex';
+    }
 
     // 2. Escuchar cuando el usuario selecciona un archivo
     fileInput.addEventListener('change', function(event) {
         const file = event.target.files[0];
-
-        // Asegurarse de que se seleccionó un archivo
-        if (file) {
-            // Usar FileReader para leer el archivo como una URL de datos
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                // Cuando la lectura esté completa, establecer el `src` de la imagen de vista previa
-                previewImage.src = e.target.result;
-
-                // Ocultar la sección de carga y mostrar la sección de vista previa
-                if (newPhotoSection) newPhotoSection.style.display = 'none';
-                if (currentPhotoSection) currentPhotoSection.style.display = 'flex'; 
-            };
-
-            // Iniciar la lectura del archivo
-            reader.readAsDataURL(file);
-        }
+        showPreview(file);
     });
 
     // 3. Funcionalidad del botón "Reemplazar imagen"
     if (replaceBtn) {
         replaceBtn.addEventListener('click', function() {
-            // Simular un clic en el input de archivo para abrir el selector de nuevo
             fileInput.click();
         });
     }

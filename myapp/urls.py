@@ -66,7 +66,8 @@ urlpatterns = [
     path('ajax/evaluacion/<int:evaluacion_id>/guardar-diagnostico-final/', views.guardar_diagnostico_final_ajax, name='ajax_guardar_diagnostico_final'),
     path('historias/<int:historia_id>/<str:tipo>/<int:objeto_id>/enfermedad-actual/',
          views.enfermedad_actual, name="enfermedad_actual_crear"),
-     path('historias/genealogia/', views.genealogia_view, name='genealogia'),
+    path('historias/<int:historia_id>/<str:tipo>/<int:objeto_id>/genealogia/',
+         views.genealogia_view, name='genealogia_crear_editar'),
     path('historias/archive/<int:historia_id>/', views.archive_historia, name='historia_archive'),
     path('historias/unarchive/<int:historia_id>/', views.unarchive_historia, name='historia_unarchive'),
 ]

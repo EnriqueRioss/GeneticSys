@@ -119,7 +119,12 @@ class AntecedentesFamiliaresPreconcepcionales(models.Model):
     fecha_union_pareja = models.DateField(null=True, blank=True)
     consanguinidad = models.CharField(max_length=2, choices=[('Sí', 'Sí'), ('No', 'No')], null=True, blank=True)
     grado_consanguinidad = models.CharField(max_length=50, null=True, blank=True)
-
+    genealogia_foto = models.ImageField(
+            upload_to='genealogias/',
+            null=True,
+            blank=True,
+            verbose_name="Foto de la Genealogía"
+        )
     class Meta:
         constraints = [
             models.CheckConstraint(

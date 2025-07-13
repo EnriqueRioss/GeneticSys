@@ -1312,3 +1312,19 @@ class EnfermedadActualForm(ModelForm):
         self.fields['enfermedad_actual'].error_messages = {
             'required': 'Este campo es obligatorio. Por favor, describa la enfermedad actual.'
         }
+
+
+class GenealogiaForm(forms.ModelForm):
+    class Meta:
+        model = AntecedentesFamiliaresPreconcepcionales
+        fields = ['genealogia_foto']
+        widgets = {
+            'genealogia_foto': forms.FileInput(attrs={
+                'accept': 'image/*',
+                'style': 'display: none;', # Se oculta porque el label personalizado lo activa
+                'id': 'id_genealogia_foto' # Se define un ID consistente
+            }),
+        }
+        labels = {
+            'genealogia_foto': '' # El label se maneja en el template
+        }

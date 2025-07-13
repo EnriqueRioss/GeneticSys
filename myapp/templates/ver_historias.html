@@ -7,7 +7,35 @@
     <link rel="stylesheet" href="{% static '/styles/verhistorias.css' %}">
 
     <style>
-  
+  .genealogia-container {
+    padding: 1.5rem;
+    text-align: center;
+    /* (Opcional) Para mejorar el centrado de la imagen si es más pequeña que el contenedor */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* ===== INICIO DE LA MODIFICACIÓN ===== */
+.genealogia-preview-image {
+    max-width: 100%;
+    /* Añadimos una altura máxima para evitar que imágenes muy altas desborden el modal */
+    max-height: 60vh; /* 60% de la altura de la ventana del navegador */
+    height: auto;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    background-color: white;
+    /* Esta propiedad es clave: asegura que toda la imagen se vea sin distorsionarse */
+    object-fit: contain;
+}
+/* ===== FIN DE LA MODIFICACIÓN ===== */
+
+.no-data-message {
+    text-align: center;
+    padding: 2rem;
+    color: #868e96;
+    font-style: italic;
+}
       
     </style>
 </head>
