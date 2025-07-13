@@ -348,8 +348,33 @@ document.addEventListener('DOMContentLoaded', function() {
             }).join('');
         }
 
+        // ===== SECCIÓN 5: GENEALOGÍA (LA NUEVA LÓGICA) =====
+        let genealogiaHtml = '';
+        if (data.genealogia_url) {
+            genealogiaHtml = `
+                <section class="info-section">
+                    <h3 class="section-title"><i class="fas fa-sitemap"></i> Genealogía</h3>
+                    <div class="section-content genealogia-container">
+                        <img src="${data.genealogia_url}" alt="Árbol genealógico del paciente" class="genealogia-preview-image">
+                    </div>
+                </section>
+            `;
+        } else {
+            genealogiaHtml = `
+                <section class="info-section">
+                    <h3 class="section-title"><i class="fas fa-sitemap"></i> Genealogía</h3>
+                    <div class="section-content no-data-message">
+                        <p>No se ha cargado una imagen de la genealogía para esta historia.</p>
+                    </div>
+                </section>
+            `;
+        }
+
+    // ===== FIN DE LA LÓGICA DE LA GENEALOGÍA =====
+
+
         
-        modalBody.innerHTML = propositoHtml + medicalRegistryHtml + familyHtml + examenFisicoHtml;
+        modalBody.innerHTML = propositoHtml + medicalRegistryHtml + familyHtml + examenFisicoHtml + genealogiaHtml;
     }
 
 

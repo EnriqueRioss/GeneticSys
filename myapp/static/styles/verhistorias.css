@@ -683,6 +683,27 @@ a i{
     color: rgb(153, 1, 1);
 }
 
+.genealogia-container {
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.genealogia-preview-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    background-color: white;
+}
+
+.no-data-message {
+    text-align: center;
+    padding: 2rem;
+    color: #868e96;
+    font-style: italic;
+}
+
+
 
 
 /*--------  ESTILOS PARA LA MODAL DE ARCHIVAR Y DESARCHIVAR  --------*/
