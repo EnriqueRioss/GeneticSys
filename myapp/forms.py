@@ -917,12 +917,15 @@ class PatientSearchForm(forms.Form):
         # Poblar choices de estado pasados desde la vista
         self.fields['estado'].choices = [('', 'Todos los Estados')] + estado_choices
 
-        # Lógica de Genetista (igual que antes)
-        self.fields['genetista'].label_from_instance = lambda obj: obj.user.get_full_name() or obj.user.username
+        # --- INICIO DE LA MODIFICACIÓN ---
+        self.fields['genetista'].label_from_instance = lambda obj: f"{obj.user.get_full_name() or obj.user.username} ({obj.get_rol_display()})"
         if user and hasattr(user, 'genetistas'):
             user_gen_profile = user.genetistas
             if user_gen_profile.rol == 'ADM' or user.is_superuser:
-                self.fields['genetista'].queryset = Genetistas.objects.filter(rol='GEN').select_related('user').order_by('user__last_name')
+                # MODIFICACIÓN: Incluimos GEN y ADM en la lista para administradores
+                self.fields['genetista'].queryset = Genetistas.objects.filter(
+                    rol__in=['GEN', 'ADM']
+                ).select_related('user').order_by('user__last_name')
             elif user_gen_profile.rol == 'GEN':
                 self.fields['genetista'].queryset = Genetistas.objects.filter(pk=user_gen_profile.pk)
                 self.fields['genetista'].initial = user_gen_profile
@@ -933,6 +936,7 @@ class PatientSearchForm(forms.Form):
                 self.fields['genetista'].widget.attrs['disabled'] = True
             else:
                 self.fields['genetista'].widget.attrs['disabled'] = True
+        # --- FIN DE LA MODIFICACIÓN ---
 
 
 class ReportSearchForm(forms.Form):
@@ -948,10 +952,13 @@ class ReportSearchForm(forms.Form):
         choices=REPORT_TYPE_CHOICES, required=True, label="Tipo de Reporte",
         widget=forms.Select(attrs={'id': 'report-type-select'})
     )
+    # --- INICIO DE LA MODIFICACIÓN ---
+    # Añadimos autocomplete='off' para evitar la advertencia del navegador.
     date_range = forms.CharField(
         required=False, label="Rango de Fechas",
-        widget=forms.TextInput(attrs={'id': 'date-range-flatpickr', 'placeholder': 'Seleccionar rango'})
+        widget=forms.TextInput(attrs={'id': 'date-range-flatpickr', 'placeholder': 'Seleccionar rango', 'autocomplete': 'off'})
     )
+    # --- FIN DE LA MODIFICACIÓN ---
     genetista = forms.ModelChoiceField(
         queryset=Genetistas.objects.none(), required=False, label="Genetista",
         empty_label="Todos los Genetistas", widget=forms.Select(attrs={'id': 'genetista-select'})
@@ -979,12 +986,16 @@ class ReportSearchForm(forms.Form):
         user = kwargs.pop('user', None) 
         super().__init__(*args, **kwargs)
         
-        # Lógica de permisos para Genetista (sin cambios)
-        self.fields['genetista'].label_from_instance = lambda obj: obj.user.get_full_name() or obj.user.username
+        # --- INICIO DE LA MODIFICACIÓN ---
+        # Lógica de permisos para Genetista
+        self.fields['genetista'].label_from_instance = lambda obj: f"{obj.user.get_full_name() or obj.user.username} ({obj.get_rol_display()})"
         if user and hasattr(user, 'genetistas'):
             profile = user.genetistas
             if profile.rol == 'ADM' or user.is_superuser:
-                self.fields['genetista'].queryset = Genetistas.objects.filter(rol='GEN').select_related('user').order_by('user__last_name')
+                # MODIFICACIÓN: Incluimos GEN y ADM en la lista
+                self.fields['genetista'].queryset = Genetistas.objects.filter(
+                    rol__in=['GEN', 'ADM']
+                ).select_related('user').order_by('user__last_name')
             elif profile.rol == 'GEN':
                 self.fields['genetista'].queryset = Genetistas.objects.filter(pk=profile.pk)
                 self.fields['genetista'].initial = profile
@@ -993,15 +1004,16 @@ class ReportSearchForm(forms.Form):
                 self.fields['genetista'].queryset = Genetistas.objects.filter(pk=profile.associated_genetista.pk)
                 self.fields['genetista'].initial = profile.associated_genetista
                 self.fields['genetista'].widget.attrs['disabled'] = True
+        # --- FIN DE LA MODIFICACIÓN ---
         
-        # Lógica de permisos para choices de estado
+        # Lógica de permisos para choices de estado (sin cambios)
         if user and (user.is_superuser or (hasattr(user, 'genetistas') and user.genetistas.rol == 'ADM')):
             self.fields['estado_historia'].choices = [('', 'Todos')] + HistoriasClinicas.ESTADO_CHOICES
             self.fields['estado_paciente'].choices = [('', 'Todos')] + Propositos.ESTADO_CHOICES
         else:
             self.fields['estado_historia'].choices = [('', 'Todos')] + [c for c in HistoriasClinicas.ESTADO_CHOICES if c[0] != 'archivada']
             self.fields['estado_paciente'].choices = [('', 'Todos')] + [c for c in Propositos.ESTADO_CHOICES if c[0] != 'inactivo']
-
+            
     def clean_date_range(self):
         date_range_str = self.cleaned_data.get('date_range')
         if not date_range_str: return None
@@ -1018,7 +1030,6 @@ class ReportSearchForm(forms.Form):
         except (ValueError, IndexError):
             raise forms.ValidationError("Formato de fecha inválido. Use DD/MM/YYYY o DD/MM/YYYY a DD/MM/YYYY.")
         return None
-    
 
 class AdminUserCreationForm(forms.ModelForm):
     # === CAMBIO 1: Añadir el campo username explícitamente ===
