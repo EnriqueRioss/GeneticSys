@@ -267,95 +267,174 @@
                                         <th>Acciones</th>
                                     </tr>
                                 </thead>
+                                <!-- Reemplaza el <tbody> completo en gestion_pacientes.html -->
                                 <tbody>
-                                    {% for proposito in pacientes_list %}
-                                    <tr class="{% if proposito.is_in_couple %}pareja-row{% endif %}"
-                                    data-proposito-id="{{ proposito.proposito_id }}"
-                                        data-nombre="{{ proposito.nombres }} {{ proposito.apellidos }}"
-                                        data-identificacion="{{ proposito.identificacion }}"
-                                        data-foto-url="{% if proposito.foto %}{{ proposito.foto.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}"
-                                        data-edad="{{ proposito.edad|default_if_none:'N/A' }}"
-                                        data-telefono="{{ proposito.telefono|default_if_none:'N/A' }}"
-                                        data-email="{{ proposito.email|default_if_none:'N/A' }}"
-                                        data-direccion="{{ proposito.direccion|default_if_none:'N/A' }}"
-                                        data-genetista="{{ proposito.historia.genetista.user.get_full_name|default:'N/A' }}"
-                                        data-estado-display="{{ proposito.get_estado_display }}"
-                                        data-estado-slug="{{ proposito.estado|slugify }}"
-                                        data-ultima-visita="{{ proposito.historia.fecha_ingreso|date:'Y-m-d' }}"
-                                        data-avatar-fallback="{{ proposito.nombres|first|upper }}{{ proposito.apellidos|first|upper }}"
-                                        >
-                                        <td class="inactivate-checkbox-cell" style="display: none;">
-                                            <input type="checkbox" class="paciente-checkbox" value="{{ proposito.proposito_id }}">
-                                        </td>
-                                        <td>
-                                            <div class="patient-info">
-                                                <div class="patient-avatar">
-                                                     {% if proposito.foto %}
-                                                        <img src="{{ proposito.foto.url }}" alt="Avatar" class="avatar-img">
+                                    {% for item in pacientes_list %}
+                                        {% if item.pareja_id %}  {# Es un objeto Pareja #}
+                                            {% with p1=item.proposito_id_1 p2=item.proposito_id_2 %}
+                                            <tr class="pareja-row-combined"
+                                                data-type="couple"
+                                                data-proposito1-id="{{ p1.proposito_id }}"
+                                                data-proposito2-id="{{ p2.proposito_id }}"
+                                                data-nombre1="{{ p1.nombres }} {{ p1.apellidos }}"
+                                                data-nombre2="{{ p2.nombres }} {{ p2.apellidos }}"
+                                                data-identificacion1="{{ p1.identificacion }}"
+                                                data-identificacion2="{{ p2.identificacion }}"
+                                                data-foto-url1="{% if p1.foto %}{{ p1.foto.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}"
+                                                data-foto-url2="{% if p2.foto %}{{ p2.foto.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}"
+                                                data-avatar-fallback1="{{ p1.nombres|first|upper }}{{ p1.apellidos|first|upper }}"
+                                                data-avatar-fallback2="{{ p2.nombres|first|upper }}{{ p2.apellidos|first|upper }}"
+                                                data-edad1="{{ p1.edad|default_if_none:'N/A' }}"
+                                                data-edad2="{{ p2.edad|default_if_none:'N/A' }}"
+                                                data-telefono1="{{ p1.telefono|default_if_none:'N/A' }}"
+                                                data-telefono2="{{ p2.telefono|default_if_none:'N/A' }}"
+                                                data-email1="{{ p1.email|default_if_none:'N/A' }}"
+                                                data-email2="{{ p2.email|default_if_none:'N/A' }}"
+                                                data-direccion1="{{ p1.direccion|default_if_none:'N/A' }}"
+                                                data-direccion2="{{ p2.direccion|default_if_none:'N/A' }}"
+                                                data-genetista="{{ p1.historia.genetista.user.get_full_name|default:'N/A' }}"
+                                                data-estado-display1="{{ p1.get_estado_display }}"
+                                                data-estado-display2="{{ p2.get_estado_display }}"
+                                                data-estado-slug1="{{ p1.estado }}"
+                                                data-estado-slug2="{{ p2.estado }}"
+                                                data-ultima-visita="{{ p1.historia.fecha_ingreso|date:'Y-m-d' }}">
+                                                <td class="inactivate-checkbox-cell" style="display: none;">
+                                                    <input type="checkbox" class="paciente-checkbox" value="{{ p1.proposito_id }}">
+                                                    <input type="checkbox" class="paciente-checkbox" value="{{ p2.proposito_id }}">
+                                                </td>
+                                                <td>
+                                                    <div class="patient-info-stacked">
+                                                        <div class="patient-info">
+                                                            <div class="patient-avatar">
+                                                                {% if p1.foto %}<img src="{{ p1.foto.url }}" alt="Avatar" class="avatar-img">{% else %}<span class="avatar-fallback">{{ p1.nombres|first|upper }}{{ p1.apellidos|first|upper }}</span>{% endif %}
+                                                            </div>
+                                                            <div class="patient-details">
+                                                                <div class="patient-name">{{ p1.nombres }} {{ p1.apellidos }}</div>
+                                                                <div class="patient-id">ID: {{ p1.identificacion }}</div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="patient-info">
+                                                            <div class="patient-avatar">
+                                                                {% if p2.foto %}<img src="{{ p2.foto.url }}" alt="Avatar" class="avatar-img">{% else %}<span class="avatar-fallback">{{ p2.nombres|first|upper }}{{ p2.apellidos|first|upper }}</span>{% endif %}
+                                                            </div>
+                                                            <div class="patient-details">
+                                                                <div class="patient-name">{{ p2.nombres }} {{ p2.apellidos }}</div>
+                                                                <div class="patient-id">ID: {{ p2.identificacion }}</div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <!-- ===== CAMBIO 1: Visualización de Edad por separado ===== -->
+                                                <td class="hide-on-mobile" data-label="Edad">
+                                                    <div>{{ p1.edad|default_if_none:"N/A" }} años</div>
+                                                    <div>{{ p2.edad|default_if_none:"N/A" }} años</div>
+                                                </td>
+                                                <!-- ===== CAMBIO 2: Visualización de Contactos para ambos ===== -->
+                                                <td class="hide-on-tablet" data-label="Contacto">
+                                                    <div class="contact-info">
+                                                        {% if p1.telefono %}<div class="contact-item"><i class="fas fa-phone contact-icon"></i>{{ p1.telefono }} ({{ p1.nombres|truncatechars:10 }})</div>{% endif %}
+                                                        {% if p1.email %}<div class="contact-item muted"><i class="fas fa-envelope contact-icon"></i>{{ p1.email }}</div>{% endif %}
+                                                    </div>
+                                                    {% if p1.telefono or p1.email %}<hr style="margin: 0.5rem 0; border-color: #eee;">{% endif %}
+                                                    <div class="contact-info">
+                                                        {% if p2.telefono %}<div class="contact-item"><i class="fas fa-phone contact-icon"></i>{{ p2.telefono }} ({{ p2.nombres|truncatechars:10 }})</div>{% endif %}
+                                                        {% if p2.email %}<div class="contact-item muted"><i class="fas fa-envelope contact-icon"></i>{{ p2.email }}</div>{% endif %}
+                                                    </div>
+                                                </td>
+                                                <td class="hide-on-tablet" data-label="Genetista">{{ p1.historia.genetista.user.get_full_name|default:"N/A" }}</td>
+                                                <td class="hide-on-mobile" data-label="Ultima Visita">{{ p1.historia.fecha_ingreso|date:"Y-m-d" }}</td>
+                                                <!-- ===== CAMBIO 3: Lógica para mostrar estado único o doble ===== -->
+                                                <td data-label="Estado">
+                                                    {% if p1.estado == p2.estado %}
+                                                        <span class="badge badge-{{ p1.estado|slugify }}">{{ p1.get_estado_display }}</span>
                                                     {% else %}
-                                                        <span class="avatar-fallback">{{ proposito.nombres|first|upper }}{{ proposito.apellidos|first|upper }}</span>
+                                                        <span class="badge badge-{{ p1.estado|slugify }}">{{ p1.get_estado_display }}</span><br>
+                                                        <span class="badge badge-{{ p2.estado|slugify }}">{{ p2.get_estado_display }}</span>
                                                     {% endif %}
-                                                </div>
-                                                <div class="patient-details">
-                                                    <div class="patient-name" data-label="Paciente">{{ proposito.nombres }} {{ proposito.apellidos }}</div>
-                                                    <div class="patient-id">ID: {{ proposito.identificacion }}</div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td class="hide-on-mobile" data-label="Edad">{{ proposito.edad|default_if_none:"N/A" }} años</td>
-                                        <td class="hide-on-tablet" data-label="Contacto">
-                                            <div class="contact-info">
-                                                {% if proposito.telefono %}
-                                                <div class="contact-item">
-                                                    <i class="fas fa-phone contact-icon"></i>
-                                                    {{ proposito.telefono }}
-                                                </div>
-                                                {% endif %}
-                                                {% if proposito.email %}
-                                                <div class="contact-item muted">
-                                                    <i class="fas fa-envelope contact-icon"></i>
-                                                    {{ proposito.email }}
-                                                </div>
-                                                {% endif %}
-                                            </div>
-                                        </td>
-                                        <td class="hide-on-tablet" data-label="Genetista">{{ proposito.historia.genetista.user.get_full_name|default:"N/A" }}</td>
-                                        <td class="hide-on-mobile" data-label="Ultima Visita">{{ proposito.historia.fecha_ingreso|date:"Y-m-d" }}</td>
-                                        <td data-label="Estado">
-                                            <span class="badge badge-{{ proposito.estado|slugify }}">{{ proposito.get_estado_display }}</span>
-                                        </td>
-                                        <td class="hide-on-mobile" data-label="Historia ID">
-                                            <div class="history-badges">
-                                                {% if proposito.historia %}
-                                                    <span class="badge">HC {{ proposito.historia.numero_historia }}</span>
-                                                {% endif %}
-                                                {% if proposito.plan_estudio_pendiente_count > 0 %}
-                                                    <span class="badge badge-danger">{{ proposito.plan_estudio_pendiente_count }} pendiente{{ proposito.plan_estudio_pendiente_count|pluralize }}</span>
-                                                {% endif %}
-                                            </div>
-                                        </td>
-                                        <td data-label="Acciones">
-                                            <div class="action-buttons">
-                                                {% if proposito.estado != 'inactivo' %}
-                                                    <button type="button" class="btn-ver">
-                                                        <i class="fas fa-eye"></i>
-                                                    </button>
-                                                    
-                                                    {% if proposito.is_in_couple %}
-                                                        <button type="button" class="btn-editar" onclick="window.location.href='{% url 'pareja_crear' historia_id=proposito.historia.historia_id %}?from_gestion=true'">
+                                                </td>
+                                                <td class="hide-on-mobile" data-label="Historia ID">
+                                                    <div class="history-badges">
+                                                        <span class="badge">HC {{ p1.historia.numero_historia }}</span>
+                                                        {% if item.plan_estudio_pendiente_count > 0 %}
+                                                            <span class="badge badge-danger">{{ item.plan_estudio_pendiente_count }} pendiente{{ item.plan_estudio_pendiente_count|pluralize }}</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </td>
+                                                <td data-label="Acciones">
+                                                    <div class="action-buttons">
+                                                        <button type="button" class="btn-ver"><i class="fas fa-eye"></i></button>
+                                                        {% if p1.estado != 'inactivo' or p2.estado != 'inactivo' %}
+                                                        <a href="{% url 'pareja_crear' historia_id=p1.historia.historia_id %}?from_gestion=true" class="btn-editar">
                                                             <i class="fas fa-edit"></i>
-                                                        </button>
-                                                    {% else %}
-                                                         <button type="button" class="btn-editar" onclick="window.location.href='{% url 'paciente_crear' historia_id=proposito.historia.historia_id %}?from_gestion=true'">
-                                                            <i class="fas fa-edit"></i>
-                                                        </button>
-                                                    {% endif %}
-                                                {% else %}
-                                                    <span class="badge badge-inactivo" style="padding: 8px 12px; font-weight: bold;">Inactivo</span>
-                                                {% endif %}
-                                            </div>
-                                        </td>
-                                    </tr>
+                                                        </a>
+                                                        {% endif %}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endwith %}
+                                        {% else %} {# Es un objeto Proposito individual #}
+                                            {% with proposito=item %}
+                                            <tr data-type="single"
+                                                data-proposito-id="{{ proposito.proposito_id }}"
+                                                data-nombre="{{ proposito.nombres }} {{ proposito.apellidos }}"
+                                                data-identificacion="{{ proposito.identificacion }}"
+                                                data-foto-url="{% if proposito.foto %}{{ proposito.foto.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}"
+                                                data-avatar-fallback="{{ proposito.nombres|first|upper }}{{ proposito.apellidos|first|upper }}"
+                                                data-edad="{{ proposito.edad|default_if_none:'N/A' }}"
+                                                data-telefono="{{ proposito.telefono|default_if_none:'N/A' }}"
+                                                data-email="{{ proposito.email|default_if_none:'N/A' }}"
+                                                data-direccion="{{ proposito.direccion|default_if_none:'N/A' }}"
+                                                data-genetista="{{ proposito.historia.genetista.user.get_full_name|default:'N/A' }}"
+                                                data-estado-display="{{ proposito.get_estado_display }}"
+                                                data-estado-slug="{{ proposito.estado|slugify }}"
+                                                data-ultima-visita="{{ proposito.historia.fecha_ingreso|date:'Y-m-d' }}">
+                                                <td class="inactivate-checkbox-cell" style="display: none;">
+                                                    <input type="checkbox" class="paciente-checkbox" value="{{ proposito.proposito_id }}">
+                                                </td>
+                                                <td>
+                                                    <div class="patient-info">
+                                                        <div class="patient-avatar">
+                                                            {% if proposito.foto %}<img src="{{ proposito.foto.url }}" alt="Avatar" class="avatar-img">{% else %}<span class="avatar-fallback">{{ proposito.nombres|first|upper }}{{ proposito.apellidos|first|upper }}</span>{% endif %}
+                                                        </div>
+                                                        <div class="patient-details">
+                                                            <div class="patient-name">{{ proposito.nombres }} {{ proposito.apellidos }}</div>
+                                                            <div class="patient-id">ID: {{ proposito.identificacion }}</div>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td class="hide-on-mobile" data-label="Edad">{{ proposito.edad|default_if_none:"N/A" }} años</td>
+                                                <td class="hide-on-tablet" data-label="Contacto">
+                                                    <div class="contact-info">
+                                                        {% if proposito.telefono %}<div class="contact-item"><i class="fas fa-phone contact-icon"></i>{{ proposito.telefono }}</div>{% endif %}
+                                                        {% if proposito.email %}<div class="contact-item muted"><i class="fas fa-envelope contact-icon"></i>{{ proposito.email }}</div>{% endif %}
+                                                    </div>
+                                                </td>
+                                                <td class="hide-on-tablet" data-label="Genetista">{{ proposito.historia.genetista.user.get_full_name|default:"N/A" }}</td>
+                                                <td class="hide-on-mobile" data-label="Ultima Visita">{{ proposito.historia.fecha_ingreso|date:"Y-m-d" }}</td>
+                                                <td data-label="Estado"><span class="badge badge-{{ proposito.estado|slugify }}">{{ proposito.get_estado_display }}</span></td>
+                                                <td class="hide-on-mobile" data-label="Historia ID">
+                                                    <div class="history-badges">
+                                                        <span class="badge">HC {{ proposito.historia.numero_historia }}</span>
+                                                        {% if proposito.plan_estudio_pendiente_count > 0 %}
+                                                            <span class="badge badge-danger">{{ proposito.plan_estudio_pendiente_count }} pendiente{{ proposito.plan_estudio_pendiente_count|pluralize }}</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </td>
+                                                <td data-label="Acciones">
+                                                    <div class="action-buttons">
+                                                        {% if proposito.estado != 'inactivo' %}
+                                                            <button type="button" class="btn-ver"><i class="fas fa-eye"></i></button>
+                                                            <a href="{% url 'paciente_crear' historia_id=proposito.historia.historia_id %}?from_gestion=true" class="btn-editar">
+                                                                <i class="fas fa-edit"></i>
+                                                            </a>
+                                                        {% else %}
+                                                            <span class="badge badge-inactivo" style="padding: 8px 12px; font-weight: bold;">Inactivo</span>
+                                                        {% endif %}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            {% endwith %}
+                                        {% endif %}
                                     {% empty %}
                                     <tr>
                                         <td colspan="9" style="text-align: center; padding: 20px;">No se encontraron pacientes que coincidan con los filtros.</td>
@@ -397,51 +476,102 @@
         
             <div class="contenido-tabs">
                 <div class="tab-content active" id="personal-info">
-                    <div class="info-grid">
-                        <div class="info-card">
-                            <div class="card-header">
-                                <h3 class="card-title">Datos Personales</h3>
+                    <!-- Vista para Paciente Individual -->
+                    <div id="single-patient-view">
+                        <div class="info-grid">
+                            <div class="info-card">
+                                <div class="card-header">
+                                    <h3 class="card-title">Datos Personales</h3>
+                                </div>
+                                <div class="card-content">
+                                    <div class="info-item">
+                                        <i class="fas fa-calendar"></i>
+                                        <span class="info-text" id="modal-info-edad"></span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-phone"></i>
+                                        <span class="info-text" id="modal-info-telefono"></span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-envelope"></i>
+                                        <span class="info-text" id="modal-info-email"></span>
+                                    </div>
+                                    <div class="info-item">
+                                        <i class="fas fa-map-pin"></i>
+                                        <span class="info-text" id="modal-info-direccion"></span>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="card-content">
-                                <div class="info-item">
-                                    <i class="fas fa-calendar"></i>
-                                    <span class="info-text" id="modal-info-edad"></span>
+                            <div class="info-card">
+                                <div class="card-header">
+                                    <h3 class="card-title">Información Médica</h3>
                                 </div>
-                                <div class="info-item">
-                                    <i class="fas fa-phone"></i>
-                                    <span class="info-text" id="modal-info-telefono"></span>
-                                </div>
-                                <div class="info-item">
-                                    <i class="fas fa-envelope"></i>
-                                    <span class="info-text" id="modal-info-email"></span>
-                                </div>
-                                <div class="info-item">
-                                    <i class="fas fa-map-pin"></i>
-                                    <span class="info-text" id="modal-info-direccion"></span>
+                                <div class="card-content">
+                                    <div class="info-row">
+                                        <span class="info-label">Genetista asignado:</span>
+                                        <span class="badge" id="modal-info-genetista"></span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Estado:</span>
+                                        <span class="badge" id="modal-info-estado"></span>
+                                    </div>
+                                    <div class="info-row">
+                                        <span class="info-label">Última visita:</span>
+                                        <span class="info-text" id="modal-info-ultima-visita"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="info-card">
-                            <div class="card-header">
-                                <h3 class="card-title">Información Médica</h3>
+                    </div>
+                    <!-- Vista para Pareja (oculta por defecto) -->
+                    <div id="couple-patient-view" style="display: none;">
+                        <div class="info-grid-couple">
+                            <!-- Columna Cónyuge 1 -->
+                            <div class="info-card">
+                                <div class="card-header">
+                                    <h3 class="card-title" id="couple-name1"></h3>
+                                    <p class="patient-id muted" id="couple-id1"></p>
+                                </div>
+                                <div class="card-content">
+                                    <div class="info-item"><i class="fas fa-calendar"></i><span class="info-text" id="couple-edad1"></span></div>
+                                    <div class="info-item"><i class="fas fa-phone"></i><span class="info-text" id="couple-telefono1"></span></div>
+                                    <div class="info-item"><i class="fas fa-envelope"></i><span class="info-text" id="couple-email1"></span></div>
+                                    <div class="info-item"><i class="fas fa-map-pin"></i><span class="info-text" id="couple-direccion1"></span></div>
+                                </div>
                             </div>
-                            <div class="card-content">
-                                <div class="info-row">
-                                    <span class="info-label">Genetista asignado:</span>
-                                    <span class="badge" id="modal-info-genetista"></span>
+                            <!-- Columna Cónyuge 2 -->
+                            <div class="info-card">
+                                <div class="card-header">
+                                    <h3 class="card-title" id="couple-name2"></h3>
+                                    <p class="patient-id muted" id="couple-id2"></p>
                                 </div>
-                                <div class="info-row">
-                                    <span class="info-label">Estado:</span>
-                                    <span class="badge" id="modal-info-estado"></span>
+                                <div class="card-content">
+                                    <div class="info-item"><i class="fas fa-calendar"></i><span class="info-text" id="couple-edad2"></span></div>
+                                    <div class="info-item"><i class="fas fa-phone"></i><span class="info-text" id="couple-telefono2"></span></div>
+                                    <div class="info-item"><i class="fas fa-envelope"></i><span class="info-text" id="couple-email2"></span></div>
+                                    <div class="info-item"><i class="fas fa-map-pin"></i><span class="info-text" id="couple-direccion2"></span></div>
                                 </div>
-                                <div class="info-row">
-                                    <span class="info-label">Última visita:</span>
-                                    <span class="info-text" id="modal-info-ultima-visita"></span>
-                                </div>
-                                <div class="info-row">
-                                    <span class="info-label">Evoluciones:</span>
-                                    <span class="badge">2</span>
+                            </div>
+                        </div>
+                        <!-- Info médica compartida -->
+                        <div class="info-grid" style="margin-top: 1.5rem;">
+                            <div class="info-card">
+                                <div class="card-header"><h3 class="card-title">Información Médica Compartida</h3></div>
+                                <div class="card-content">
+                                    <div class="info-row">
+                                        <span class="info-label">Genetista asignado:</span>
+                                        <span class="badge" id="couple-info-genetista"></span>
+                                    </div>
+                                    <!-- ===== INICIO DE LA MODIFICACIÓN ===== -->
+                                    <div class="info-row">
+                                        <span class="info-label">Estado:</span>
+                                        <span class="badge" id="couple-info-estado"></span>
+                                    </div>
+                                    <!-- ===== FIN DE LA MODIFICACIÓN ===== -->
+                                    <div class="info-row">
+                                        <span class="info-label">Última visita:</span>
+                                        <span class="info-text" id="couple-info-ultima-visita"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -544,358 +674,418 @@
 
 
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const verPacienteModal = document.getElementById('verPacienteModal');
-        const tableBody = document.querySelector('.patients-table tbody');
-        const closeVerPacienteModalBtn = document.getElementById('closeVerPacienteModalBtn');
-        const historyListContainer = document.getElementById('history-list-container');
-        const getCSRFToken = () => document.querySelector('[name=csrfmiddlewaretoken]').value;
-        const nuevaConsultaBtn = document.getElementById('btn-nueva-consulta');
-        //const nuevoDiagnosticoBtn = document.getElementById('btn-nuevo-diagnostico');
-
-        function closeModal() {
-            if (verPacienteModal) {
-                verPacienteModal.classList.remove('active');
-                verPacienteModal.removeAttribute('data-current-proposito-id');
+<!-- Reemplaza el <script> completo al final de gestion_pacientes.html -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const verPacienteModal = document.getElementById('verPacienteModal');
+            const tableBody = document.querySelector('.patients-table tbody');
+            const closeVerPacienteModalBtn = document.getElementById('closeVerPacienteModalBtn');
+            const historyListContainer = document.getElementById('history-list-container');
+            const getCSRFToken = () => document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const nuevaConsultaBtn = document.getElementById('btn-nueva-consulta');
+    
+            function closeModal() {
+                if (verPacienteModal) {
+                    verPacienteModal.classList.remove('active');
+                    verPacienteModal.removeAttribute('data-current-proposito-id');
+                    // Reset tabs to default
+                    verPacienteModal.querySelectorAll('.modal .tab-btn').forEach(btn => btn.classList.remove('active'));
+                    verPacienteModal.querySelector('.tab-btn[data-tab="personal-info"]').classList.add('active');
+                    verPacienteModal.querySelectorAll('.modal .tab-content').forEach(content => content.classList.remove('active'));
+                    verPacienteModal.querySelector('#personal-info').classList.add('active');
+                }
+                historyListContainer.innerHTML = '<div class="spinner"></div>';
             }
-            historyListContainer.innerHTML = '<div class="spinner"></div>';
-        }
+    
+            if (tableBody) {
+                tableBody.addEventListener('click', function(e) {
+                    const viewButton = e.target.closest('.btn-ver');
+                    if (viewButton) {
+                        const row = viewButton.closest('tr');
+                        if (!row) return;
+    
+                        const type = row.dataset.type;
+                        const singleView = document.getElementById('single-patient-view');
+                        const coupleView = document.getElementById('couple-patient-view');
+                        const modalAvatar = document.getElementById('modal-avatar');
+                        const modalPatientName = document.getElementById('modal-patient-name');
+                        const modalPatientId = document.getElementById('modal-patient-id');
+                        
+                        let propositoIdForAjax;
+    
+                        if (type === 'couple') {
+                            singleView.style.display = 'none';
+                            coupleView.style.display = 'block';
+                            modalAvatar.style.display = 'none'; // Ocultamos el avatar principal para parejas
+    
+                            modalPatientName.textContent = `Pareja: ${row.dataset.nombre1} y ${row.dataset.nombre2}`;
+                            modalPatientId.textContent = `IDs: ${row.dataset.identificacion1} y ${row.dataset.identificacion2}`;
+    
+                            // Poblar datos Cónyuge 1
+                            document.getElementById('couple-name1').textContent = row.dataset.nombre1;
+                            document.getElementById('couple-id1').textContent = `ID: ${row.dataset.identificacion1}`;
+                            document.getElementById('couple-edad1').textContent = `Edad: ${row.dataset.edad1} años`;
+                            document.getElementById('couple-telefono1').textContent = row.dataset.telefono1;
+                            document.getElementById('couple-email1').textContent = row.dataset.email1;
+                            document.getElementById('couple-direccion1').textContent = row.dataset.direccion1;
+    
+                            // Poblar datos Cónyuge 2
+                            document.getElementById('couple-name2').textContent = row.dataset.nombre2;
+                            document.getElementById('couple-id2').textContent = `ID: ${row.dataset.identificacion2}`;
+                            document.getElementById('couple-edad2').textContent = `Edad: ${row.dataset.edad2} años`;
+                            document.getElementById('couple-telefono2').textContent = row.dataset.telefono2;
+                            document.getElementById('couple-email2').textContent = row.dataset.email2;
+                            document.getElementById('couple-direccion2').textContent = row.dataset.direccion2;
+    
+                            // Poblar info médica compartida
+                            document.getElementById('couple-info-genetista').textContent = row.dataset.genetista;
+                            document.getElementById('couple-info-ultima-visita').textContent = row.dataset.ultimaVisita;
+                            
+                            // ===== INICIO DE LA LÓGICA MODIFICADA PARA ESTADO =====
+                            const slug1 = row.dataset.estadoSlug1;
+                            const slug2 = row.dataset.estadoSlug2;
+                            
+                            let finalSlug, finalDisplay;
 
-        if (tableBody) {
-            tableBody.addEventListener('click', function(e) {
-                const viewButton = e.target.closest('.btn-ver');
-                if (viewButton) {
-                    const row = viewButton.closest('tr');
-                    if (row) {
-                        document.getElementById('modal-patient-name').textContent = row.dataset.nombre;
-                        document.getElementById('modal-patient-id').textContent = 'ID: ' + row.dataset.identificacion;
-                        const avatarImg = document.getElementById('modal-avatar-img');
-                        const avatarFallback = document.getElementById('modal-avatar-fallback');
-                        if (row.dataset.fotoUrl && !row.dataset.fotoUrl.endsWith('default_avatar.png')) {
-                            avatarImg.src = row.dataset.fotoUrl; avatarImg.style.display = 'block'; avatarFallback.style.display = 'none';
-                        } else {
-                            avatarFallback.textContent = row.dataset.avatarFallback; avatarImg.style.display = 'none'; avatarFallback.style.display = 'flex';
+                            // Prioridad: Inactivo > En Seguimiento > Cerrado
+                            if (slug1 === 'inactivo' || slug2 === 'inactivo') {
+                                finalSlug = 'inactivo';
+                                finalDisplay = 'Inactivo';
+                            } else if (slug1 === 'en_seguimiento' || slug2 === 'en_seguimiento') {
+                                finalSlug = 'en_seguimiento';
+                                finalDisplay = 'En Seguimiento';
+                            } else { // Ambos deben ser 'cerrado'
+                                finalSlug = 'cerrado';
+                                finalDisplay = 'Cerrado';
+                            }
+
+                            const estadoBadge = document.getElementById('couple-info-estado');
+                            estadoBadge.textContent = finalDisplay;
+                            estadoBadge.className = 'badge badge-' + finalSlug;
+                            // ===== FIN DE LA LÓGICA MODIFICADA PARA ESTADO =====
+                            
+                            propositoIdForAjax = row.dataset.proposito1Id; // Usamos el ID del primer miembro para la consulta AJAX
+    
+                        } else { // type === 'single'
+                            singleView.style.display = 'block';
+                            coupleView.style.display = 'none';
+                            modalAvatar.style.display = 'flex';
+    
+                            // Poblar datos del paciente individual
+                            modalPatientName.textContent = row.dataset.nombre;
+                            modalPatientId.textContent = 'ID: ' + row.dataset.identificacion;
+                            const avatarImg = document.getElementById('modal-avatar-img');
+                            const avatarFallback = document.getElementById('modal-avatar-fallback');
+                            if (row.dataset.fotoUrl && !row.dataset.fotoUrl.endsWith('default_avatar.png')) {
+                                avatarImg.src = row.dataset.fotoUrl; avatarImg.style.display = 'block'; avatarFallback.style.display = 'none';
+                            } else {
+                                avatarFallback.textContent = row.dataset.avatarFallback; avatarImg.style.display = 'none'; avatarFallback.style.display = 'flex';
+                            }
+                            document.getElementById('modal-info-edad').textContent = 'Edad: ' + row.dataset.edad + ' años';
+                            document.getElementById('modal-info-telefono').textContent = row.dataset.telefono;
+                            document.getElementById('modal-info-email').textContent = row.dataset.email;
+                            document.getElementById('modal-info-direccion').textContent = row.dataset.direccion;
+                            document.getElementById('modal-info-genetista').textContent = row.dataset.genetista;
+                            document.getElementById('modal-info-ultima-visita').textContent = row.dataset.ultimaVisita;
+                            const estadoBadge = document.getElementById('modal-info-estado');
+                            estadoBadge.textContent = row.dataset.estadoDisplay;
+                            estadoBadge.className = 'badge badge-' + row.dataset.estadoSlug;
+                            
+                            propositoIdForAjax = row.dataset.propositoId;
                         }
-                        document.getElementById('modal-info-edad').textContent = 'Edad: ' + row.dataset.edad + ' años';
-                        document.getElementById('modal-info-telefono').textContent = row.dataset.telefono;
-                        document.getElementById('modal-info-email').textContent = row.dataset.email;
-                        document.getElementById('modal-info-direccion').textContent = row.dataset.direccion;
-                        document.getElementById('modal-info-genetista').textContent = row.dataset.genetista;
-                        document.getElementById('modal-info-ultima-visita').textContent = row.dataset.ultimaVisita;
-                        const estadoBadge = document.getElementById('modal-info-estado');
-                        estadoBadge.textContent = row.dataset.estadoDisplay;
-                        estadoBadge.className = 'badge badge-' + row.dataset.estadoSlug;
-
-                        const propositoId = row.dataset.propositoId;
-                        verPacienteModal.dataset.currentPropositoId = propositoId;
-
-                        loadHistoriaClinica(propositoId);
-
+    
+                        verPacienteModal.dataset.currentPropositoId = propositoIdForAjax;
+                        loadHistoriaClinica(propositoIdForAjax);
                         verPacienteModal.classList.add('active');
                     }
-                }
-            });
-        }
-
-        if (closeVerPacienteModalBtn) closeVerPacienteModalBtn.addEventListener('click', closeModal);
-        if (verPacienteModal) verPacienteModal.addEventListener('click', e => { if (e.target === verPacienteModal) closeModal(); });
-
-        verPacienteModal.querySelectorAll('.modal .tab-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                verPacienteModal.querySelectorAll('.modal .tab-btn').forEach(btn => btn.classList.remove('active'));
-                this.classList.add('active');
-                verPacienteModal.querySelectorAll('.modal .tab-content').forEach(content => content.classList.remove('active'));
-                const tabId = this.getAttribute('data-tab');
-                verPacienteModal.querySelector('#' + tabId).classList.add('active');
-            });
-        });
-
-        function loadHistoriaClinica(propositoId) {
-            historyListContainer.innerHTML = '<div class="spinner"></div>';
+                });
+            }
             
-            // Resetear botones
-            nuevaConsultaBtn.style.display = 'none';
-            nuevaConsultaBtn.href = '#';
-            //nuevoDiagnosticoBtn.style.display = 'none';
-           // nuevoDiagnosticoBtn.href = '#';
-
-            const presuntivosList = document.getElementById('diagnosticos-presuntivos-list');
-            const finalContainer = document.getElementById('diagnostico-final-container');
-            const finalView = document.getElementById('diagnostico-final-view');
-            const finalEdit = document.getElementById('diagnostico-final-edit');
-            const finalAddBtn = document.getElementById('btn-add-diagnostico-final');
-
-            presuntivosList.innerHTML = '';
-            finalView.style.display = 'none';
-            finalEdit.style.display = 'none';
-            finalAddBtn.style.display = 'none';
-            finalContainer.dataset.evaluacionId = '';
-
-            fetch(`/ajax/get-historia-clinica/${propositoId}/`)
-                .then(response => response.json())
-                .then(data => {
-                    historyListContainer.innerHTML = '';
-                    if (data.evaluacion_id) {
-                        const urlNuevaConsulta = `/evaluacion/${data.evaluacion_id}/nueva-consulta/`;
-                        nuevaConsultaBtn.href = urlNuevaConsulta;
-                        nuevaConsultaBtn.style.display = 'inline-flex';
-                        //nuevoDiagnosticoBtn.href = urlNuevaConsulta;
-                        //nuevoDiagnosticoBtn.style.display = 'inline-flex';
-                    }
-                    if (data.planes_de_estudio.length > 0) {
-                        data.planes_de_estudio.forEach(plan => {
-                            const cardHtml = createPlanEstudioCard(plan);
-                            historyListContainer.insertAdjacentHTML('beforeend', cardHtml);
-                        });
-                    } else {
-                        historyListContainer.innerHTML = '<p style="text-align:center; color: #777;">No hay planes de estudio registrados para este paciente.</p>';
-                    }
-
-                    if (data.evaluacion_id) {
-                        finalContainer.dataset.evaluacionId = data.evaluacion_id;
-
-                        if (data.diagnosticos_presuntivos && data.diagnosticos_presuntivos.length > 0) {
-                            data.diagnosticos_presuntivos.forEach(desc => {
-                                const item = document.createElement('div');
-                                item.className = 'analysis-item';
-                                item.innerHTML = `<span class="analysis-name">${desc}</span>`;
-                                presuntivosList.appendChild(item);
+            if (closeVerPacienteModalBtn) closeVerPacienteModalBtn.addEventListener('click', closeModal);
+            if (verPacienteModal) verPacienteModal.addEventListener('click', e => { if (e.target === verPacienteModal) closeModal(); });
+    
+            verPacienteModal.querySelectorAll('.modal .tab-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    verPacienteModal.querySelectorAll('.modal .tab-btn').forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    verPacienteModal.querySelectorAll('.modal .tab-content').forEach(content => content.classList.remove('active'));
+                    const tabId = this.getAttribute('data-tab');
+                    verPacienteModal.querySelector('#' + tabId).classList.add('active');
+                });
+            });
+    
+            // El resto de la función loadHistoriaClinica y las demás funciones permanecen sin cambios
+            // Copiamos la versión más actualizada de la pregunta original para asegurar que todo funcione
+            function loadHistoriaClinica(propositoId) {
+                historyListContainer.innerHTML = '<div class="spinner"></div>';
+                
+                nuevaConsultaBtn.style.display = 'none';
+                nuevaConsultaBtn.href = '#';
+    
+                const presuntivosList = document.getElementById('diagnosticos-presuntivos-list');
+                const finalContainer = document.getElementById('diagnostico-final-container');
+                const finalView = document.getElementById('diagnostico-final-view');
+                const finalEdit = document.getElementById('diagnostico-final-edit');
+                const finalAddBtn = document.getElementById('btn-add-diagnostico-final');
+    
+                presuntivosList.innerHTML = '';
+                finalView.style.display = 'none';
+                finalEdit.style.display = 'none';
+                finalAddBtn.style.display = 'none';
+                finalContainer.dataset.evaluacionId = '';
+    
+                fetch(`/ajax/get-historia-clinica/${propositoId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        historyListContainer.innerHTML = '';
+                        if (data.evaluacion_id) {
+                            const urlNuevaConsulta = `/evaluacion/${data.evaluacion_id}/nueva-consulta/`;
+                            nuevaConsultaBtn.href = urlNuevaConsulta;
+                            nuevaConsultaBtn.style.display = 'inline-flex';
+                        }
+                        if (data.planes_de_estudio.length > 0) {
+                            data.planes_de_estudio.forEach(plan => {
+                                const cardHtml = createPlanEstudioCard(plan);
+                                historyListContainer.insertAdjacentHTML('beforeend', cardHtml);
                             });
                         } else {
-                            presuntivosList.innerHTML = '<div class="analysis-item"><span class="analysis-name muted">Sin diagnósticos presuntivos registrados.</span></div>';
+                            historyListContainer.innerHTML = '<p style="text-align:center; color: #777;">No hay planes de estudio registrados para este paciente.</p>';
                         }
-
-                        if (data.diagnostico_final) {
-                            document.getElementById('diagnostico-final-text').innerText = data.diagnostico_final;
-                            document.getElementById('diagnostico-final-textarea').value = data.diagnostico_final;
-                            finalView.style.display = 'block';
-                            finalEdit.style.display = 'none';
-                            finalAddBtn.style.display = 'none';
+    
+                        if (data.evaluacion_id) {
+                            finalContainer.dataset.evaluacionId = data.evaluacion_id;
+    
+                            if (data.diagnosticos_presuntivos && data.diagnosticos_presuntivos.length > 0) {
+                                data.diagnosticos_presuntivos.forEach(desc => {
+                                    const item = document.createElement('div');
+                                    item.className = 'analysis-item';
+                                    item.innerHTML = `<span class="analysis-name">${desc}</span>`;
+                                    presuntivosList.appendChild(item);
+                                });
+                            } else {
+                                presuntivosList.innerHTML = '<div class="analysis-item"><span class="analysis-name muted">Sin diagnósticos presuntivos registrados.</span></div>';
+                            }
+    
+                            if (data.diagnostico_final) {
+                                document.getElementById('diagnostico-final-text').innerText = data.diagnostico_final;
+                                document.getElementById('diagnostico-final-textarea').value = data.diagnostico_final;
+                                finalView.style.display = 'block';
+                                finalEdit.style.display = 'none';
+                                finalAddBtn.style.display = 'none';
+                            } else {
+                                finalView.style.display = 'none';
+                                finalEdit.style.display = 'none';
+                                finalAddBtn.style.display = 'block';
+                            }
                         } else {
-                            finalView.style.display = 'none';
-                            finalEdit.style.display = 'none';
-                            finalAddBtn.style.display = 'block';
+                             presuntivosList.innerHTML = '<div class="analysis-item"><span class="analysis-name muted">Aún no se ha iniciado una evaluación genética.</span></div>';
                         }
-                    } else {
-                         presuntivosList.innerHTML = '<div class="analysis-item"><span class="analysis-name muted">Aún no se ha iniciado una evaluación genética.</span></div>';
-                    }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching historia clinica:', error);
+                        historyListContainer.innerHTML = '<p style="text-align:center; color: red;">Error al cargar el historial.</p>';
+                        presuntivosList.innerHTML = '<p style="text-align:center; color: red;">Error al cargar los diagnósticos.</p>';
+                    });
+            }
+    
+            function createPlanEstudioCard(plan) {
+                const statusClass = plan.completado ? 'status-completed' : 'status-pending';
+                const statusText = plan.completado ? 'Completado' : 'Pendiente';
+                const fechaVisita = plan.fecha_visita ? new Date(plan.fecha_visita + 'T00:00:00').toLocaleDateString('es-ES') : 'N/A';
+                
+                let archivosHtml = plan.archivos.map(archivo => `<a href="${archivo.url}" target="_blank" class="tag">${archivo.nombre}</a>`).join('');
+                if (!archivosHtml) archivosHtml = '<span class="tag tag-muted">Sin archivos</span>';
+    
+                let archivosEliminarHtml = plan.archivos.map(archivo => `
+                    <li>
+                        <label>
+                            <input type="checkbox" name="archivos_a_eliminar" value="${archivo.id}">
+                            ${archivo.nombre}
+                        </label>
+                    </li>
+                `).join('');
+    
+                return `
+                    <div class="history-card" data-plan-id="${plan.id}">
+                        <div class="view-content">
+                            <div class="card-main-content">
+                                <div class="historia-card-header">
+                                    <span class="badge history-id">${plan.tipo_consulta}</span>
+                                    <span class="badge ${statusClass}">${statusText}</span>
+                                </div>
+                                <div class="card-body">
+                                    <h4 class="history-title">Plan de Estudio:</h4>
+                                    <p class="history-subtitle">${plan.accion}</p>
+                                    <h4 class="history-title" style="margin-top: 10px;">Resultados:</h4>
+                                    <p class="history-subtitle">${plan.asesoramiento_evoluciones || 'Sin resultados registrados.'}</p>
+                                    <div class="history-meta">
+                                        <div class="meta-item"><i class="fas fa-calendar"></i><span>${fechaVisita}</span></div>
+                                        <div class="meta-item"><i class="fas fa-user"></i><span>${plan.genetista_nombre}</span></div>
+                                    </div>
+                                </div>
+                                <div class="history-tags">${archivosHtml}</div>
+                            </div>
+                            <div class="card-actions view-actions">
+                                <button class="action-btn js-edit-btn" title="Editar"><i class="fas fa-edit"></i></button>
+                            </div>
+                        </div>
+                        <div class="editable-content">
+                            <h4>Editando: ${plan.tipo_consulta}</h4>
+                            <form class="edit-form" action="/ajax/edit-plan-estudio/${plan.id}/" method="POST" enctype="multipart/form-data">
+                                <input type="hidden" name="csrfmiddlewaretoken" value="${getCSRFToken()}">
+                                <div class="form-group">
+                                    <label for="accion_${plan.id}">Acción a Realizar</label>
+                                    <textarea name="accion" id="accion_${plan.id}" rows="3">${plan.accion}</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="evoluciones_${plan.id}">Asesoramiento y Evoluciones (Resultados)</label>
+                                    <textarea name="asesoramiento_evoluciones" id="evoluciones_${plan.id}" rows="3">${plan.asesoramiento_evoluciones}</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="fecha_visita_${plan.id}">Fecha de Próxima Visita</label>
+                                    <input type="date" name="fecha_visita" id="fecha_visita_${plan.id}" value="${plan.fecha_visita || ''}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="archivos_nuevos_${plan.id}">Añadir nuevos archivos</label>
+                                    <input type="file" name="archivos_nuevos" id="archivos_nuevos_${plan.id}" multiple>
+                                </div>
+                                <div class="form-group-medio">
+                                    <div class="half-width">
+                                        <label>Eliminar archivos existentes</label>
+                                        <ul class="file-delete-list">${archivosEliminarHtml}</ul>
+                                    </div>
+                                    <div class="half-width">
+                                        <label>
+                                            Marcar como Completado
+                                            <br>
+                                            <input type="checkbox" name="completado" ${plan.completado ? 'checked' : ''}>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="card-actions edit-actions">
+                                    <button type="button" class="btn btn-secondary js-cancel-btn">Cancelar</button>
+                                    <button type="submit" class="btn btn-primary js-save-btn">Guardar Cambios</button>
+                                </div>
+                                <div class="form-errors" style="color: red; margin-top: 10px;"></div>
+                            </form>
+                        </div>
+                    </div>`;
+            }
+    
+            historyListContainer.addEventListener('click', function(e) {
+                const card = e.target.closest('.history-card');
+                if (!card) return;
+    
+                if (e.target.closest('.js-edit-btn')) { card.classList.add('is-editing'); }
+                if (e.target.closest('.js-cancel-btn')) { card.classList.remove('is-editing'); card.querySelector('.form-errors').innerHTML = ''; }
+    
+                if (e.target.closest('.js-save-btn')) {
+                    e.preventDefault();
+                    const form = card.querySelector('form');
+                    const formData = new FormData(form);
+                    const saveButton = e.target.closest('.js-save-btn');
+                    const originalButtonText = saveButton.innerHTML;
+                    saveButton.innerHTML = 'Guardando...';
+                    saveButton.disabled = true;
+    
+                    fetch(form.action, { method: 'POST', body: formData, headers: { 'X-CSRFToken': getCSRFToken() } })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            card.classList.remove('is-editing');
+                            const propositoId = verPacienteModal.dataset.currentPropositoId;
+                            loadHistoriaClinica(propositoId);
+                        } else {
+                            const errorContainer = card.querySelector('.form-errors');
+                            let errorHtml = '<strong>Por favor, corrija los siguientes errores:</strong><ul>';
+                            const errors = JSON.parse(data.errors);
+                            for (const field in errors) {
+                                errors[field].forEach(error => { errorHtml += `<li>${field}: ${error.message}</li>`; });
+                            }
+                            errorHtml += '</ul>';
+                            errorContainer.innerHTML = errorHtml;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error submitting form:', error);
+                        card.querySelector('.form-errors').innerHTML = 'Ocurrió un error de red. Inténtelo de nuevo.';
+                    })
+                    .finally(() => {
+                        saveButton.innerHTML = originalButtonText;
+                        saveButton.disabled = false;
+                    });
+                }
+            });
+    
+            const btnAddFinal = document.getElementById('btn-add-diagnostico-final');
+            const btnEditFinal = document.getElementById('btn-edit-diagnostico-final');
+            const btnCancelFinal = document.getElementById('btn-cancel-diagnostico-final');
+            const btnSaveFinal = document.getElementById('btn-save-diagnostico-final');
+            const finalViewDiv = document.getElementById('diagnostico-final-view');
+            const finalEditDiv = document.getElementById('diagnostico-final-edit');
+            const finalContainerDiv = document.getElementById('diagnostico-final-container');
+            const finalTextArea = document.getElementById('diagnostico-final-textarea');
+    
+            btnAddFinal.addEventListener('click', () => {
+                finalTextArea.value = '';
+                btnAddFinal.style.display = 'none';
+                finalEditDiv.style.display = 'block';
+            });
+    
+            btnEditFinal.addEventListener('click', () => {
+                finalViewDiv.style.display = 'none';
+                finalEditDiv.style.display = 'block';
+                finalTextArea.value = document.getElementById('diagnostico-final-text').innerText;
+            });
+    
+            btnCancelFinal.addEventListener('click', () => {
+                finalEditDiv.style.display = 'none';
+                if (document.getElementById('diagnostico-final-text').innerText) {
+                    finalViewDiv.style.display = 'block';
+                } else {
+                    btnAddFinal.style.display = 'block';
+                }
+            });
+    
+            btnSaveFinal.addEventListener('click', () => {
+                const evaluacionId = finalContainerDiv.dataset.evaluacionId;
+                if (!evaluacionId) {
+                    alert('Error: No se encontró el ID de la evaluación.');
+                    return;
+                }
+    
+                const diagnosticoTexto = finalTextArea.value;
+                const originalButtonText = btnSaveFinal.innerHTML;
+                btnSaveFinal.innerHTML = 'Guardando...';
+                btnSaveFinal.disabled = true;
+    
+                fetch(`/ajax/evaluacion/${evaluacionId}/guardar-diagnostico-final/`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCSRFToken() },
+                    body: JSON.stringify({ diagnostico_final: diagnosticoTexto })
                 })
-                .catch(error => {
-                    console.error('Error fetching historia clinica:', error);
-                    historyListContainer.innerHTML = '<p style="text-align:center; color: red;">Error al cargar el historial.</p>';
-                    presuntivosList.innerHTML = '<p style="text-align:center; color: red;">Error al cargar los diagnósticos.</p>';
-                });
-        }
-
-        function createPlanEstudioCard(plan) {
-            const statusClass = plan.completado ? 'status-completed' : 'status-pending';
-            const statusText = plan.completado ? 'Completado' : 'Pendiente';
-            const fechaVisita = plan.fecha_visita ? new Date(plan.fecha_visita + 'T00:00:00').toLocaleDateString('es-ES') : 'N/A';
-            
-            let archivosHtml = plan.archivos.map(archivo => `<a href="${archivo.url}" target="_blank" class="tag">${archivo.nombre}</a>`).join('');
-            if (!archivosHtml) archivosHtml = '<span class="tag tag-muted">Sin archivos</span>';
-
-            let archivosEliminarHtml = plan.archivos.map(archivo => `
-                <li>
-                    <label>
-                        <input type="checkbox" name="archivos_a_eliminar" value="${archivo.id}">
-                        ${archivo.nombre}
-                    </label>
-                </li>
-            `).join('');
-
-            return `
-                <div class="history-card" data-plan-id="${plan.id}">
-                    <div class="view-content">
-                        <div class="card-main-content">
-                            <div class="historia-card-header">
-                                <span class="badge history-id">${plan.tipo_consulta}</span>
-                                <span class="badge ${statusClass}">${statusText}</span>
-                            </div>
-                            <div class="card-body">
-                                <h4 class="history-title">Plan de Estudio:</h4>
-                                <p class="history-subtitle">${plan.accion}</p>
-                                <h4 class="history-title" style="margin-top: 10px;">Resultados:</h4>
-                                <p class="history-subtitle">${plan.asesoramiento_evoluciones || 'Sin resultados registrados.'}</p>
-                                <div class="history-meta">
-                                    <div class="meta-item"><i class="fas fa-calendar"></i><span>${fechaVisita}</span></div>
-                                    <div class="meta-item"><i class="fas fa-user"></i><span>${plan.genetista_nombre}</span></div>
-                                </div>
-                            </div>
-                            <div class="history-tags">${archivosHtml}</div>
-                        </div>
-                        <div class="card-actions view-actions">
-                            <button class="action-btn js-edit-btn" title="Editar"><i class="fas fa-edit"></i></button>
-                        </div>
-                    </div>
-                    <div class="editable-content">
-                        <h4>Editando: ${plan.tipo_consulta}</h4>
-                        <form class="edit-form" action="/ajax/edit-plan-estudio/${plan.id}/" method="POST" enctype="multipart/form-data">
-                            <input type="hidden" name="csrfmiddlewaretoken" value="${getCSRFToken()}">
-                            <div class="form-group">
-                                <label for="accion_${plan.id}">Acción a Realizar</label>
-                                <textarea name="accion" id="accion_${plan.id}" rows="3">${plan.accion}</textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="evoluciones_${plan.id}">Asesoramiento y Evoluciones (Resultados)</label>
-                                <textarea name="asesoramiento_evoluciones" id="evoluciones_${plan.id}" rows="3">${plan.asesoramiento_evoluciones}</textarea>
-                            </div>
-                            <div class="form-group">
-                                <label for="fecha_visita_${plan.id}">Fecha de Próxima Visita</label>
-                                <input type="date" name="fecha_visita" id="fecha_visita_${plan.id}" value="${plan.fecha_visita || ''}">
-                            </div>
-                            <div class="form-group">
-                                <label for="archivos_nuevos_${plan.id}">Añadir nuevos archivos</label>
-                                <input type="file" name="archivos_nuevos" id="archivos_nuevos_${plan.id}" multiple>
-                            </div>
-                            <div class="form-group-medio">
-                                <div class="half-width">
-                                    <label>Eliminar archivos existentes</label>
-                                    <ul class="file-delete-list">${archivosEliminarHtml}</ul>
-                                </div>
-                                <div class="half-width">
-                                    <label>
-                                        Marcar como Completado
-                                        <br>
-                                        <input type="checkbox" name="completado" ${plan.completado ? 'checked' : ''}>
-                                    </label>
-                                </div>
-                            </div>
-                            ${plan.archivos.length > 0 ? `
-                            
-                            ` : ''}
-                            <div class="card-actions edit-actions">
-                                <button type="button" class="btn btn-secondary js-cancel-btn">Cancelar</button>
-                                <button type="submit" class="btn btn-primary js-save-btn">Guardar Cambios</button>
-                            </div>
-                            <div class="form-errors" style="color: red; margin-top: 10px;"></div>
-                        </form>
-                    </div>
-                </div>`;
-        }
-
-        historyListContainer.addEventListener('click', function(e) {
-            const card = e.target.closest('.history-card');
-            if (!card) return;
-
-            if (e.target.closest('.js-edit-btn')) { card.classList.add('is-editing'); }
-            if (e.target.closest('.js-cancel-btn')) { card.classList.remove('is-editing'); card.querySelector('.form-errors').innerHTML = ''; }
-
-            if (e.target.closest('.js-save-btn')) {
-                e.preventDefault();
-                const form = card.querySelector('form');
-                const formData = new FormData(form);
-                const saveButton = e.target.closest('.js-save-btn');
-                const originalButtonText = saveButton.innerHTML;
-                saveButton.innerHTML = 'Guardando...';
-                saveButton.disabled = true;
-
-                fetch(form.action, { method: 'POST', body: formData, headers: { 'X-CSRFToken': getCSRFToken() } })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        card.classList.remove('is-editing');
-                        const propositoId = verPacienteModal.dataset.currentPropositoId;
-                        loadHistoriaClinica(propositoId);
-                    } else {
-                        const errorContainer = card.querySelector('.form-errors');
-                        let errorHtml = '<strong>Por favor, corrija los siguientes errores:</strong><ul>';
-                        const errors = JSON.parse(data.errors);
-                        for (const field in errors) {
-                            errors[field].forEach(error => { errorHtml += `<li>${field}: ${error.message}</li>`; });
+                        document.getElementById('diagnostico-final-text').innerText = diagnosticoTexto;
+                        finalEditDiv.style.display = 'none';
+                        if(diagnosticoTexto) {
+                            finalViewDiv.style.display = 'block';
+                        } else {
+                            finalViewDiv.style.display = 'none';
+                            btnAddFinal.style.display = 'block';
                         }
-                        errorHtml += '</ul>';
-                        errorContainer.innerHTML = errorHtml;
-                    }
-                })
-                .catch(error => {
-                    console.error('Error submitting form:', error);
-                    card.querySelector('.form-errors').innerHTML = 'Ocurrió un error de red. Inténtelo de nuevo.';
-                })
-                .finally(() => {
-                    saveButton.innerHTML = originalButtonText;
-                    saveButton.disabled = false;
-                });
-            }
-        });
-
-        const btnAddFinal = document.getElementById('btn-add-diagnostico-final');
-        const btnEditFinal = document.getElementById('btn-edit-diagnostico-final');
-        const btnCancelFinal = document.getElementById('btn-cancel-diagnostico-final');
-        const btnSaveFinal = document.getElementById('btn-save-diagnostico-final');
-        const finalViewDiv = document.getElementById('diagnostico-final-view');
-        const finalEditDiv = document.getElementById('diagnostico-final-edit');
-        const finalContainerDiv = document.getElementById('diagnostico-final-container');
-        const finalTextArea = document.getElementById('diagnostico-final-textarea');
-
-        btnAddFinal.addEventListener('click', () => {
-            finalTextArea.value = '';
-            btnAddFinal.style.display = 'none';
-            finalEditDiv.style.display = 'block';
-        });
-
-        btnEditFinal.addEventListener('click', () => {
-            finalViewDiv.style.display = 'none';
-            finalEditDiv.style.display = 'block';
-            finalTextArea.value = document.getElementById('diagnostico-final-text').innerText;
-        });
-
-        btnCancelFinal.addEventListener('click', () => {
-            finalEditDiv.style.display = 'none';
-            if (document.getElementById('diagnostico-final-text').innerText) {
-                finalViewDiv.style.display = 'block';
-            } else {
-                btnAddFinal.style.display = 'block';
-            }
-        });
-
-        btnSaveFinal.addEventListener('click', () => {
-            const evaluacionId = finalContainerDiv.dataset.evaluacionId;
-            if (!evaluacionId) {
-                alert('Error: No se encontró el ID de la evaluación.');
-                return;
-            }
-
-            const diagnosticoTexto = finalTextArea.value;
-            const originalButtonText = btnSaveFinal.innerHTML;
-            btnSaveFinal.innerHTML = 'Guardando...';
-            btnSaveFinal.disabled = true;
-
-            fetch(`/ajax/evaluacion/${evaluacionId}/guardar-diagnostico-final/`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': getCSRFToken()
-                },
-                body: JSON.stringify({ diagnostico_final: diagnosticoTexto })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    document.getElementById('diagnostico-final-text').innerText = diagnosticoTexto;
-                    finalEditDiv.style.display = 'none';
-                    if(diagnosticoTexto) {
-                        finalViewDiv.style.display = 'block';
                     } else {
-                        finalViewDiv.style.display = 'none';
-                        btnAddFinal.style.display = 'block';
+                        alert('Error al guardar: ' + data.message);
                     }
-                } else {
-                    alert('Error al guardar: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Ocurrió un error de red.');
-            })
-            .finally(() => {
-                btnSaveFinal.innerHTML = originalButtonText;
-                btnSaveFinal.disabled = false;
+                })
+                .catch(error => { console.error('Error:', error); alert('Ocurrió un error de red.'); })
+                .finally(() => {
+                    btnSaveFinal.innerHTML = originalButtonText;
+                    btnSaveFinal.disabled = false;
+                });
             });
         });
-       
-    });
-</script>
+    </script>
     
 {% endblock %}

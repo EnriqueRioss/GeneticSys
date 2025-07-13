@@ -2145,7 +2145,6 @@ def gestion_pacientes_view(request):
     pacientes_seguimiento = base_pacientes_qs.filter(estado=Propositos.ESTADO_SEGUIMIENTO).count()
     pacientes_inactivos = base_pacientes_qs.filter(estado=Propositos.ESTADO_INACTIVO).count()
     
-    # ... (el resto del cálculo de estadísticas se mantiene igual)
     historias_ids = base_pacientes_qs.values_list('historia_id', flat=True).distinct()
     historias_clinicas_count = HistoriasClinicas.objects.filter(pk__in=historias_ids).count()
     evaluaciones_ids = EvaluacionGenetica.objects.filter(Q(proposito__in=base_pacientes_qs) | Q(pareja__proposito_id_1__in=base_pacientes_qs) | Q(pareja__proposito_id_2__in=base_pacientes_qs)).values_list('evaluacion_id', flat=True).distinct()
@@ -2156,17 +2155,12 @@ def gestion_pacientes_view(request):
     nuevas_historias_mes = HistoriasClinicas.objects.filter(pk__in=historias_ids, fecha_ingreso__gte=start_of_month).count()
     porcentaje_cerrados = (pacientes_cerrados / total_pacientes * 100) if total_pacientes > 0 else 0
 
-    # Determinar qué opciones de estado mostrar en el filtro
+    # Formulario de búsqueda (sin cambios)
     user_role = request.user.genetistas.rol
     estado_choices_for_filter = Propositos.ESTADO_CHOICES if user_role == 'ADM' or request.user.is_superuser else [c for c in Propositos.ESTADO_CHOICES if c[0] != Propositos.ESTADO_INACTIVO]
-
-    # Usar el nuevo formulario específico para esta vista
     form = PatientSearchForm(request.GET or None, user=request.user, estado_choices=estado_choices_for_filter)
     
-    pacientes_a_procesar_qs = base_pacientes_qs.annotate(
-        plan_estudio_pendiente_count=Count('evaluaciongenetica__planes_estudio', filter=Q(evaluaciongenetica__planes_estudio__completado=False))
-    ).order_by('-historia__fecha_ingreso')
-
+    pacientes_a_procesar_qs = base_pacientes_qs
     search_attempted = bool(request.GET)
     if form.is_valid():
         if form.cleaned_data.get('genetista'):
@@ -2177,30 +2171,71 @@ def gestion_pacientes_view(request):
         if form.cleaned_data.get('estado'):
             pacientes_a_procesar_qs = pacientes_a_procesar_qs.filter(estado=form.cleaned_data.get('estado'))
 
-    # Procesamiento para agrupar parejas (sin cambios)
-    pacientes_dict = {p.proposito_id: p for p in pacientes_a_procesar_qs}
-    parejas_qs = Parejas.objects.filter(Q(proposito_id_1_id__in=pacientes_dict.keys()) & Q(proposito_id_2_id__in=pacientes_dict.keys())).select_related('proposito_id_1', 'proposito_id_2')
-    final_pacientes_list = []
+    # ===== INICIO DE LA LÓGICA MODIFICADA PARA AGRUPAR PAREJAS =====
+    
+    # Anotamos el conteo de planes pendientes para historias de un solo propósito.
+    pacientes_con_conteo_single = pacientes_a_procesar_qs.annotate(
+        plan_estudio_pendiente_count_single=Count('evaluaciongenetica__planes_estudio', filter=Q(evaluaciongenetica__planes_estudio__completado=False))
+    )
+
+    pacientes_dict = {p.proposito_id: p for p in pacientes_con_conteo_single}
     processed_ids = set()
+    final_list = []
+
+    # Buscamos todas las parejas que involucren a los pacientes filtrados.
+    parejas_qs = Parejas.objects.filter(
+        Q(proposito_id_1_id__in=pacientes_dict.keys()) | Q(proposito_id_2_id__in=pacientes_dict.keys())
+    ).select_related(
+        'proposito_id_1__historia__genetista__user', 
+        'proposito_id_2__historia__genetista__user'
+    ).prefetch_related(
+        'evaluaciongenetica_set__planes_estudio' # Clave para obtener los planes de la pareja
+    )
+
+    # Procesamos las parejas primero
     for pareja in parejas_qs:
-        if pareja.proposito_id_1_id not in processed_ids and pareja.proposito_id_2_id not in processed_ids:
-            p1 = pacientes_dict.get(pareja.proposito_id_1_id); p2 = pacientes_dict.get(pareja.proposito_id_2_id)
-            p1.is_in_couple = True; p2.is_in_couple = True
-            p1.couple_id = pareja.pk; p2.couple_id = pareja.pk
-            final_pacientes_list.extend([p1, p2])
-            processed_ids.add(p1.proposito_id); processed_ids.add(p2.proposito_id)
+        # Nos aseguramos de que AMBOS miembros de la pareja estén en la lista filtrada
+        if pareja.proposito_id_1_id in pacientes_dict and pareja.proposito_id_2_id in pacientes_dict:
+            if pareja.proposito_id_1_id not in processed_ids and pareja.proposito_id_2_id not in processed_ids:
+                
+                # Calculamos el conteo de planes pendientes para la pareja
+                evaluacion = pareja.evaluaciongenetica_set.first()
+                if evaluacion:
+                    pareja.plan_estudio_pendiente_count = sum(1 for plan in evaluacion.planes_estudio.all() if not plan.completado)
+                else:
+                    pareja.plan_estudio_pendiente_count = 0
+                
+                # Adjuntamos los objetos Proposito completos (con sus datos) al objeto Pareja
+                pareja.proposito_id_1 = pacientes_dict[pareja.proposito_id_1_id]
+                pareja.proposito_id_2 = pacientes_dict[pareja.proposito_id_2_id]
+
+                final_list.append(pareja)
+                processed_ids.add(pareja.proposito_id_1_id)
+                processed_ids.add(pareja.proposito_id_2_id)
+
+    # Procesamos los pacientes individuales restantes
     for proposito_id, proposito in pacientes_dict.items():
         if proposito_id not in processed_ids:
-            proposito.is_in_couple = False; proposito.couple_id = None
-            final_pacientes_list.append(proposito)
+            # Usamos el conteo que anotamos previamente para los propósitos individuales
+            proposito.plan_estudio_pendiente_count = proposito.plan_estudio_pendiente_count_single
+            final_list.append(proposito)
+
+    # Reordenamos la lista final por fecha para mantener la consistencia
+    final_list.sort(key=lambda item: (item.proposito_id_1.historia.fecha_ingreso if hasattr(item, 'pareja_id') else item.historia.fecha_ingreso), reverse=True)
     
+    pacientes_count_display = len(final_list) # El contador ahora refleja "entradas" en la tabla
+
+    # ===== FIN DE LA LÓGICA MODIFICADA =====
+
     context = {
         'total_pacientes': total_pacientes, 'pacientes_cerrados': pacientes_cerrados, 
         'pacientes_seguimiento': pacientes_seguimiento, 'pacientes_inactivos': pacientes_inactivos,
         'historias_clinicas_count': historias_clinicas_count, 'analisis_pendientes_count': analisis_pendientes_count,
         'nuevos_pacientes_mes': nuevos_pacientes_mes, 'nuevas_historias_mes': nuevas_historias_mes, 
         'porcentaje_cerrados': porcentaje_cerrados,
-        'form': form, 'pacientes_list': final_pacientes_list, 'pacientes_count': len(final_pacientes_list),
+        'form': form, 
+        'pacientes_list': final_list, # Usamos la nueva lista procesada
+        'pacientes_count': pacientes_count_display, # Usamos el nuevo contador
         'search_attempted': search_attempted
     }
     return render(request, "gestion_pacientes.html", context)
