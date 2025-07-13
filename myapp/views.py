@@ -1544,6 +1544,9 @@ def enfermedad_actual(request, historia_id, tipo, objeto_id):
     }
     return render(request, 'enfermedad_actual.html', context)
 
+def genealogia_view(request):
+    return render(request, 'genealogia.html')
+
 # views.py
 @require_POST
 @login_required
