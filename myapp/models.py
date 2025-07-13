@@ -191,7 +191,7 @@ class AntecedentesPersonales(models.Model):
     )
     fur = models.DateField(null=True, blank=True)
     edad_gestacional = models.IntegerField(null=True, blank=True)
-    controles_prenatales = models.CharField(max_length=100, blank=True, default='')
+    controles_prenatales = models.IntegerField(null=True, blank=True)
     numero_partos = models.IntegerField(null=True, blank=True)
     numero_gestas = models.IntegerField(null=True, blank=True)
     numero_cesareas = models.IntegerField(null=True, blank=True)

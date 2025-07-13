@@ -215,14 +215,28 @@ class PadresPropositoForm(forms.Form):
 
     def clean_padre_fecha_nacimiento(self):
         fecha = self.cleaned_data.get('padre_fecha_nacimiento')
-        if fecha and fecha > timezone.now().date():
-            raise forms.ValidationError("La fecha de nacimiento no puede ser en el futuro.")
+        if fecha:
+            today = timezone.now().date()
+            if fecha > today:
+                raise forms.ValidationError("La fecha de nacimiento no puede ser en el futuro.")
+            
+            # Cálculo de edad
+            age = today.year - fecha.year - ((today.month, today.day) < (fecha.month, fecha.day))
+            if age < 10:
+                raise forms.ValidationError("El padre debe tener al menos 10 años de edad.")
         return fecha
 
     def clean_madre_fecha_nacimiento(self):
         fecha = self.cleaned_data.get('madre_fecha_nacimiento')
-        if fecha and fecha > timezone.now().date():
-            raise forms.ValidationError("La fecha de nacimiento no puede ser en el futuro.")
+        if fecha:
+            today = timezone.now().date()
+            if fecha > today:
+                raise forms.ValidationError("La fecha de nacimiento no puede ser en el futuro.")
+            
+            # Cálculo de edad
+            age = today.year - fecha.year - ((today.month, today.day) < (fecha.month, fecha.day))
+            if age < 10:
+                raise forms.ValidationError("La madre debe tener al menos 10 años de edad.")
         return fecha
 class PropositosForm(ModelForm):
     identificacion_prefijo = forms.ChoiceField(choices=PREFIJOS_ID, label="ID*")
@@ -423,20 +437,37 @@ class ParejaPropositosForm(forms.Form):
 
     def clean_fecha_nacimiento_1(self):
         fecha = self.cleaned_data.get('fecha_nacimiento_1')
-        if fecha and fecha > timezone.now().date():
-            raise forms.ValidationError("La fecha de nacimiento no puede ser en el futuro.")
+        if fecha:
+            today = timezone.now().date()
+            if fecha > today:
+                raise forms.ValidationError("La fecha de nacimiento no puede ser en el futuro.")
+            
+            # Cálculo de edad
+            age = today.year - fecha.year - ((today.month, today.day) < (fecha.month, fecha.day))
+            if age < 10:
+                raise forms.ValidationError("El cónyuge debe tener al menos 10 años de edad.")
         return fecha
 
     def clean_fecha_nacimiento_2(self):
         fecha = self.cleaned_data.get('fecha_nacimiento_2')
-        if fecha and fecha > timezone.now().date():
-            raise forms.ValidationError("La fecha de nacimiento no puede ser en el futuro.")
+        if fecha:
+            today = timezone.now().date()
+            if fecha > today:
+                raise forms.ValidationError("La fecha de nacimiento no puede ser en el futuro.")
+
+            # Cálculo de edad
+            age = today.year - fecha.year - ((today.month, today.day) < (fecha.month, fecha.day))
+            if age < 10:
+                raise forms.ValidationError("El cónyuge debe tener al menos 10 años de edad.")
         return fecha
 
 class AntecedentesDesarrolloNeonatalForm(forms.Form):
     fur = forms.DateField(required=False, widget=DateInput(attrs={'type': 'date', 'class':'form-control'}), label="Fecha de Última Regla (FUR)")
     edad_gestacional = forms.IntegerField(required=False, label="Edad Gestacional (semanas)", widget=forms.NumberInput(attrs={'min':'0'}))
-    controles_prenatales = forms.CharField(max_length=100, required=False, label="Controles Prenatales", strip=True)
+    # ===== CAMPO MODIFICADO =====
+    # Se convierte en un campo numérico con validación en el widget.
+    controles_prenatales = forms.IntegerField(required=False, label="Controles Prenatales", widget=forms.NumberInput(attrs={'min':'0', 'max':'12'}))
+    # ============================
     numero_partos = forms.IntegerField(required=False, label="Número de Partos", widget=forms.NumberInput(attrs={'min':'0'}))
     numero_gestas = forms.IntegerField(required=False, label="Número de Gestas", widget=forms.NumberInput(attrs={'min':'0'}))
     numero_cesareas = forms.IntegerField(required=False, label="Número de Cesáreas", widget=forms.NumberInput(attrs={'min':'0'}))
@@ -493,39 +524,49 @@ class AntecedentesDesarrolloNeonatalForm(forms.Form):
 
     def clean_edad_gestacional(self):
         edad_g = self.cleaned_data.get('edad_gestacional')
-        if edad_g is not None and (edad_g < 18 or edad_g > 45):
-            raise forms.ValidationError("Ingrese una edad gestacional válida (ej: 18-45 semanas).")
+        if edad_g is not None and (edad_g < 1 or edad_g > 43):
+            raise forms.ValidationError("Ingrese una edad gestacional válida (entre 1 y 43 semanas).")
         return edad_g
 
-    def _clean_non_negative_integer(self, field_name):
+    def _clean_integer_in_range(self, field_name, min_val, max_val):
         value = self.cleaned_data.get(field_name)
-        if value is not None and value < 0:
-            self.add_error(field_name, "Este valor no puede ser negativo.")
+        if value is not None:
+            if not isinstance(value, int):
+                self.add_error(field_name, "Debe ingresar un número entero.")
+                return value
+            if not (min_val <= value <= max_val):
+                self.add_error(field_name, f"El valor debe estar entre {min_val} y {max_val}.")
         return value
 
-    def clean_numero_partos(self): return self._clean_non_negative_integer('numero_partos')
-    def clean_numero_gestas(self): return self._clean_non_negative_integer('numero_gestas')
-    def clean_numero_cesareas(self): return self._clean_non_negative_integer('numero_cesareas')
-    def clean_numero_abortos(self): return self._clean_non_negative_integer('numero_abortos')
-    def clean_numero_mortinatos(self): return self._clean_non_negative_integer('numero_mortinatos')
-    def clean_numero_malformaciones(self): return self._clean_non_negative_integer('numero_malformaciones')
+    # ===== MÉTODO MODIFICADO =====
+    # Se reemplaza la validación anterior por la reutilización del helper.
+    def clean_controles_prenatales(self):
+        return self._clean_integer_in_range('controles_prenatales', 0, 12)
+    # ============================
+
+    def clean_numero_partos(self): return self._clean_integer_in_range('numero_partos', 0, 12)
+    def clean_numero_gestas(self): return self._clean_integer_in_range('numero_gestas', 0, 12)
+    def clean_numero_cesareas(self): return self._clean_integer_in_range('numero_cesareas', 0, 8)
+    def clean_numero_abortos(self): return self._clean_integer_in_range('numero_abortos', 0, 12)
+    def clean_numero_mortinatos(self): return self._clean_integer_in_range('numero_mortinatos', 0, 12)
+    def clean_numero_malformaciones(self): return self._clean_integer_in_range('numero_malformaciones', 0, 12)
 
     def clean_peso_nacer(self):
         peso = self.cleaned_data.get('peso_nacer')
-        if peso is not None and (peso <= 0 or peso > 10):
-             raise forms.ValidationError("Ingrese un peso válido (ej: 0.1 - 10 kg).")
+        if peso is not None and (peso < 0.5 or peso > 6.0):
+             raise forms.ValidationError("Ingrese un peso válido (entre 0.5 y 6.0 kg).")
         return peso
 
     def clean_talla_nacer(self):
         talla = self.cleaned_data.get('talla_nacer')
-        if talla is not None and (talla <= 20 or talla > 70):
-             raise forms.ValidationError("Ingrese una talla válida (ej: 20 - 70 cm).")
+        if talla is not None and (talla < 35 or talla > 60):
+             raise forms.ValidationError("Ingrese una talla válida (entre 35 y 60 cm).")
         return talla
 
     def clean_circunferencia_cefalica(self):
         cc = self.cleaned_data.get('circunferencia_cefalica')
-        if cc is not None and (cc <= 15 or cc > 50):
-             raise forms.ValidationError("Ingrese una circunferencia cefálica válida (ej: 15 - 50 cm).")
+        if cc is not None and (cc < 22 or cc > 38):
+             raise forms.ValidationError("Ingrese una circunferencia cefálica válida (entre 22 y 38 cm).")
         return cc
 
     def clean(self):
@@ -555,7 +596,11 @@ class AntecedentesDesarrolloNeonatalForm(forms.Form):
         ap_defaults = {
             'fur': self.cleaned_data.get('fur'),
             'edad_gestacional': self.cleaned_data.get('edad_gestacional'),
-            'controles_prenatales': self.cleaned_data.get('controles_prenatales', ''),
+            # ===== LÍNEA MODIFICADA =====
+            # Se quita el default '', ya que .get() devolverá None si está vacío,
+            # lo cual es correcto para un IntegerField nullable.
+            'controles_prenatales': self.cleaned_data.get('controles_prenatales'),
+            # ============================
             'numero_partos': self.cleaned_data.get('numero_partos'),
             'numero_gestas': self.cleaned_data.get('numero_gestas'),
             'numero_cesareas': self.cleaned_data.get('numero_cesareas'),
@@ -570,7 +615,7 @@ class AntecedentesDesarrolloNeonatalForm(forms.Form):
             'otros_antecedentes': self.cleaned_data.get('otros_antecedentes'),
             'observaciones': self.cleaned_data.get('observaciones')
         }
-        ap_defaults = {k:v for k,v in ap_defaults.items() if v is not None or k=='controles_prenatales'}
+        ap_defaults = {k:v for k,v in ap_defaults.items() if v is not None}
 
 
         if proposito:
@@ -740,17 +785,26 @@ class ExamenFisicoForm(ModelForm):
         value = self.cleaned_data.get(field_name)
         if value is not None:
             if value < min_val:
-                raise forms.ValidationError(f"Este valor debe ser mayor o igual a {min_val}.")
+                raise forms.ValidationError(f"El valor debe ser mayor o igual a {min_val}.")
             if max_val and value > max_val:
-                raise forms.ValidationError(f"Este valor no debe exceder {max_val}.")
+                raise forms.ValidationError(f"El valor no debe exceder {max_val}.")
         return value
 
-    def clean_medida_abrazada(self): return self._clean_positive_decimal('medida_abrazada', 300)
-    def clean_segmento_inferior(self): return self._clean_positive_decimal('segmento_inferior', 200)
-    def clean_segmento_superior(self): return self._clean_positive_decimal('segmento_superior', 200)
-    def clean_circunferencia_cefalica(self): return self._clean_positive_decimal('circunferencia_cefalica', 100)
-    def clean_talla(self): return self._clean_positive_decimal('talla', 300)
-    def clean_peso(self): return self._clean_positive_decimal('peso', 500, min_val=0.1)
+    def clean_peso(self): return self._clean_positive_decimal('peso', min_val=0.5, max_val=150)
+    def clean_talla(self): return self._clean_positive_decimal('talla', min_val=35, max_val=250)
+    def clean_circunferencia_cefalica(self): return self._clean_positive_decimal('circunferencia_cefalica', min_val=22, max_val=60)
+    def clean_medida_abrazada(self): return self._clean_positive_decimal('medida_abrazada', min_val=40, max_val=200)
+    def clean_ct(self): return self._clean_positive_decimal('ct', min_val=15, max_val=150)
+    def clean_distancia_intermamilar(self): return self._clean_positive_decimal('distancia_intermamilar', min_val=3, max_val=30)
+    def clean_segmento_superior(self): return self._clean_positive_decimal('segmento_superior', min_val=20, max_val=100)
+    def clean_segmento_inferior(self): return self._clean_positive_decimal('segmento_inferior', min_val=0, max_val=100)
+    def clean_pabellones_auriculares(self): return self._clean_positive_decimal('pabellones_auriculares', min_val=1, max_val=7)
+    def clean_distancia_interc_interna(self): return self._clean_positive_decimal('distancia_interc_interna', min_val=1, max_val=4)
+    def clean_distancia_interc_externa(self): return self._clean_positive_decimal('distancia_interc_externa', min_val=3, max_val=12)
+    def clean_longitud_mano_derecha(self): return self._clean_positive_decimal('longitud_mano_derecha', min_val=3, max_val=20)
+    def clean_longitud_mano_izquierda(self): return self._clean_positive_decimal('longitud_mano_izquierda', min_val=3, max_val=20)
+    
+    # Se mantienen las validaciones existentes no modificadas
     def clean_tension_arterial_sistolica(self): return self._clean_positive_decimal('tension_arterial_sistolica', 300, min_val=10)
     def clean_tension_arterial_diastolica(self): return self._clean_positive_decimal('tension_arterial_diastolica', 200, min_val=10)
 
@@ -828,6 +882,11 @@ class PlanEstudioEditForm(forms.ModelForm):
         if self.instance and self.instance.pk:
             self.fields['archivos_a_eliminar'].queryset = self.instance.archivos.all()
             self.fields['archivos_a_eliminar'].label_from_instance = lambda obj: obj.get_display_name()
+    def clean_fecha_visita(self):
+        fecha = self.cleaned_data.get('fecha_visita')
+        if fecha and fecha < timezone.now().date():
+            raise forms.ValidationError("La fecha de próxima visita no puede ser en el pasado.")
+        return fecha
 
     def save(self, commit=True):
         plan_estudio = super().save(commit=commit)
@@ -858,6 +917,12 @@ class PlanEstudioForm(forms.ModelForm):
             'asesoramiento_evoluciones': forms.HiddenInput(),
             'evaluacion': forms.HiddenInput(),
         }
+    def clean_fecha_visita(self):
+        fecha = self.cleaned_data.get('fecha_visita')
+        if fecha and fecha < timezone.now().date():
+            raise forms.ValidationError("La fecha de próxima visita no puede ser en el pasado.")
+        return fecha
+
 
 # Factories para los formsets
 DiagnosticoFormSet = inlineformset_factory(
@@ -1258,6 +1323,24 @@ class AutorizacionForm(forms.ModelForm):
                 self.fields['representante_selector'].initial = self.instance.representante_padre
         else:
              del self.fields['representante_selector']
+    def clean(self):
+        cleaned_data = super().clean()
+        autorizacion_examenes = cleaned_data.get('autorizacion_examenes')
+        signature_data = cleaned_data.get('signature_data')
+
+        # Validación 1: Autorización debe ser "Sí" para finalizar.
+        if autorizacion_examenes is not True:
+            self.add_error('autorizacion_examenes', 'Debe seleccionar "Sí" para poder finalizar la historia.')
+
+        # Validación 2: Firma es requerida si no existe una previamente.
+        has_existing_signature = self.instance and self.instance.pk and self.instance.archivo_autorizacion
+        has_new_signature = bool(signature_data)
+        
+        if not has_existing_signature and not has_new_signature:
+            # Añade un error no asociado a un campo específico, que el JS puede mostrar globalmente.
+            self.add_error(None, 'La firma del paciente o representante es obligatoria.')
+
+        return cleaned_data
 
     def save(self, commit=True):
         # Asignamos el valor del selector al campo real del modelo
