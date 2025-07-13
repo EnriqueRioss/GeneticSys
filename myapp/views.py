@@ -1411,6 +1411,7 @@ def ver_historias(request):
     """
     Vista mejorada para listar, filtrar y gestionar historias clínicas con control de acceso basado en roles.
     """
+    # ... (lógica de clear_editing_session y permisos sin cambios) ...
     clear_editing_session(request)
 
     try:
@@ -1434,7 +1435,8 @@ def ver_historias(request):
             messages.warning(request, "Usted es un Lector sin genetista asociado y no puede ver historias.")
     else: # ADM o Superuser
         historias_qs = base_qs
-
+    
+    # ... (lógica de filtros de búsqueda sin cambios) ...
     search_query = request.GET.get('buscar_historia', '').strip()
     estado_query = request.GET.get('estado_historia', '').strip()
     genetista_query_id = request.GET.get('genetista', '').strip()
@@ -1456,15 +1458,18 @@ def ver_historias(request):
     if motivo_query and motivo_query != 'todos':
         historias_qs = historias_qs.filter(motivo_tipo_consulta=motivo_query)
 
-    genetistas_list_for_filter = Genetistas.objects.filter(rol='GEN').select_related('user').order_by('user__first_name')
+    # --- INICIO DE LA MODIFICACIÓN ---
+    # MODIFICACIÓN: Incluimos GEN y ADM en la lista para el filtro del template
+    genetistas_list_for_filter = Genetistas.objects.filter(
+        rol__in=['GEN', 'ADM']
+    ).select_related('user').order_by('user__first_name')
+    # --- FIN DE LA MODIFICACIÓN ---
 
     context = {
         'historias_list': historias_qs,
         'genetistas_list': genetistas_list_for_filter,
-        # Pasamos las opciones de estado para el filtro
         'estado_choices': [c for c in HistoriasClinicas.ESTADO_CHOICES if c[0] != HistoriasClinicas.ESTADO_ARCHIVADA] if user_profile.rol != 'ADM' else HistoriasClinicas.ESTADO_CHOICES,
         'motivo_choices': HistoriasClinicas._meta.get_field('motivo_tipo_consulta').choices,
-        # Pasamos el formulario de archivado para el modal
         'archivar_form': ArchivarHistoriaForm()
     }
     return render(request, 'ver_historias.html', context)
@@ -1693,44 +1698,37 @@ def reports_view(request):
     
     results, headers = [], []
     search_attempted = bool(request.GET)
-    report_type = request.GET.get('report_type', 'patients')
-    report_type_display_name = dict(form.fields['report_type'].choices).get(report_type, '')
+    report_type_display_name = ''
 
     if form.is_valid():
         report_type = form.cleaned_data.get('report_type', 'patients')
         report_type_display_name = dict(form.fields['report_type'].choices).get(report_type, '')
         
-        # --- Lógica de filtrado base ---
         user_gen_profile = request.user.genetistas
         genetista_obj = form.cleaned_data.get('genetista')
         date_range = form.cleaned_data.get('date_range')
         
-        # --- Lógica específica por tipo de reporte ---
         if report_type == 'histories':
             headers = ['N° Historia', 'Paciente(s)', 'Motivo', 'Estado', 'Genetista', 'Fecha Creación', 'Última Modificación']
             qs = HistoriasClinicas.objects.select_related('genetista__user').prefetch_related('propositos_set')
-            # Filtro por rol
+            
             if user_gen_profile.rol == 'GEN': qs = qs.filter(genetista=user_gen_profile)
             elif user_gen_profile.rol == 'LEC' and user_gen_profile.associated_genetista: qs = qs.filter(genetista=user_gen_profile.associated_genetista)
             elif genetista_obj: qs = qs.filter(genetista=genetista_obj)
 
-            # Filtros específicos
             if form.cleaned_data.get('estado_historia'): qs = qs.filter(estado=form.cleaned_data.get('estado_historia'))
             if form.cleaned_data.get('numero_historia_desde'): qs = qs.filter(numero_historia__gte=form.cleaned_data.get('numero_historia_desde'))
             if form.cleaned_data.get('numero_historia_hasta'): qs = qs.filter(numero_historia__lte=form.cleaned_data.get('numero_historia_hasta'))
+            # MODIFICACIÓN: Se aplica el filtro de fecha
             if date_range:
                 if date_range.get('desde'): qs = qs.filter(fecha_ingreso__date__gte=date_range['desde'])
                 if date_range.get('hasta'): qs = qs.filter(fecha_ingreso__date__lte=date_range['hasta'])
 
             for h in qs.order_by('-numero_historia'):
-                results.append([
-                    f"HC-{h.numero_historia}", h.get_paciente_display(), h.get_motivo_tipo_consulta_display(),
-                    h.get_estado_display(), h.genetista.user.get_full_name() if h.genetista else "N/A",
-                    h.fecha_ingreso.strftime('%d-%m-%Y'), h.fecha_ultima_modificacion.strftime('%d-%m-%Y %H:%M') if h.fecha_ultima_modificacion else "N/A"
-                ])
+                results.append([f"HC-{h.numero_historia}", h.get_paciente_display(), h.get_motivo_tipo_consulta_display(), h.get_estado_display(), h.genetista.user.get_full_name() if h.genetista else "N/A", h.fecha_ingreso.strftime('%d-%m-%Y'), h.fecha_ultima_modificacion.strftime('%d-%m-%Y %H:%M') if h.fecha_ultima_modificacion else "N/A"])
         
-        else: # Lógica para reportes basados en Propósitos
-            base_propositos_qs = _get_pacientes_queryset_for_role(request.user) # Reutilizamos la función auxiliar
+        else:
+            base_propositos_qs = _get_pacientes_queryset_for_role(request.user)
             if genetista_obj: base_propositos_qs = base_propositos_qs.filter(historia__genetista=genetista_obj)
 
             if report_type == 'patients':
@@ -1740,37 +1738,48 @@ def reports_view(request):
                     base_propositos_qs = base_propositos_qs.filter(Q(nombres__icontains=q) | Q(apellidos__icontains=q) | Q(identificacion__icontains=q))
                 if form.cleaned_data.get('estado_paciente'):
                     base_propositos_qs = base_propositos_qs.filter(estado=form.cleaned_data.get('estado_paciente'))
-
+                # MODIFICACIÓN: Se aplica el filtro de fecha
+                if date_range:
+                    if date_range.get('desde'): base_propositos_qs = base_propositos_qs.filter(historia__fecha_ingreso__date__gte=date_range['desde'])
+                    if date_range.get('hasta'): base_propositos_qs = base_propositos_qs.filter(historia__fecha_ingreso__date__lte=date_range['hasta'])
+                
                 for p in base_propositos_qs.order_by('-historia__fecha_ingreso'):
                     results.append([f"HC-{p.historia.numero_historia}", f"{p.nombres} {p.apellidos}", p.identificacion, p.edad or "N/A", p.historia.genetista.user.get_full_name() if p.historia.genetista else "N/A", p.historia.fecha_ingreso.strftime('%d-%m-%Y'), p.get_estado_display()])
             
-            elif report_type == 'consultations' or report_type == 'diagnoses':
-                # La lógica para estos dos no cambia significativamente, se mantiene
-                if report_type == 'consultations':
-                    headers = ['Paciente', 'N° Historia', 'Plan de Estudio', 'Estado', 'Fecha Próxima Visita', 'Genetista']
-                    qs = PlanEstudio.objects.filter(Q(evaluacion__proposito__in=base_propositos_qs) | Q(evaluacion__pareja__proposito_id_1__in=base_propositos_qs)).select_related('evaluacion__proposito__historia__genetista__user','evaluacion__pareja__proposito_id_1__historia__genetista__user').distinct()
-                    if form.cleaned_data.get('estado_consulta') == 'pendientes': qs = qs.filter(completado=False)
-                    elif form.cleaned_data.get('estado_consulta') == 'completadas': qs = qs.filter(completado=True)
-                    for plan in qs.order_by('-fecha_visita'):
-                        paciente, hc, genetista = "N/A", "N/A", "N/A"
-                        if plan.evaluacion.proposito: paciente, hc, genetista = f"{plan.evaluacion.proposito.nombres} {plan.evaluacion.proposito.apellidos}", f"HC-{plan.evaluacion.proposito.historia.numero_historia}", plan.evaluacion.proposito.historia.genetista.user.get_full_name() if plan.evaluacion.proposito.historia.genetista else "N/A"
-                        elif plan.evaluacion.pareja: p1=plan.evaluacion.pareja.proposito_id_1; paciente, hc, genetista = f"Pareja: {p1.nombres} y {plan.evaluacion.pareja.proposito_id_2.nombres}", f"HC-{p1.historia.numero_historia}", p1.historia.genetista.user.get_full_name() if p1.historia.genetista else "N/A"
-                        results.append([paciente, hc, plan.accion, "Completada" if plan.completado else "Pendiente", plan.fecha_visita.strftime('%d-%m-%Y') if plan.fecha_visita else "N/A", genetista])
-                
-                elif report_type == 'diagnoses':
-                    headers = ['Paciente', 'N° Historia', 'Diagnóstico Final', 'Genetista', 'Última Modificación']
-                    qs = EvaluacionGenetica.objects.filter(Q(proposito__in=base_propositos_qs) | Q(pareja__proposito_id_1__in=base_propositos_qs)).filter(diagnostico_final__isnull=False).exclude(diagnostico_final__exact='').select_related('proposito__historia__genetista__user','pareja__proposito_id_1__historia__genetista__user').distinct()
-                    if form.cleaned_data.get('buscar_diagnostico'): qs = qs.filter(diagnostico_final__icontains=form.cleaned_data.get('buscar_diagnostico'))
-                    for ev in qs.order_by('-proposito__historia__fecha_ultima_modificacion'):
-                        paciente, hc, genetista, fecha_mod = "N/A", "N/A", "N/A", "N/A"
-                        if ev.proposito: paciente, hc, genetista, fecha_mod = f"{ev.proposito.nombres} {ev.proposito.apellidos}", f"HC-{ev.proposito.historia.numero_historia}", ev.proposito.historia.genetista.user.get_full_name() if ev.proposito.historia.genetista else "N/A", ev.proposito.historia.fecha_ultima_modificacion.strftime('%d-%m-%Y') if ev.proposito.historia.fecha_ultima_modificacion else "N/A"
-                        elif ev.pareja: p1 = ev.pareja.proposito_id_1; paciente, hc, genetista, fecha_mod = f"Pareja: {p1.nombres} y {ev.pareja.proposito_id_2.nombres}", f"HC-{p1.historia.numero_historia}", p1.historia.genetista.user.get_full_name() if p1.historia.genetista else "N/A", p1.historia.fecha_ultima_modificacion.strftime('%d-%m-%Y') if p1.historia.fecha_ultima_modificacion else "N/A"
-                        results.append([paciente, hc, ev.diagnostico_final, genetista, fecha_mod])
+            elif report_type == 'consultations':
+                headers = ['Paciente', 'N° Historia', 'Plan de Estudio', 'Estado', 'Fecha Próxima Visita', 'Genetista']
+                qs = PlanEstudio.objects.filter(Q(evaluacion__proposito__in=base_propositos_qs) | Q(evaluacion__pareja__proposito_id_1__in=base_propositos_qs)).select_related('evaluacion__proposito__historia__genetista__user','evaluacion__pareja__proposito_id_1__historia__genetista__user').distinct()
+                if form.cleaned_data.get('estado_consulta') == 'pendientes': qs = qs.filter(completado=False)
+                elif form.cleaned_data.get('estado_consulta') == 'completadas': qs = qs.filter(completado=True)
+                # MODIFICACIÓN: Se aplica el filtro de fecha
+                if date_range:
+                    if date_range.get('desde'): qs = qs.filter(fecha_visita__gte=date_range['desde'])
+                    if date_range.get('hasta'): qs = qs.filter(fecha_visita__lte=date_range['hasta'])
+
+                for plan in qs.order_by('-fecha_visita'):
+                    paciente, hc, genetista = "N/A", "N/A", "N/A"
+                    if plan.evaluacion.proposito: paciente, hc, genetista = f"{plan.evaluacion.proposito.nombres} {plan.evaluacion.proposito.apellidos}", f"HC-{plan.evaluacion.proposito.historia.numero_historia}", plan.evaluacion.proposito.historia.genetista.user.get_full_name() if plan.evaluacion.proposito.historia.genetista else "N/A"
+                    elif plan.evaluacion.pareja: p1=plan.evaluacion.pareja.proposito_id_1; paciente, hc, genetista = f"Pareja: {p1.nombres} y {plan.evaluacion.pareja.proposito_id_2.nombres}", f"HC-{p1.historia.numero_historia}", p1.historia.genetista.user.get_full_name() if p1.historia.genetista else "N/A"
+                    results.append([paciente, hc, plan.accion, "Completada" if plan.completado else "Pendiente", plan.fecha_visita.strftime('%d-%m-%Y') if plan.fecha_visita else "N/A", genetista])
+            
+            elif report_type == 'diagnoses':
+                headers = ['Paciente', 'N° Historia', 'Diagnóstico Final', 'Genetista', 'Fecha de Evaluación']
+                qs = EvaluacionGenetica.objects.filter(Q(proposito__in=base_propositos_qs) | Q(pareja__proposito_id_1__in=base_propositos_qs)).filter(diagnostico_final__isnull=False).exclude(diagnostico_final__exact='').select_related('proposito__historia__genetista__user','pareja__proposito_id_1__historia__genetista__user').distinct()
+                if form.cleaned_data.get('buscar_diagnostico'): qs = qs.filter(diagnostico_final__icontains=form.cleaned_data.get('buscar_diagnostico'))
+                # MODIFICACIÓN: Se aplica el filtro de fecha
+                if date_range:
+                    if date_range.get('desde'): qs = qs.filter(fecha_creacion__date__gte=date_range['desde'])
+                    if date_range.get('hasta'): qs = qs.filter(fecha_creacion__date__lte=date_range['hasta'])
+
+                for ev in qs.order_by('-fecha_creacion'):
+                    paciente, hc, genetista, fecha_ev = "N/A", "N/A", "N/A", "N/A"
+                    if ev.proposito: paciente, hc, genetista, fecha_ev = f"{ev.proposito.nombres} {ev.proposito.apellidos}", f"HC-{ev.proposito.historia.numero_historia}", ev.proposito.historia.genetista.user.get_full_name() if ev.proposito.historia.genetista else "N/A", ev.fecha_creacion.strftime('%d-%m-%Y')
+                    elif ev.pareja: p1 = ev.pareja.proposito_id_1; paciente, hc, genetista, fecha_ev = f"Pareja: {p1.nombres} y {ev.pareja.proposito_id_2.nombres}", f"HC-{p1.historia.numero_historia}", p1.historia.genetista.user.get_full_name() if p1.historia.genetista else "N/A", ev.fecha_creacion.strftime('%d-%m-%Y')
+                    results.append([paciente, hc, ev.diagnostico_final, genetista, fecha_ev])
 
     context = {
         'form': form, 'results': results, 'headers': headers,
-        'search_attempted': search_attempted, 'report_type': report_type,
-        'report_type_display_name': report_type_display_name,
+        'search_attempted': search_attempted, 'report_type_display_name': report_type_display_name,
     }
     return render(request, 'reports.html', context)
 
@@ -1785,30 +1794,30 @@ def export_report_data(request, export_format):
     results, headers = [], []
     report_type = form.cleaned_data.get('report_type', 'patients')
     
-    # Lógica de filtrado base (similar a la vista)
     user_gen_profile = request.user.genetistas
     genetista_obj = form.cleaned_data.get('genetista')
     date_range = form.cleaned_data.get('date_range')
     
-    # Lógica específica por tipo de reporte (duplicada de la vista principal)
     if report_type == 'histories':
         headers = ['N° Historia', 'Paciente(s)', 'Motivo', 'Estado', 'Genetista', 'Fecha Creación', 'Última Modificación']
         qs = HistoriasClinicas.objects.select_related('genetista__user').prefetch_related('propositos_set')
-        # Aplicar filtros
+        
         if user_gen_profile.rol == 'GEN': qs = qs.filter(genetista=user_gen_profile)
         elif user_gen_profile.rol == 'LEC' and user_gen_profile.associated_genetista: qs = qs.filter(genetista=user_gen_profile.associated_genetista)
         elif genetista_obj: qs = qs.filter(genetista=genetista_obj)
+
         if form.cleaned_data.get('estado_historia'): qs = qs.filter(estado=form.cleaned_data.get('estado_historia'))
         if form.cleaned_data.get('numero_historia_desde'): qs = qs.filter(numero_historia__gte=form.cleaned_data.get('numero_historia_desde'))
         if form.cleaned_data.get('numero_historia_hasta'): qs = qs.filter(numero_historia__lte=form.cleaned_data.get('numero_historia_hasta'))
+        # MODIFICACIÓN: Se aplica el filtro de fecha
         if date_range:
             if date_range.get('desde'): qs = qs.filter(fecha_ingreso__date__gte=date_range['desde'])
             if date_range.get('hasta'): qs = qs.filter(fecha_ingreso__date__lte=date_range['hasta'])
-        # Generar resultados
+
         for h in qs.order_by('-numero_historia'):
             results.append([f"HC-{h.numero_historia}", h.get_paciente_display(), h.get_motivo_tipo_consulta_display(), h.get_estado_display(), h.genetista.user.get_full_name() if h.genetista else "N/A", h.fecha_ingreso.strftime('%d-%m-%Y'), h.fecha_ultima_modificacion.strftime('%d-%m-%Y %H:%M') if h.fecha_ultima_modificacion else "N/A"])
     
-    else: # Lógica para reportes basados en Propósitos
+    else:
         base_propositos_qs = _get_pacientes_queryset_for_role(request.user)
         if genetista_obj: base_propositos_qs = base_propositos_qs.filter(historia__genetista=genetista_obj)
 
@@ -1819,15 +1828,24 @@ def export_report_data(request, export_format):
                 base_propositos_qs = base_propositos_qs.filter(Q(nombres__icontains=q) | Q(apellidos__icontains=q) | Q(identificacion__icontains=q))
             if form.cleaned_data.get('estado_paciente'):
                 base_propositos_qs = base_propositos_qs.filter(estado=form.cleaned_data.get('estado_paciente'))
+            # MODIFICACIÓN: Se aplica el filtro de fecha
+            if date_range:
+                if date_range.get('desde'): base_propositos_qs = base_propositos_qs.filter(historia__fecha_ingreso__date__gte=date_range['desde'])
+                if date_range.get('hasta'): base_propositos_qs = base_propositos_qs.filter(historia__fecha_ingreso__date__lte=date_range['hasta'])
+            
             for p in base_propositos_qs.order_by('-historia__fecha_ingreso'):
                 results.append([f"HC-{p.historia.numero_historia}", f"{p.nombres} {p.apellidos}", p.identificacion, p.edad or "N/A", p.historia.genetista.user.get_full_name() if p.historia.genetista else "N/A", p.historia.fecha_ingreso.strftime('%d-%m-%Y'), p.get_estado_display()])
         
-        # ***** INICIO DE LA LÓGICA FALTANTE *****
         elif report_type == 'consultations':
             headers = ['Paciente', 'N° Historia', 'Plan de Estudio', 'Estado', 'Fecha Próxima Visita', 'Genetista']
             qs = PlanEstudio.objects.filter(Q(evaluacion__proposito__in=base_propositos_qs) | Q(evaluacion__pareja__proposito_id_1__in=base_propositos_qs)).select_related('evaluacion__proposito__historia__genetista__user','evaluacion__pareja__proposito_id_1__historia__genetista__user').distinct()
             if form.cleaned_data.get('estado_consulta') == 'pendientes': qs = qs.filter(completado=False)
             elif form.cleaned_data.get('estado_consulta') == 'completadas': qs = qs.filter(completado=True)
+            # MODIFICACIÓN: Se aplica el filtro de fecha
+            if date_range:
+                if date_range.get('desde'): qs = qs.filter(fecha_visita__gte=date_range['desde'])
+                if date_range.get('hasta'): qs = qs.filter(fecha_visita__lte=date_range['hasta'])
+
             for plan in qs.order_by('-fecha_visita'):
                 paciente, hc, genetista = "N/A", "N/A", "N/A"
                 if plan.evaluacion.proposito: paciente, hc, genetista = f"{plan.evaluacion.proposito.nombres} {plan.evaluacion.proposito.apellidos}", f"HC-{plan.evaluacion.proposito.historia.numero_historia}", plan.evaluacion.proposito.historia.genetista.user.get_full_name() if plan.evaluacion.proposito.historia.genetista else "N/A"
@@ -1835,17 +1853,21 @@ def export_report_data(request, export_format):
                 results.append([paciente, hc, plan.accion, "Completada" if plan.completado else "Pendiente", plan.fecha_visita.strftime('%d-%m-%Y') if plan.fecha_visita else "N/A", genetista])
 
         elif report_type == 'diagnoses':
-            headers = ['Paciente', 'N° Historia', 'Diagnóstico Final', 'Genetista', 'Última Modificación']
+            headers = ['Paciente', 'N° Historia', 'Diagnóstico Final', 'Genetista', 'Fecha de Evaluación']
             qs = EvaluacionGenetica.objects.filter(Q(proposito__in=base_propositos_qs) | Q(pareja__proposito_id_1__in=base_propositos_qs)).filter(diagnostico_final__isnull=False).exclude(diagnostico_final__exact='').select_related('proposito__historia__genetista__user','pareja__proposito_id_1__historia__genetista__user').distinct()
             if form.cleaned_data.get('buscar_diagnostico'): qs = qs.filter(diagnostico_final__icontains=form.cleaned_data.get('buscar_diagnostico'))
-            for ev in qs.order_by('-proposito__historia__fecha_ultima_modificacion'):
-                paciente, hc, genetista, fecha_mod = "N/A", "N/A", "N/A", "N/A"
-                if ev.proposito: paciente, hc, genetista, fecha_mod = f"{ev.proposito.nombres} {ev.proposito.apellidos}", f"HC-{ev.proposito.historia.numero_historia}", ev.proposito.historia.genetista.user.get_full_name() if ev.proposito.historia.genetista else "N/A", ev.proposito.historia.fecha_ultima_modificacion.strftime('%d-%m-%Y') if ev.proposito.historia.fecha_ultima_modificacion else "N/A"
-                elif ev.pareja: p1 = ev.pareja.proposito_id_1; paciente, hc, genetista, fecha_mod = f"Pareja: {p1.nombres} y {ev.pareja.proposito_id_2.nombres}", f"HC-{p1.historia.numero_historia}", p1.historia.genetista.user.get_full_name() if p1.historia.genetista else "N/A", p1.historia.fecha_ultima_modificacion.strftime('%d-%m-%Y') if p1.historia.fecha_ultima_modificacion else "N/A"
-                results.append([paciente, hc, ev.diagnostico_final, genetista, fecha_mod])
-        # ***** FIN DE LA LÓGICA FALTANTE *****
+            # MODIFICACIÓN: Se aplica el filtro de fecha
+            if date_range:
+                if date_range.get('desde'): qs = qs.filter(fecha_creacion__date__gte=date_range['desde'])
+                if date_range.get('hasta'): qs = qs.filter(fecha_creacion__date__lte=date_range['hasta'])
 
-    # --- Lógica de exportación genérica ---
+            for ev in qs.order_by('-fecha_creacion'):
+                paciente, hc, genetista, fecha_ev = "N/A", "N/A", "N/A", "N/A"
+                if ev.proposito: paciente, hc, genetista, fecha_ev = f"{ev.proposito.nombres} {ev.proposito.apellidos}", f"HC-{ev.proposito.historia.numero_historia}", ev.proposito.historia.genetista.user.get_full_name() if ev.proposito.historia.genetista else "N/A", ev.fecha_creacion.strftime('%d-%m-%Y')
+                elif ev.pareja: p1 = ev.pareja.proposito_id_1; paciente, hc, genetista, fecha_ev = f"Pareja: {p1.nombres} y {ev.pareja.proposito_id_2.nombres}", f"HC-{p1.historia.numero_historia}", p1.historia.genetista.user.get_full_name() if p1.historia.genetista else "N/A", ev.fecha_creacion.strftime('%d-%m-%Y')
+                results.append([paciente, hc, ev.diagnostico_final, genetista, fecha_ev])
+    
+    # --- Lógica de exportación genérica (sin cambios) ---
     if export_format == 'csv':
         response = HttpResponse(content_type='text/csv; charset=utf-8')
         response['Content-Disposition'] = f'attachment; filename="reporte_{report_type}_{timezone.now().strftime("%Y%m%d_%H%M%S")}.csv"'
@@ -1861,17 +1883,13 @@ def export_report_data(request, export_format):
         elements.append(Paragraph(f"Reporte de {dict(form.fields['report_type'].choices).get(report_type)}", styles['h1']))
         elements.append(Spacer(1, 0.2*72))
         
-        # CORRECCIÓN CLAVE: Asegurarse de que `table_data` nunca esté completamente vacía.
         if not headers:
-            # Si no hay cabeceras, es porque el tipo de reporte no era válido.
-            # Se podría mostrar un error, pero por ahora mostramos una tabla vacía con una cabecera de error.
             headers = ["Error"]
             results = [["Tipo de reporte no válido o sin datos."]]
 
         table_data = [headers] + results
         if not results:
-             # Añadir una fila de "No hay registros" si results está vacío pero headers no.
-            table_data.append(["No se encontraron registros."] * len(headers))
+             table_data.append(["No se encontraron registros."] * len(headers))
         
         table = Table(table_data)
         table.setStyle(TableStyle([
