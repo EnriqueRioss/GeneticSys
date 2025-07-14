@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block form_content %}
+
 <head>
     <title>Datos del Propósito</title>
     <link rel="stylesheet" href="{% static '/styles/stylesforms.css' %}">
@@ -225,7 +226,7 @@ document.addEventListener('DOMContentLoaded', function() {
     <script>
     document.addEventListener('DOMContentLoaded', function() {
         // La función setupAjaxForm debe estar definida en tu script global
-        setupAjaxForm('crear-paciente-form');
+        setupEnhancedAjaxForm('antecedentes-preconcepcionales-form');
     
         const replaceBtn = document.querySelector('.replace-photo-btn');
         if (replaceBtn) {
@@ -237,5 +238,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     </script>
+
 
 {% endblock form_content %}

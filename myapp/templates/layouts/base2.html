@@ -78,101 +78,21 @@
     <!-- ================================================================= -->
     <!-- === REUSABLE AJAX FORM HANDLING SCRIPT ========================== -->
     <!-- ================================================================= -->
-<script>
-        function setupAjaxForm(formId) {
-            const form = document.getElementById(formId);
-            if (!form) {
-                console.error(`Form with ID "${formId}" not found.`);
-                return;
-            }
+    <script src="{% static 'js/global_form_handler.js' %}"></script>
+    <!-- ===== FIN DE CAMBIOS ===== -->
         
-            let clickedButton = null;
-        
-            // 1. Captura qué botón de envío fue clickeado
-            form.querySelectorAll('button[type="submit"]').forEach(button => {
-                button.addEventListener('click', function() {
-                    clickedButton = this;
-                });
-            });
-        
-            form.addEventListener('submit', function(e) {
-                e.preventDefault(); // Detener el envío normal
-        
-                const formData = new FormData(form);
-        
-                // 2. Añade el nombre y valor del botón clickeado al FormData
-                if (clickedButton) {
-                    formData.append(clickedButton.name, clickedButton.value || '');
-                }
-        
-                // Limpiar errores previos
-                form.querySelectorAll('.field-errors').forEach(el => el.innerHTML = '');
-                const nonFieldErrors = form.querySelector('.non-field-errors');
-                if (nonFieldErrors) nonFieldErrors.innerHTML = '';
-        
-        
-                fetch(form.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        // El CSRF token ya está en el FormData, no es necesario en headers
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.redirect_url) {
-                        // Redirección exitosa
-                        window.location.href = data.redirect_url;
-                    } else {
-                        // Manejar errores de validación
-                        if (data.errors) {
-                            // Errores globales del formulario
-                            if (data.errors.__all__) {
-                                data.errors.__all__.forEach(error => {
-                                    if(nonFieldErrors) nonFieldErrors.innerHTML += `<span>${error}</span>`;
-                                });
-                            }
-                            // Errores específicos de cada campo
-                            for (const fieldName in data.errors) {
-                                if (fieldName !== '__all__') {
-                                    const errorDiv = document.getElementById(`error_id_${fieldName}`);
-                                    const fieldErrorContainer = form.querySelector(`#error_id_${fieldName}`);
-        
-                                    if (fieldErrorContainer) {
-                                        let errorHtml = '';
-                                        data.errors[fieldName].forEach(error => {
-                                            errorHtml += `<span>${error.message || error}</span>`;
-                                        });
-                                        fieldErrorContainer.innerHTML = errorHtml;
-                                    }
-                                }
-                            }
-                        } else {
-                             if(nonFieldErrors) nonFieldErrors.innerHTML = '<span>Ocurrió un error inesperado.</span>';
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.error('Error en la petición AJAX:', error);
-                    if(nonFieldErrors) nonFieldErrors.innerHTML = '<span>Error de conexión. Intente de nuevo.</span>';
-                });
-        
-                // Resetear el botón clickeado para el próximo envío
-                clickedButton = null;
-            });
-        }
-      
-
-    document.addEventListener('DOMContentLoaded', function() {
-        {% if messages %}
-            {% for message in messages %}
-                {% if 'POPUP:' in message.message %}
-                    alert("{{ message.message|slice:'7:'|escapejs }}");
-                {% endif %}
-            {% endfor %}
-        {% endif %}
-    });
-</script>
+    <script>
+        // Este script se mantiene para manejar los mensajes emergentes de Django
+        document.addEventListener('DOMContentLoaded', function() {
+            {% if messages %}
+                {% for message in messages %}
+                    {% if 'POPUP:' in message.message %}
+                        alert("{{ message.message|slice:'7:'|escapejs }}");
+                    {% endif %}
+                {% endfor %}
+            {% endif %}
+        });
+    </script>
+    
 
 {% endblock %}

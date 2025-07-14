@@ -790,5 +790,34 @@ legend {
 }
 
 
+.field-errors span,
+.non-field-errors span,
+.error-list p,
+.error-list { /* Para diagnosticos_plan y otros */
+    color: #dc3545; /* Un rojo estándar de Bootstrap para errores */
+    font-size: 0.9rem; /* Un poco más grande para mejor legibilidad */
+    font-weight: 500;
+    display: block; /* Asegura que cada error ocupe su propia línea */
+    margin-top: 0.3rem;
+}
+
+/* Estilo para el contenedor de errores no específicos de un campo */
+.non-field-errors {
+    background-color: #f8d7da;
+    border: 1px solid #f5c2c7;
+    color: #842029;
+    padding: 1rem;
+    border-radius: 4px;
+    margin-bottom: 1.5rem;
+    display: none; /* Se muestra con JS cuando hay errores */
+}
+
+/* Estilo para los campos de formulario (input, select, textarea) que tienen un error */
+input.is-invalid,
+select.is-invalid,
+textarea.is-invalid {
+    border-color: #dc3545 !important; /* !important para asegurar que sobreescriba otros estilos */
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25); /* Un suave resplandor rojo */
+}
 
 

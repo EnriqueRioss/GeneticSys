@@ -838,10 +838,27 @@ class EvaluacionGeneticaForm(forms.ModelForm):
         widgets = {
             'signos_clinicos': forms.Textarea(attrs={
                 'rows': 10,
-                'class': 'form-control'
+                'class': 'form-control',
+                'placeholder': 'Describa los signos clínicos más relevantes del paciente...'
             }),
         }
 
+    # --- INICIO DE LA MODIFICACIÓN ---
+    def __init__(self, *args, **kwargs):
+        # Primero, se llama al constructor de la clase padre.
+        super().__init__(*args, **kwargs)
+        
+        # Hacemos que el campo 'signos_clinicos' sea obligatorio a nivel de formulario.
+        self.fields['signos_clinicos'].required = True
+        
+        # (Opcional pero recomendado) Personalizamos el mensaje de error para más claridad.
+        self.fields['signos_clinicos'].error_messages = {
+            'required': 'Este campo es obligatorio. Por favor, describa los signos clínicos relevantes.'
+        }
+        
+        # (Opcional pero recomendado) Añadimos un label más descriptivo con un asterisco.
+        self.fields['signos_clinicos'].label = "Signos Clínicos Relevantes *"
+        
 class DiagnosticoPresuntivoForm(forms.ModelForm):
     class Meta:
         model = DiagnosticoPresuntivo
