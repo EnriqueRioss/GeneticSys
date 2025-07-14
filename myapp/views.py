@@ -2939,15 +2939,17 @@ def generar_pdf_historia(request, historia_id):
         if not table_data: return
         table = Table(table_data, colWidths=col_widths); table.setStyle(TableStyle([('ALIGN', (0, 0), (-1, -1), 'LEFT'), ('VALIGN', (0, 0), (-1, -1), 'TOP'), ('GRID', (0,0), (-1,-1), 0.5, colors.lightgrey), ('LEFTPADDING', (0,0), (-1,-1), 6), ('RIGHTPADDING', (0,0), (-1,-1), 6), ('TOPPADDING', (0,0), (-1,-1), 6), ('BOTTOMPADDING', (0,0), (-1,-1), 6)])); story.append(table); story.append(Spacer(1, 0.1*inch))
 
-    story.append(Paragraph("REPÚBLICA BOLIVARIANA DE VENEZUELA", styles['Center'])); story.append(Paragraph("UNIVERSIDAD DEL ZULIA", styles['Center'])); story.append(Paragraph("INSTITUTO DE INVESTIGACIONES GENÉTICAS 'DR. HÉCTOR VALLADARES'", styles['Center'])); story.append(Spacer(1, 0.3*inch)); _add_title("HISTORIA CLÍNICA GENÉTICA")
+    # ===== INICIO DE LA MODIFICACIÓN 1: Encabezado Genérico =====
+    story.append(Spacer(1, 0.3*inch))
+    _add_title("HISTORIA CLÍNICA GENÉTICA")
+    # ===== FIN DE LA MODIFICACIÓN 1 =====
+
     _add_key_value_table({"Nº de Historia IIGLUZ": f"HC-{historia.numero_historia}", "Fecha de Ingreso": _format_val(historia.fecha_ingreso), "Tipo de Historia": historia.get_motivo_tipo_consulta_display(), "Genetista": _format_val(historia.genetista.user.get_full_name() if historia.genetista and historia.genetista.user else "No asignado"), "Cursante de Postgrado": _format_val(historia.cursante_postgrado), "Médico Referente": f"{_format_val(historia.medico)} ({_format_val(historia.especialidad)})", "Centro de Referencia": _format_val(historia.centro_referencia),})
     _add_section_title("DATOS DEL PACIENTE(S)")
     if not sujeto_principal: story.append(Paragraph("No hay paciente(s) asignado(s) a esta historia clínica.", styles['Alert']))
     elif tipo_sujeto == 'proposito':
         p = sujeto_principal
-        # --- INICIO DE LA MODIFICACIÓN ---
         proposito_data = { "Nombres y Apellidos": f"{p.nombres} {p.apellidos}", "Identificación": p.identificacion, "Edad": get_edad_display(p.fecha_nacimiento), "Fecha de Nacimiento": _format_val(p.fecha_nacimiento), "Lugar de Nacimiento": _format_val(p.lugar_nacimiento), "Sexo": _format_val(p.get_sexo_display()), "Escolaridad": _format_val(p.escolaridad), "Ocupación": _format_val(p.ocupacion), "Dirección": _format_val(p.direccion), "Teléfono": _format_val(p.telefono), "Email": _format_val(p.email), "Grupo Sanguíneo": f"{_format_val(p.grupo_sanguineo)} {_format_val(p.factor_rh)}",}
-        # --- FIN DE LA MODIFICACIÓN ---
         _add_key_value_table(proposito_data)
         _add_subsection_title("DATOS DEL PADRE")
         padre = padres_info.get('Padre')
@@ -2960,13 +2962,9 @@ def generar_pdf_historia(request, historia_id):
     elif tipo_sujeto == 'pareja':
         for i, p in enumerate(propositos):
             _add_subsection_title(f"CÓNYUGE {i+1}")
-            # --- INICIO DE LA MODIFICACIÓN ---
             proposito_data = {"Nombres y Apellidos": f"{p.nombres} {p.apellidos}", "Identificación": p.identificacion, "Edad": get_edad_display(p.fecha_nacimiento), "Fecha de Nacimiento": _format_val(p.fecha_nacimiento), "Escolaridad": _format_val(p.escolaridad), "Ocupación": _format_val(p.ocupacion),}
-            # --- FIN DE LA MODIFICACIÓN ---
             _add_key_value_table(proposito_data)
     
-    # ... (resto de la lógica de construcción de PDF sin cambios) ...
-    # ... (El código es idéntico al original desde aquí) ...
     if antecedentes_personales or periodo_neonatal or desarrollo_psicomotor or antecedentes_familiares:
         story.append(PageBreak()); _add_section_title("ANTECEDENTES")
         if antecedentes_personales:
@@ -2997,16 +2995,47 @@ def generar_pdf_historia(request, historia_id):
         else: story.append(Paragraph("No se registró un plan de estudio.", styles['Normal']))
         _add_subsection_title("ASESORAMIENTO Y EVOLUCIONES"); asesoramiento_text = "".join([f"<b>Fecha {_format_val(plan.fecha_visita)}:</b> {_format_val(plan.asesoramiento_evoluciones)}<br/><br/>" for plan in planes_estudio.filter(asesoramiento_evoluciones__isnull=False).exclude(asesoramiento_evoluciones__exact='')])
         story.append(Paragraph(asesoramiento_text if asesoramiento_text else "Sin evoluciones registradas.", styles['Normal']))
+
+    # ===== INICIO DE LA MODIFICACIÓN 2: Sección de Autorización =====
     if autorizaciones:
-        story.append(PageBreak()); _add_section_title("AUTORIZACIÓN")
+        story.append(PageBreak())
+        _add_section_title("AUTORIZACIÓN Y CONSENTIMIENTO INFORMADO")
+
+        auth_intro = "El suscrito paciente o representante del mismo Sr. o Sra.:"
+        auth_body = "Autorizo a él o los médicos del  Presente Instituto de Investigaciones Genéticas a efectuar todo examen físico y de laboratorio, fotografías y/o videos clínicos, imagenes diagnósticas, terapéuticas, estudios anatomopatológicos incluyendo necropsia en caso de muerte, y diversas técnicas de diagnositico prenatal que se consideren pertinentes para el diagnositico y tratamiento del mismo. Así mismo, autorizo a que la información, resultados de examenes complementarios, fotografías y/o videos obtenidos durante el estudio del paciente, siempre y cuando no se mencione su nombre, pueden ser divulgados por medios audiovisuales y/o publicaciones escritas con fines estrictamente académicas o científicos."
+        
         for auto in autorizaciones:
-            firmante = f"Representante: {auto.representante_padre.nombres} {auto.representante_padre.apellidos} (C.I: {_format_val(auto.representante_padre.identificacion)})" if auto.proposito.is_minor() and auto.representante_padre else "El mismo paciente."
-            story.append(Paragraph(f"<b>Propósito:</b> {auto.proposito.nombres} {auto.proposito.apellidos}", styles['Normal'])); story.append(Paragraph(f"¿Autoriza la realización de exámenes genéticos?: <b>{'Sí' if auto.autorizacion_examenes else 'No'}</b>", styles['Normal'])); story.append(Paragraph(f"Firmante: <b>{firmante}</b>", styles['Normal'])); story.append(Spacer(1, 0.2 * inch))
+            firmante_nombre = f"{auto.representante_padre.nombres} {auto.representante_padre.apellidos}" if auto.proposito.is_minor() and auto.representante_padre else f"{auto.proposito.nombres} {auto.proposito.apellidos}"
+            firmante_id = f"C.I: {_format_val(auto.representante_padre.identificacion)}" if auto.proposito.is_minor() and auto.representante_padre else f"C.I: {_format_val(auto.proposito.identificacion)}"
+            firmante_rol = "Representante" if auto.proposito.is_minor() and auto.representante_padre else "Paciente"
+            firmante_display = f"{firmante_nombre} ({firmante_id}) - {firmante_rol}"
+            
+            story.append(Paragraph(f"<b>Consentimiento para:</b> {auto.proposito.nombres} {auto.proposito.apellidos}", styles['SubSectionTitle']))
+            story.append(Spacer(1, 0.2 * inch))
+
+            story.append(Paragraph(auth_intro, styles['Normal']))
+            story.append(Spacer(1, 0.1 * inch))
+            story.append(Paragraph(auth_body, styles['Justify']))
+
+            story.append(Spacer(1, 0.4 * inch))
+            
             if auto.archivo_autorizacion and hasattr(auto.archivo_autorizacion, 'path'):
-                try: signature_img = Image(auto.archivo_autorizacion.path, width=2.5 * inch, height=1.2 * inch); signature_img.preserveAspectRatio = True; signature_img.hAlign = 'LEFT'; story.append(signature_img); story.append(Paragraph("______________________________", styles['Left'])); story.append(Paragraph("Firma", styles['Left']))
-                except Exception as e: print(f"Error al procesar imagen de firma para PDF (path: {auto.archivo_autorizacion.name}): {e}"); story.append(Paragraph("<i>[Firma no disponible - Error al procesar imagen]</i>", styles['Alert'])); story.append(Spacer(1, 0.4 * inch))
-            else: story.append(Spacer(1, 0.4 * inch)); story.append(Paragraph("______________________________", styles['Left'])); story.append(Paragraph("Firma", styles['Left']))
+                try:
+                    signature_img = Image(auto.archivo_autorizacion.path, width=2.5 * inch, height=1.2 * inch)
+                    signature_img.preserveAspectRatio = True
+                    signature_img.hAlign = 'LEFT'
+                    story.append(signature_img)
+                except Exception as e:
+                    print(f"Error al procesar imagen de firma para PDF (path: {auto.archivo_autorizacion.name}): {e}")
+                    story.append(Paragraph("<i>[Firma no disponible - Error al procesar imagen]</i>", styles['Alert']))
+                    story.append(Spacer(1, 0.4 * inch))
+            else:
+                story.append(Spacer(1, 1.2 * inch)) # Espacio para la firma manual
+
+            story.append(Paragraph("______________________________", styles['Left']))
+            story.append(Paragraph(f"<b>Firma de:</b> {firmante_display}", styles['Left']))
             story.append(Spacer(1, 0.5 * inch))
+    # ===== FIN DE LA MODIFICACIÓN 2 =====
 
     try: doc.build(story)
     except Exception as e: print(f"CRITICAL PDF BUILD ERROR: {e}"); return HttpResponse(f"Error crítico al construir el PDF. Revise la consola del servidor. Error: {e}", status=500)
