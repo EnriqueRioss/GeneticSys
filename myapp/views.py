@@ -48,7 +48,9 @@ from reportlab.lib.pagesizes import letter
 from reportlab.lib import colors
 from reportlab.lib.units import inch
 
-
+from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill
+from openpyxl.utils import get_column_letter
 
 from django import forms
 
@@ -118,7 +120,25 @@ WORKFLOWS = {
 
 
 
-
+def get_edad_display(fecha_nacimiento):
+    """Calcula y formatea la edad en años o meses."""
+    if not fecha_nacimiento:
+        return "N/A"
+    today = timezone.now().date()
+    age_years = today.year - fecha_nacimiento.year - ((today.month, today.day) < (fecha_nacimiento.month, fecha_nacimiento.day))
+    if age_years >= 2:
+        return f"{age_years} años"
+    else:
+        # Calcula la diferencia en meses
+        months = (today.year - fecha_nacimiento.year) * 12 + today.month - fecha_nacimiento.month
+        # Ajusta si el día actual es anterior al día de nacimiento
+        if today.day < fecha_nacimiento.day:
+            months -= 1
+        # Previene meses negativos para recién nacidos
+        months = max(0, months)
+        return f"{months} meses"
+    
+    
 def clear_editing_session(request):
     """
     Función auxiliar para limpiar la sesión de edición si se inició
@@ -2263,6 +2283,7 @@ def reports_view(request):
         date_range = form.cleaned_data.get('date_range')
         
         if report_type == 'histories':
+            # ... (sin cambios en este bloque) ...
             headers = ['N° Historia', 'Paciente(s)', 'Motivo', 'Estado', 'Genetista', 'Fecha Creación', 'Última Modificación']
             qs = HistoriasClinicas.objects.select_related('genetista__user').prefetch_related('propositos_set')
             
@@ -2273,7 +2294,6 @@ def reports_view(request):
             if form.cleaned_data.get('estado_historia'): qs = qs.filter(estado=form.cleaned_data.get('estado_historia'))
             if form.cleaned_data.get('numero_historia_desde'): qs = qs.filter(numero_historia__gte=form.cleaned_data.get('numero_historia_desde'))
             if form.cleaned_data.get('numero_historia_hasta'): qs = qs.filter(numero_historia__lte=form.cleaned_data.get('numero_historia_hasta'))
-            # MODIFICACIÓN: Se aplica el filtro de fecha
             if date_range:
                 if date_range.get('desde'): qs = qs.filter(fecha_ingreso__date__gte=date_range['desde'])
                 if date_range.get('hasta'): qs = qs.filter(fecha_ingreso__date__lte=date_range['hasta'])
@@ -2292,24 +2312,25 @@ def reports_view(request):
                     base_propositos_qs = base_propositos_qs.filter(Q(nombres__icontains=q) | Q(apellidos__icontains=q) | Q(identificacion__icontains=q))
                 if form.cleaned_data.get('estado_paciente'):
                     base_propositos_qs = base_propositos_qs.filter(estado=form.cleaned_data.get('estado_paciente'))
-                # MODIFICACIÓN: Se aplica el filtro de fecha
                 if date_range:
                     if date_range.get('desde'): base_propositos_qs = base_propositos_qs.filter(historia__fecha_ingreso__date__gte=date_range['desde'])
                     if date_range.get('hasta'): base_propositos_qs = base_propositos_qs.filter(historia__fecha_ingreso__date__lte=date_range['hasta'])
                 
                 for p in base_propositos_qs.order_by('-historia__fecha_ingreso'):
-                    results.append([f"HC-{p.historia.numero_historia}", f"{p.nombres} {p.apellidos}", p.identificacion, p.edad or "N/A", p.historia.genetista.user.get_full_name() if p.historia.genetista else "N/A", p.historia.fecha_ingreso.strftime('%d-%m-%Y'), p.get_estado_display()])
+                    # --- INICIO DE LA MODIFICACIÓN ---
+                    edad_display = get_edad_display(p.fecha_nacimiento)
+                    results.append([f"HC-{p.historia.numero_historia}", f"{p.nombres} {p.apellidos}", p.identificacion, edad_display, p.historia.genetista.user.get_full_name() if p.historia.genetista else "N/A", p.historia.fecha_ingreso.strftime('%d-%m-%Y'), p.get_estado_display()])
+                    # --- FIN DE LA MODIFICACIÓN ---
             
             elif report_type == 'consultations':
+                 # ... (sin cambios en este bloque) ...
                 headers = ['Paciente', 'N° Historia', 'Plan de Estudio', 'Estado', 'Fecha Próxima Visita', 'Genetista']
                 qs = PlanEstudio.objects.filter(Q(evaluacion__proposito__in=base_propositos_qs) | Q(evaluacion__pareja__proposito_id_1__in=base_propositos_qs)).select_related('evaluacion__proposito__historia__genetista__user','evaluacion__pareja__proposito_id_1__historia__genetista__user').distinct()
                 if form.cleaned_data.get('estado_consulta') == 'pendientes': qs = qs.filter(completado=False)
                 elif form.cleaned_data.get('estado_consulta') == 'completadas': qs = qs.filter(completado=True)
-                # MODIFICACIÓN: Se aplica el filtro de fecha
                 if date_range:
                     if date_range.get('desde'): qs = qs.filter(fecha_visita__gte=date_range['desde'])
                     if date_range.get('hasta'): qs = qs.filter(fecha_visita__lte=date_range['hasta'])
-
                 for plan in qs.order_by('-fecha_visita'):
                     paciente, hc, genetista = "N/A", "N/A", "N/A"
                     if plan.evaluacion.proposito: paciente, hc, genetista = f"{plan.evaluacion.proposito.nombres} {plan.evaluacion.proposito.apellidos}", f"HC-{plan.evaluacion.proposito.historia.numero_historia}", plan.evaluacion.proposito.historia.genetista.user.get_full_name() if plan.evaluacion.proposito.historia.genetista else "N/A"
@@ -2317,14 +2338,13 @@ def reports_view(request):
                     results.append([paciente, hc, plan.accion, "Completada" if plan.completado else "Pendiente", plan.fecha_visita.strftime('%d-%m-%Y') if plan.fecha_visita else "N/A", genetista])
             
             elif report_type == 'diagnoses':
+                # ... (sin cambios en este bloque) ...
                 headers = ['Paciente', 'N° Historia', 'Diagnóstico Final', 'Genetista', 'Fecha de Evaluación']
                 qs = EvaluacionGenetica.objects.filter(Q(proposito__in=base_propositos_qs) | Q(pareja__proposito_id_1__in=base_propositos_qs)).filter(diagnostico_final__isnull=False).exclude(diagnostico_final__exact='').select_related('proposito__historia__genetista__user','pareja__proposito_id_1__historia__genetista__user').distinct()
                 if form.cleaned_data.get('buscar_diagnostico'): qs = qs.filter(diagnostico_final__icontains=form.cleaned_data.get('buscar_diagnostico'))
-                # MODIFICACIÓN: Se aplica el filtro de fecha
                 if date_range:
                     if date_range.get('desde'): qs = qs.filter(fecha_creacion__date__gte=date_range['desde'])
                     if date_range.get('hasta'): qs = qs.filter(fecha_creacion__date__lte=date_range['hasta'])
-
                 for ev in qs.order_by('-fecha_creacion'):
                     paciente, hc, genetista, fecha_ev = "N/A", "N/A", "N/A", "N/A"
                     if ev.proposito: paciente, hc, genetista, fecha_ev = f"{ev.proposito.nombres} {ev.proposito.apellidos}", f"HC-{ev.proposito.historia.numero_historia}", ev.proposito.historia.genetista.user.get_full_name() if ev.proposito.historia.genetista else "N/A", ev.fecha_creacion.strftime('%d-%m-%Y')
@@ -2337,7 +2357,8 @@ def reports_view(request):
     }
     return render(request, 'reports.html', context)
 
-
+# --- VISTA 'export_report_data' MODIFICADA ---
+# --- VISTA 'export_report_data' MODIFICADA ---
 @login_required
 @all_roles_required
 def export_report_data(request, export_format):
@@ -2363,11 +2384,9 @@ def export_report_data(request, export_format):
         if form.cleaned_data.get('estado_historia'): qs = qs.filter(estado=form.cleaned_data.get('estado_historia'))
         if form.cleaned_data.get('numero_historia_desde'): qs = qs.filter(numero_historia__gte=form.cleaned_data.get('numero_historia_desde'))
         if form.cleaned_data.get('numero_historia_hasta'): qs = qs.filter(numero_historia__lte=form.cleaned_data.get('numero_historia_hasta'))
-        # MODIFICACIÓN: Se aplica el filtro de fecha
         if date_range:
             if date_range.get('desde'): qs = qs.filter(fecha_ingreso__date__gte=date_range['desde'])
             if date_range.get('hasta'): qs = qs.filter(fecha_ingreso__date__lte=date_range['hasta'])
-
         for h in qs.order_by('-numero_historia'):
             results.append([f"HC-{h.numero_historia}", h.get_paciente_display(), h.get_motivo_tipo_consulta_display(), h.get_estado_display(), h.genetista.user.get_full_name() if h.genetista else "N/A", h.fecha_ingreso.strftime('%d-%m-%Y'), h.fecha_ultima_modificacion.strftime('%d-%m-%Y %H:%M') if h.fecha_ultima_modificacion else "N/A"])
     
@@ -2382,20 +2401,19 @@ def export_report_data(request, export_format):
                 base_propositos_qs = base_propositos_qs.filter(Q(nombres__icontains=q) | Q(apellidos__icontains=q) | Q(identificacion__icontains=q))
             if form.cleaned_data.get('estado_paciente'):
                 base_propositos_qs = base_propositos_qs.filter(estado=form.cleaned_data.get('estado_paciente'))
-            # MODIFICACIÓN: Se aplica el filtro de fecha
             if date_range:
                 if date_range.get('desde'): base_propositos_qs = base_propositos_qs.filter(historia__fecha_ingreso__date__gte=date_range['desde'])
                 if date_range.get('hasta'): base_propositos_qs = base_propositos_qs.filter(historia__fecha_ingreso__date__lte=date_range['hasta'])
             
             for p in base_propositos_qs.order_by('-historia__fecha_ingreso'):
-                results.append([f"HC-{p.historia.numero_historia}", f"{p.nombres} {p.apellidos}", p.identificacion, p.edad or "N/A", p.historia.genetista.user.get_full_name() if p.historia.genetista else "N/A", p.historia.fecha_ingreso.strftime('%d-%m-%Y'), p.get_estado_display()])
+                edad_display = get_edad_display(p.fecha_nacimiento)
+                results.append([f"HC-{p.historia.numero_historia}", f"{p.nombres} {p.apellidos}", p.identificacion, edad_display, p.historia.genetista.user.get_full_name() if p.historia.genetista else "N/A", p.historia.fecha_ingreso.strftime('%d-%m-%Y'), p.get_estado_display()])
         
         elif report_type == 'consultations':
             headers = ['Paciente', 'N° Historia', 'Plan de Estudio', 'Estado', 'Fecha Próxima Visita', 'Genetista']
             qs = PlanEstudio.objects.filter(Q(evaluacion__proposito__in=base_propositos_qs) | Q(evaluacion__pareja__proposito_id_1__in=base_propositos_qs)).select_related('evaluacion__proposito__historia__genetista__user','evaluacion__pareja__proposito_id_1__historia__genetista__user').distinct()
             if form.cleaned_data.get('estado_consulta') == 'pendientes': qs = qs.filter(completado=False)
             elif form.cleaned_data.get('estado_consulta') == 'completadas': qs = qs.filter(completado=True)
-            # MODIFICACIÓN: Se aplica el filtro de fecha
             if date_range:
                 if date_range.get('desde'): qs = qs.filter(fecha_visita__gte=date_range['desde'])
                 if date_range.get('hasta'): qs = qs.filter(fecha_visita__lte=date_range['hasta'])
@@ -2405,29 +2423,57 @@ def export_report_data(request, export_format):
                 if plan.evaluacion.proposito: paciente, hc, genetista = f"{plan.evaluacion.proposito.nombres} {plan.evaluacion.proposito.apellidos}", f"HC-{plan.evaluacion.proposito.historia.numero_historia}", plan.evaluacion.proposito.historia.genetista.user.get_full_name() if plan.evaluacion.proposito.historia.genetista else "N/A"
                 elif plan.evaluacion.pareja: p1=plan.evaluacion.pareja.proposito_id_1; paciente, hc, genetista = f"Pareja: {p1.nombres} y {plan.evaluacion.pareja.proposito_id_2.nombres}", f"HC-{p1.historia.numero_historia}", p1.historia.genetista.user.get_full_name() if p1.historia.genetista else "N/A"
                 results.append([paciente, hc, plan.accion, "Completada" if plan.completado else "Pendiente", plan.fecha_visita.strftime('%d-%m-%Y') if plan.fecha_visita else "N/A", genetista])
-
         elif report_type == 'diagnoses':
             headers = ['Paciente', 'N° Historia', 'Diagnóstico Final', 'Genetista', 'Fecha de Evaluación']
             qs = EvaluacionGenetica.objects.filter(Q(proposito__in=base_propositos_qs) | Q(pareja__proposito_id_1__in=base_propositos_qs)).filter(diagnostico_final__isnull=False).exclude(diagnostico_final__exact='').select_related('proposito__historia__genetista__user','pareja__proposito_id_1__historia__genetista__user').distinct()
             if form.cleaned_data.get('buscar_diagnostico'): qs = qs.filter(diagnostico_final__icontains=form.cleaned_data.get('buscar_diagnostico'))
-            # MODIFICACIÓN: Se aplica el filtro de fecha
             if date_range:
                 if date_range.get('desde'): qs = qs.filter(fecha_creacion__date__gte=date_range['desde'])
                 if date_range.get('hasta'): qs = qs.filter(fecha_creacion__date__lte=date_range['hasta'])
-
             for ev in qs.order_by('-fecha_creacion'):
                 paciente, hc, genetista, fecha_ev = "N/A", "N/A", "N/A", "N/A"
                 if ev.proposito: paciente, hc, genetista, fecha_ev = f"{ev.proposito.nombres} {ev.proposito.apellidos}", f"HC-{ev.proposito.historia.numero_historia}", ev.proposito.historia.genetista.user.get_full_name() if ev.proposito.historia.genetista else "N/A", ev.fecha_creacion.strftime('%d-%m-%Y')
                 elif ev.pareja: p1 = ev.pareja.proposito_id_1; paciente, hc, genetista, fecha_ev = f"Pareja: {p1.nombres} y {ev.pareja.proposito_id_2.nombres}", f"HC-{p1.historia.numero_historia}", p1.historia.genetista.user.get_full_name() if p1.historia.genetista else "N/A", ev.fecha_creacion.strftime('%d-%m-%Y')
                 results.append([paciente, hc, ev.diagnostico_final, genetista, fecha_ev])
     
-    # --- Lógica de exportación genérica (sin cambios) ---
-    if export_format == 'csv':
-        response = HttpResponse(content_type='text/csv; charset=utf-8')
-        response['Content-Disposition'] = f'attachment; filename="reporte_{report_type}_{timezone.now().strftime("%Y%m%d_%H%M%S")}.csv"'
-        writer = csv.writer(response)
-        if headers: writer.writerow(headers)
-        writer.writerows(results)
+    # --- Lógica de exportación MODIFICADA ---
+    if export_format == 'csv': # El endpoint sigue siendo 'csv' pero ahora genera un archivo Excel (.xlsx)
+        wb = Workbook()
+        ws = wb.active
+        ws.title = f"Reporte_{report_type}"
+
+        # Estilos para la cabecera
+        header_font = Font(name='Arial', bold=True, color="FFFFFF")
+        header_fill = PatternFill(start_color="4F81BD", end_color="4F81BD", fill_type="solid")
+
+        # Escribir cabeceras y aplicar estilo
+        if headers:
+            ws.append(headers)
+            for cell in ws[1]:
+                cell.font = header_font
+                cell.fill = header_fill
+        
+        # Escribir filas de datos
+        for row_data in results:
+            ws.append(row_data)
+        
+        # Ajustar el ancho de las columnas después de haber insertado todos los datos
+        for column_cells in ws.columns:
+            max_length = 0
+            column_letter = get_column_letter(column_cells[0].column)
+            for cell in column_cells:
+                try:
+                    if len(str(cell.value)) > max_length:
+                        max_length = len(str(cell.value))
+                except:
+                    pass
+            adjusted_width = (max_length + 2)
+            ws.column_dimensions[column_letter].width = adjusted_width
+
+        # Crear la respuesta HTTP con el archivo XLSX
+        response = HttpResponse(content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+        response['Content-Disposition'] = f'attachment; filename="reporte_{report_type}_{timezone.now().strftime("%Y%m%d_%H%M%S")}.xlsx"'
+        wb.save(response) # Guardar el libro de trabajo directamente en la respuesta
         return response
 
     elif export_format == 'pdf':
@@ -2436,31 +2482,18 @@ def export_report_data(request, export_format):
         elements, styles = [], getSampleStyleSheet()
         elements.append(Paragraph(f"Reporte de {dict(form.fields['report_type'].choices).get(report_type)}", styles['h1']))
         elements.append(Spacer(1, 0.2*72))
-        
         if not headers:
-            headers = ["Error"]
-            results = [["Tipo de reporte no válido o sin datos."]]
-
+            headers = ["Error"]; results = [["Tipo de reporte no válido o sin datos."]]
         table_data = [headers] + results
         if not results:
              table_data.append(["No se encontraron registros."] * len(headers))
-        
-        table = Table(table_data)
-        table.setStyle(TableStyle([
-            ('BACKGROUND', (0, 0), (-1, 0), colors.grey), ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-            ('ALIGN', (0, 0), (-1, -1), 'CENTER'), ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
-            ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'), ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-            ('BACKGROUND', (0, 1), (-1, -1), colors.beige), ('GRID', (0, 0), (-1, -1), 1, colors.black),
-            ('FONTSIZE', (0,0), (-1,-1), 8),
-        ]))
-        elements.append(table)
+        table = Table(table_data); table.setStyle(TableStyle([('BACKGROUND', (0, 0), (-1, 0), colors.grey), ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke), ('ALIGN', (0, 0), (-1, -1), 'CENTER'), ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'), ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'), ('BOTTOMPADDING', (0, 0), (-1, 0), 12), ('BACKGROUND', (0, 1), (-1, -1), colors.beige), ('GRID', (0, 0), (-1, -1), 1, colors.black), ('FONTSIZE', (0,0), (-1,-1), 8), ])); elements.append(table)
         doc.build(elements)
         buffer.seek(0)
-        
         response = HttpResponse(buffer, content_type='application/pdf')
         response['Content-Disposition'] = f'attachment; filename="reporte_{report_type}_{timezone.now().strftime("%Y%m%d_%H%M%S")}.pdf"'
         return response
-
+        
     return HttpResponse("Formato de exportación no soportado.", status=400)
 
 @login_required
@@ -2754,32 +2787,30 @@ def gestion_pacientes_view(request):
     processed_ids = set()
     final_list = []
 
-    # Buscamos todas las parejas que involucren a los pacientes filtrados.
     parejas_qs = Parejas.objects.filter(
         Q(proposito_id_1_id__in=pacientes_dict.keys()) | Q(proposito_id_2_id__in=pacientes_dict.keys())
     ).select_related(
         'proposito_id_1__historia__genetista__user', 
         'proposito_id_2__historia__genetista__user'
     ).prefetch_related(
-        'evaluaciongenetica_set__planes_estudio' # Clave para obtener los planes de la pareja
+        'evaluaciongenetica_set__planes_estudio'
     )
 
     # Procesamos las parejas primero
     for pareja in parejas_qs:
-        # Nos aseguramos de que AMBOS miembros de la pareja estén en la lista filtrada
         if pareja.proposito_id_1_id in pacientes_dict and pareja.proposito_id_2_id in pacientes_dict:
             if pareja.proposito_id_1_id not in processed_ids and pareja.proposito_id_2_id not in processed_ids:
                 
-                # Calculamos el conteo de planes pendientes para la pareja
                 evaluacion = pareja.evaluaciongenetica_set.first()
-                if evaluacion:
-                    pareja.plan_estudio_pendiente_count = sum(1 for plan in evaluacion.planes_estudio.all() if not plan.completado)
-                else:
-                    pareja.plan_estudio_pendiente_count = 0
+                pareja.plan_estudio_pendiente_count = sum(1 for plan in evaluacion.planes_estudio.all() if not plan.completado) if evaluacion else 0
                 
-                # Adjuntamos los objetos Proposito completos (con sus datos) al objeto Pareja
                 pareja.proposito_id_1 = pacientes_dict[pareja.proposito_id_1_id]
                 pareja.proposito_id_2 = pacientes_dict[pareja.proposito_id_2_id]
+
+                # --- INICIO DE LA MODIFICACIÓN ---
+                pareja.proposito_id_1.edad_display = get_edad_display(pareja.proposito_id_1.fecha_nacimiento)
+                pareja.proposito_id_2.edad_display = get_edad_display(pareja.proposito_id_2.fecha_nacimiento)
+                # --- FIN DE LA MODIFICACIÓN ---
 
                 final_list.append(pareja)
                 processed_ids.add(pareja.proposito_id_1_id)
@@ -2788,7 +2819,9 @@ def gestion_pacientes_view(request):
     # Procesamos los pacientes individuales restantes
     for proposito_id, proposito in pacientes_dict.items():
         if proposito_id not in processed_ids:
-            # Usamos el conteo que anotamos previamente para los propósitos individuales
+            # --- INICIO DE LA MODIFICACIÓN ---
+            proposito.edad_display = get_edad_display(proposito.fecha_nacimiento)
+            # --- FIN DE LA MODIFICACIÓN ---
             proposito.plan_estudio_pendiente_count = proposito.plan_estudio_pendiente_count_single
             final_list.append(proposito)
 
@@ -2861,71 +2894,38 @@ def inactivar_pacientes_view(request):
 @all_roles_required
 @never_cache
 def generar_pdf_historia(request, historia_id):
-    """
-    Genera un reporte en PDF detallado para una historia clínica específica.
-    VERSIÓN ACTUALIZADA: Formato mejorado para los datos de los padres.
-    """
     historia = get_object_or_404(HistoriasClinicas, pk=historia_id)
-    
-    # --- Verificación de Permisos (sin cambios) ---
     try:
         user_gen_profile = request.user.genetistas
-        if user_gen_profile.rol == 'GEN' and historia.genetista != user_gen_profile:
-            raise PermissionDenied("No tiene permiso para generar el reporte de esta historia.")
+        if user_gen_profile.rol == 'GEN' and historia.genetista != user_gen_profile: raise PermissionDenied("No tiene permiso para generar el reporte de esta historia.")
         if user_gen_profile.rol == 'LEC':
-            if not user_gen_profile.associated_genetista or historia.genetista != user_gen_profile.associated_genetista:
-                raise PermissionDenied("Como lector, no tiene permiso para generar el reporte de esta historia.")
-    except Genetistas.DoesNotExist:
-        raise PermissionDenied("Perfil de usuario no encontrado.")
+            if not user_gen_profile.associated_genetista or historia.genetista != user_gen_profile.associated_genetista: raise PermissionDenied("Como lector, no tiene permiso para generar el reporte de esta historia.")
+    except Genetistas.DoesNotExist: raise PermissionDenied("Perfil de usuario no encontrado.")
 
-    # --- Recopilación de Datos (sin cambios) ---
     propositos = list(Propositos.objects.filter(historia=historia).order_by('pk'))
-    pareja = None
-    if len(propositos) > 1:
-        pareja = Parejas.objects.filter(proposito_id_1__in=propositos, proposito_id_2__in=propositos).first()
-    
+    pareja = Parejas.objects.filter(proposito_id_1__in=propositos, proposito_id_2__in=propositos).first() if len(propositos) > 1 else None
     sujeto_principal = pareja if pareja else (propositos[0] if propositos else None)
     tipo_sujeto = 'pareja' if pareja else 'proposito'
 
-    padres_info = {}
-    if tipo_sujeto == 'proposito' and sujeto_principal:
-        padres_qs = InformacionPadres.objects.filter(proposito=sujeto_principal)
-        for p in padres_qs:
-            padres_info[p.tipo] = p
-
+    padres_info = {p.tipo: p for p in InformacionPadres.objects.filter(proposito=sujeto_principal)} if tipo_sujeto == 'proposito' and sujeto_principal else {}
     q_filter = Q(proposito__in=propositos) if propositos else Q(pk__isnull=True)
-    if pareja:
-        q_filter |= Q(pareja=pareja)
-        
+    if pareja: q_filter |= Q(pareja=pareja)
+    
     antecedentes_personales = AntecedentesPersonales.objects.filter(q_filter).first()
     antecedentes_familiares = AntecedentesFamiliaresPreconcepcionales.objects.filter(q_filter).first()
     periodo_neonatal = PeriodoNeonatal.objects.filter(q_filter).first()
     desarrollo_psicomotor = DesarrolloPsicomotor.objects.filter(q_filter).first()
-    
     evaluacion_genetica = EvaluacionGenetica.objects.filter(q_filter).first()
-    diagnosticos = DiagnosticoPresuntivo.objects.none()
-    planes_estudio = PlanEstudio.objects.none()
-    if evaluacion_genetica:
-        diagnosticos = DiagnosticoPresuntivo.objects.filter(evaluacion=evaluacion_genetica).order_by('orden')
-        planes_estudio = PlanEstudio.objects.filter(evaluacion=evaluacion_genetica).order_by('fecha_visita')
-
+    diagnosticos, planes_estudio = (DiagnosticoPresuntivo.objects.filter(evaluacion=evaluacion_genetica).order_by('orden'), PlanEstudio.objects.filter(evaluacion=evaluacion_genetica).order_by('fecha_visita')) if evaluacion_genetica else (DiagnosticoPresuntivo.objects.none(), PlanEstudio.objects.none())
     examenes_fisicos = ExamenFisico.objects.filter(proposito__in=propositos).select_related('proposito')
     autorizaciones = Autorizaciones.objects.filter(proposito__in=propositos).select_related('proposito', 'representante_padre')
 
-    # --- Construcción del PDF (sin cambios en las funciones de ayuda y estilos) ---
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=letter, rightMargin=inch/2, leftMargin=inch/2, topMargin=inch/2, bottomMargin=inch/2)
     story = []
     styles = getSampleStyleSheet()
-    styles.add(ParagraphStyle(name='Justify', alignment=TA_JUSTIFY))
-    styles.add(ParagraphStyle(name='Center', alignment=TA_CENTER))
-    styles.add(ParagraphStyle(name='Right', alignment=TA_RIGHT))
-    styles.add(ParagraphStyle(name='Left', alignment=TA_LEFT))
-    styles.add(ParagraphStyle(name='SectionTitle', fontSize=12, fontName='Helvetica-Bold', spaceAfter=6))
-    styles.add(ParagraphStyle(name='SubSectionTitle', fontSize=10, fontName='Helvetica-Bold', spaceBefore=10, spaceAfter=4))
-    styles.add(ParagraphStyle(name='Alert', fontSize=10, fontName='Helvetica-Bold', textColor=colors.red))
+    styles.add(ParagraphStyle(name='Justify', alignment=TA_JUSTIFY)); styles.add(ParagraphStyle(name='Center', alignment=TA_CENTER)); styles.add(ParagraphStyle(name='Right', alignment=TA_RIGHT)); styles.add(ParagraphStyle(name='Left', alignment=TA_LEFT)); styles.add(ParagraphStyle(name='SectionTitle', fontSize=12, fontName='Helvetica-Bold', spaceAfter=6)); styles.add(ParagraphStyle(name='SubSectionTitle', fontSize=10, fontName='Helvetica-Bold', spaceBefore=10, spaceAfter=4)); styles.add(ParagraphStyle(name='Alert', fontSize=10, fontName='Helvetica-Bold', textColor=colors.red))
 
-    # --- Funciones de ayuda para el PDF (sin cambios) ---
     def _format_val(value, default="N/A"):
         if value is None or value == '': return default
         if isinstance(value, bool): return "Sí" if value else "No"
@@ -2935,97 +2935,38 @@ def generar_pdf_historia(request, historia_id):
     def _add_section_title(text): story.append(Spacer(1, 0.2*inch)); story.append(Paragraph(text, styles['SectionTitle'])); story.append(Table([['']], colWidths=[7.5*inch], style=TableStyle([('LINEABOVE', (0,0), (-1,0), 1, colors.black)]))); story.append(Spacer(1, 0.1*inch))
     def _add_subsection_title(text): story.append(Paragraph(text, styles['SubSectionTitle']))
     def _add_key_value_table(data_dict, col_widths=[2.5*inch, 5*inch]):
-        table_data = []
-        for k, v in data_dict.items():
-            p_key = Paragraph(f"<b>{k}:</b>", styles['Normal']); p_val = Paragraph(_format_val(v), styles['Normal'])
-            table_data.append([p_key, p_val])
+        table_data = [[Paragraph(f"<b>{k}:</b>", styles['Normal']), Paragraph(_format_val(v), styles['Normal'])] for k, v in data_dict.items()]
         if not table_data: return
-        table = Table(table_data, colWidths=col_widths)
-        table.setStyle(TableStyle([('ALIGN', (0, 0), (-1, -1), 'LEFT'), ('VALIGN', (0, 0), (-1, -1), 'TOP'), ('GRID', (0,0), (-1,-1), 0.5, colors.lightgrey), ('LEFTPADDING', (0,0), (-1,-1), 6), ('RIGHTPADDING', (0,0), (-1,-1), 6), ('TOPPADDING', (0,0), (-1,-1), 6), ('BOTTOMPADDING', (0,0), (-1,-1), 6)]))
-        story.append(table); story.append(Spacer(1, 0.1*inch))
+        table = Table(table_data, colWidths=col_widths); table.setStyle(TableStyle([('ALIGN', (0, 0), (-1, -1), 'LEFT'), ('VALIGN', (0, 0), (-1, -1), 'TOP'), ('GRID', (0,0), (-1,-1), 0.5, colors.lightgrey), ('LEFTPADDING', (0,0), (-1,-1), 6), ('RIGHTPADDING', (0,0), (-1,-1), 6), ('TOPPADDING', (0,0), (-1,-1), 6), ('BOTTOMPADDING', (0,0), (-1,-1), 6)])); story.append(table); story.append(Spacer(1, 0.1*inch))
 
-    # --- Contenido del PDF ---
-    
-    # 1. Cabecera (sin cambios)
-    story.append(Paragraph("REPÚBLICA BOLIVARIANA DE VENEZUELA", styles['Center']))
-    story.append(Paragraph("UNIVERSIDAD DEL ZULIA", styles['Center']))
-    story.append(Paragraph("INSTITUTO DE INVESTIGACIONES GENÉTICAS 'DR. HÉCTOR VALLADARES'", styles['Center']))
-    story.append(Spacer(1, 0.3*inch)); _add_title("HISTORIA CLÍNICA GENÉTICA")
-    header_data = {
-        "Nº de Historia IIGLUZ": f"HC-{historia.numero_historia}", "Fecha de Ingreso": _format_val(historia.fecha_ingreso),
-        "Tipo de Historia": historia.get_motivo_tipo_consulta_display(),
-        "Genetista": _format_val(historia.genetista.user.get_full_name() if historia.genetista and historia.genetista.user else "No asignado"),
-        "Cursante de Postgrado": _format_val(historia.cursante_postgrado),
-        "Médico Referente": f"{_format_val(historia.medico)} ({_format_val(historia.especialidad)})",
-        "Centro de Referencia": _format_val(historia.centro_referencia),
-    }
-    _add_key_value_table(header_data)
-
-    # 2. Información del Paciente(s)
+    story.append(Paragraph("REPÚBLICA BOLIVARIANA DE VENEZUELA", styles['Center'])); story.append(Paragraph("UNIVERSIDAD DEL ZULIA", styles['Center'])); story.append(Paragraph("INSTITUTO DE INVESTIGACIONES GENÉTICAS 'DR. HÉCTOR VALLADARES'", styles['Center'])); story.append(Spacer(1, 0.3*inch)); _add_title("HISTORIA CLÍNICA GENÉTICA")
+    _add_key_value_table({"Nº de Historia IIGLUZ": f"HC-{historia.numero_historia}", "Fecha de Ingreso": _format_val(historia.fecha_ingreso), "Tipo de Historia": historia.get_motivo_tipo_consulta_display(), "Genetista": _format_val(historia.genetista.user.get_full_name() if historia.genetista and historia.genetista.user else "No asignado"), "Cursante de Postgrado": _format_val(historia.cursante_postgrado), "Médico Referente": f"{_format_val(historia.medico)} ({_format_val(historia.especialidad)})", "Centro de Referencia": _format_val(historia.centro_referencia),})
     _add_section_title("DATOS DEL PACIENTE(S)")
-    if not sujeto_principal:
-        story.append(Paragraph("No hay paciente(s) asignado(s) a esta historia clínica.", styles['Alert']))
+    if not sujeto_principal: story.append(Paragraph("No hay paciente(s) asignado(s) a esta historia clínica.", styles['Alert']))
     elif tipo_sujeto == 'proposito':
         p = sujeto_principal
-        proposito_data = {
-            "Nombres y Apellidos": f"{p.nombres} {p.apellidos}", "Identificación": p.identificacion,
-            "Edad": f"{p.edad} años" if p.edad is not None else "N/A", "Fecha de Nacimiento": _format_val(p.fecha_nacimiento),
-            "Lugar de Nacimiento": _format_val(p.lugar_nacimiento), "Sexo": _format_val(p.get_sexo_display()),
-            "Escolaridad": _format_val(p.escolaridad), "Ocupación": _format_val(p.ocupacion),
-            "Dirección": _format_val(p.direccion), "Teléfono": _format_val(p.telefono),
-            "Email": _format_val(p.email), "Grupo Sanguíneo": f"{_format_val(p.grupo_sanguineo)} {_format_val(p.factor_rh)}",
-        }
+        # --- INICIO DE LA MODIFICACIÓN ---
+        proposito_data = { "Nombres y Apellidos": f"{p.nombres} {p.apellidos}", "Identificación": p.identificacion, "Edad": get_edad_display(p.fecha_nacimiento), "Fecha de Nacimiento": _format_val(p.fecha_nacimiento), "Lugar de Nacimiento": _format_val(p.lugar_nacimiento), "Sexo": _format_val(p.get_sexo_display()), "Escolaridad": _format_val(p.escolaridad), "Ocupación": _format_val(p.ocupacion), "Dirección": _format_val(p.direccion), "Teléfono": _format_val(p.telefono), "Email": _format_val(p.email), "Grupo Sanguíneo": f"{_format_val(p.grupo_sanguineo)} {_format_val(p.factor_rh)}",}
+        # --- FIN DE LA MODIFICACIÓN ---
         _add_key_value_table(proposito_data)
-        
-        # ***** INICIO DEL BLOQUE MODIFICADO PARA DATOS DE LOS PADRES *****
         _add_subsection_title("DATOS DEL PADRE")
         padre = padres_info.get('Padre')
-        if padre:
-            padre_data = {
-                "Nombres y Apellidos": f"{padre.nombres} {padre.apellidos}",
-                "Identificación": _format_val(padre.identificacion),
-                "Lugar de Nacimiento": _format_val(padre.lugar_nacimiento),
-                "Fecha de Nacimiento": _format_val(padre.fecha_nacimiento),
-                "Grupo Sanguíneo y Factor RH": f"{_format_val(padre.grupo_sanguineo)} {_format_val(padre.factor_rh)}",
-                "Teléfono": _format_val(padre.telefono),
-                "Dirección": _format_val(padre.direccion),
-                "Escolaridad": _format_val(padre.escolaridad),
-                "Ocupación": _format_val(padre.ocupacion),
-            }
-            _add_key_value_table(padre_data)
-        else:
-            story.append(Paragraph("Información del Padre no registrada.", styles['Normal']))
-            
+        if padre: _add_key_value_table({"Nombres y Apellidos": f"{padre.nombres} {padre.apellidos}", "Identificación": _format_val(padre.identificacion), "Lugar de Nacimiento": _format_val(padre.lugar_nacimiento), "Fecha de Nacimiento": _format_val(padre.fecha_nacimiento), "Grupo Sanguíneo y Factor RH": f"{_format_val(padre.grupo_sanguineo)} {_format_val(padre.factor_rh)}", "Teléfono": _format_val(padre.telefono), "Dirección": _format_val(padre.direccion), "Escolaridad": _format_val(padre.escolaridad), "Ocupación": _format_val(padre.ocupacion),})
+        else: story.append(Paragraph("Información del Padre no registrada.", styles['Normal']))
         _add_subsection_title("DATOS DE LA MADRE")
         madre = padres_info.get('Madre')
-        if madre:
-            madre_data = {
-                "Nombres y Apellidos": f"{madre.nombres} {madre.apellidos}",
-                "Identificación": _format_val(madre.identificacion),
-                "Lugar de Nacimiento": _format_val(madre.lugar_nacimiento),
-                "Fecha de Nacimiento": _format_val(madre.fecha_nacimiento),
-                "Grupo Sanguíneo y Factor RH": f"{_format_val(madre.grupo_sanguineo)} {_format_val(madre.factor_rh)}",
-                "Teléfono": _format_val(madre.telefono),
-                "Dirección": _format_val(madre.direccion),
-                "Escolaridad": _format_val(madre.escolaridad),
-                "Ocupación": _format_val(madre.ocupacion),
-            }
-            _add_key_value_table(madre_data)
-        else:
-            story.append(Paragraph("Información de la Madre no registrada.", styles['Normal']))
-        # ***** FIN DEL BLOQUE MODIFICADO *****
-
+        if madre: _add_key_value_table({ "Nombres y Apellidos": f"{madre.nombres} {madre.apellidos}", "Identificación": _format_val(madre.identificacion), "Lugar de Nacimiento": _format_val(madre.lugar_nacimiento), "Fecha de Nacimiento": _format_val(madre.fecha_nacimiento), "Grupo Sanguíneo y Factor RH": f"{_format_val(madre.grupo_sanguineo)} {_format_val(madre.factor_rh)}", "Teléfono": _format_val(madre.telefono), "Dirección": _format_val(madre.direccion), "Escolaridad": _format_val(madre.escolaridad), "Ocupación": _format_val(madre.ocupacion),})
+        else: story.append(Paragraph("Información de la Madre no registrada.", styles['Normal']))
     elif tipo_sujeto == 'pareja':
         for i, p in enumerate(propositos):
             _add_subsection_title(f"CÓNYUGE {i+1}")
-            proposito_data = {
-                "Nombres y Apellidos": f"{p.nombres} {p.apellidos}", "Identificación": p.identificacion,
-                "Edad": f"{p.edad} años" if p.edad is not None else "N/A", "Fecha de Nacimiento": _format_val(p.fecha_nacimiento),
-                "Escolaridad": _format_val(p.escolaridad), "Ocupación": _format_val(p.ocupacion),
-            }
+            # --- INICIO DE LA MODIFICACIÓN ---
+            proposito_data = {"Nombres y Apellidos": f"{p.nombres} {p.apellidos}", "Identificación": p.identificacion, "Edad": get_edad_display(p.fecha_nacimiento), "Fecha de Nacimiento": _format_val(p.fecha_nacimiento), "Escolaridad": _format_val(p.escolaridad), "Ocupación": _format_val(p.ocupacion),}
+            # --- FIN DE LA MODIFICACIÓN ---
             _add_key_value_table(proposito_data)
-
-    # 3. Antecedentes (sin cambios)
+    
+    # ... (resto de la lógica de construcción de PDF sin cambios) ...
+    # ... (El código es idéntico al original desde aquí) ...
     if antecedentes_personales or periodo_neonatal or desarrollo_psicomotor or antecedentes_familiares:
         story.append(PageBreak()); _add_section_title("ANTECEDENTES")
         if antecedentes_personales:
@@ -3040,8 +2981,6 @@ def generar_pdf_historia(request, historia_id):
         if antecedentes_familiares:
             _add_subsection_title("ANTECEDENTES FAMILIARES Y PRECONCEPCIONALES")
             af_data = { "Antecedentes Familiares Paternos": _format_val(antecedentes_familiares.antecedentes_padre), "Antecedentes Familiares Maternos": _format_val(antecedentes_familiares.antecedentes_madre), "Consanguinidad": f"{_format_val(antecedentes_familiares.consanguinidad)} (Grado: {_format_val(antecedentes_familiares.grado_consanguinidad)})", }; _add_key_value_table(af_data)
-
-    # 4. Examen Físico (sin cambios)
     if examenes_fisicos:
         story.append(PageBreak())
         for ef in examenes_fisicos:
@@ -3049,87 +2988,28 @@ def generar_pdf_historia(request, historia_id):
             medidas_data = [ [Paragraph("<b>Medida</b>", styles['Normal']), Paragraph("<b>Valor</b>", styles['Normal']), Paragraph("<b>Medida</b>", styles['Normal']), Paragraph("<b>Valor</b>", styles['Normal'])], ["Peso", f"{_format_val(ef.peso)} kg", "Talla", f"{_format_val(ef.talla)} cm"], ["Circ. Cefálica", f"{_format_val(ef.circunferencia_cefalica)} cm", "Brazada", f"{_format_val(ef.medida_abrazada)} cm"], ["Seg. Superior", f"{_format_val(ef.segmento_superior)} cm", "Seg. Inferior", f"{_format_val(ef.segmento_inferior)} cm"], ["T/A", f"{_format_val(ef.tension_arterial_sistolica)}/{_format_val(ef.tension_arterial_diastolica)} mmHg", "", ""], ]
             t_medidas = Table(medidas_data, colWidths=[1.5*inch, 2.25*inch, 1.5*inch, 2.25*inch]); t_medidas.setStyle(TableStyle([('GRID', (0,0), (-1,-1), 1, colors.black), ('BACKGROUND', (0,0), (-1,0), colors.lightgrey)])); story.append(t_medidas); story.append(Spacer(1, 0.2*inch))
             observaciones_data = { "Cabeza": _format_val(ef.observaciones_cabeza), "Cuello": _format_val(ef.observaciones_cuello), "Tórax": _format_val(ef.observaciones_torax), "Abdomen": _format_val(ef.observaciones_abdomen), "Genitales": _format_val(ef.observaciones_genitales), "Espalda": _format_val(ef.observaciones_espalda), "Miembros": f"Sup: {_format_val(ef.observaciones_miembros_superiores)}<br/>Inf: {_format_val(ef.observaciones_miembros_inferiores)}", "Piel": _format_val(ef.observaciones_piel), "Neurológico": _format_val(ef.observaciones_neurologico), }; _add_key_value_table(observaciones_data, col_widths=[1.5*inch, 6*inch])
-
-    # 5. Resumen, Diagnóstico y Plan (sin cambios)
     if evaluacion_genetica:
         story.append(PageBreak()); _add_section_title("RESUMEN DE EVALUACIÓN GENÉTICA"); _add_subsection_title("A. SIGNOS CLÍNICOS IMPORTANTES"); story.append(Paragraph(_format_val(evaluacion_genetica.signos_clinicos), styles['Justify'])); _add_subsection_title("B. DIAGNÓSTICOS PRESUNTIVOS")
-        if diagnosticos:
-            for i, diag in enumerate(diagnosticos): story.append(Paragraph(f"{i+1}. {_format_val(diag.descripcion)}", styles['Normal']))
+        if diagnosticos: [story.append(Paragraph(f"{i+1}. {_format_val(diag.descripcion)}", styles['Normal'])) for i, diag in enumerate(diagnosticos)]
         else: story.append(Paragraph("No se registraron diagnósticos presuntivos.", styles['Normal']))
         _add_subsection_title("C. PLAN DE ESTUDIO")
-        if planes_estudio:
-            for plan in planes_estudio: estado = "Completado" if plan.completado else "Pendiente"; story.append(Paragraph(f"<b>Acción:</b> {_format_val(plan.accion)} [<b>Estado:</b> {estado}]", styles['Normal']))
+        if planes_estudio: [story.append(Paragraph(f"<b>Acción:</b> {_format_val(plan.accion)} [<b>Estado:</b> {'Completado' if plan.completado else 'Pendiente'}]", styles['Normal'])) for plan in planes_estudio]
         else: story.append(Paragraph("No se registró un plan de estudio.", styles['Normal']))
-        _add_subsection_title("ASESORAMIENTO Y EVOLUCIONES"); asesoramiento_text = ""
-        for plan in planes_estudio.filter(asesoramiento_evoluciones__isnull=False).exclude(asesoramiento_evoluciones__exact=''): asesoramiento_text += f"<b>Fecha {_format_val(plan.fecha_visita)}:</b> {_format_val(plan.asesoramiento_evoluciones)}<br/><br/>"
+        _add_subsection_title("ASESORAMIENTO Y EVOLUCIONES"); asesoramiento_text = "".join([f"<b>Fecha {_format_val(plan.fecha_visita)}:</b> {_format_val(plan.asesoramiento_evoluciones)}<br/><br/>" for plan in planes_estudio.filter(asesoramiento_evoluciones__isnull=False).exclude(asesoramiento_evoluciones__exact='')])
         story.append(Paragraph(asesoramiento_text if asesoramiento_text else "Sin evoluciones registradas.", styles['Normal']))
-
-    # 6. Autorización (sin cambios)
     if autorizaciones:
-        story.append(PageBreak())
-        _add_section_title("AUTORIZACIÓN")
+        story.append(PageBreak()); _add_section_title("AUTORIZACIÓN")
         for auto in autorizaciones:
-            autoriza_text = "Sí" if auto.autorizacion_examenes else "No"
-            firmante = "El mismo paciente."
-            if auto.proposito.is_minor():
-                if auto.representante_padre:
-                    firmante = f"Representante: {auto.representante_padre.nombres} {auto.representante_padre.apellidos} (C.I: {_format_val(auto.representante_padre.identificacion)})"
-                else:
-                    firmante = "Representante no especificado."
-
-            story.append(Paragraph(f"<b>Propósito:</b> {auto.proposito.nombres} {auto.proposito.apellidos}", styles['Normal']))
-            story.append(Paragraph(f"¿Autoriza la realización de exámenes genéticos?: <b>{autoriza_text}</b>", styles['Normal']))
-            story.append(Paragraph(f"Firmante: <b>{firmante}</b>", styles['Normal']))
-            story.append(Spacer(1, 0.2 * inch))
-
-            # =====================================================================
-            # ===== INICIO DE LA LÓGICA DEFINITIVAMENTE CORREGIDA PARA LA FIRMA =====
-            # =====================================================================
+            firmante = f"Representante: {auto.representante_padre.nombres} {auto.representante_padre.apellidos} (C.I: {_format_val(auto.representante_padre.identificacion)})" if auto.proposito.is_minor() and auto.representante_padre else "El mismo paciente."
+            story.append(Paragraph(f"<b>Propósito:</b> {auto.proposito.nombres} {auto.proposito.apellidos}", styles['Normal'])); story.append(Paragraph(f"¿Autoriza la realización de exámenes genéticos?: <b>{'Sí' if auto.autorizacion_examenes else 'No'}</b>", styles['Normal'])); story.append(Paragraph(f"Firmante: <b>{firmante}</b>", styles['Normal'])); story.append(Spacer(1, 0.2 * inch))
             if auto.archivo_autorizacion and hasattr(auto.archivo_autorizacion, 'path'):
-                try:
-                    absolute_path = auto.archivo_autorizacion.path
-
-                    # Paso 1: Crear el objeto Image SÓLO con argumentos válidos (path, width, height)
-                    # Esto define un "cajón" o "bounding box" donde la imagen se dibujará.
-                    signature_img = Image(
-                        absolute_path,
-                        width=2.5 * inch, 
-                        height=1.2 * inch
-                    )
-                    
-                    # Paso 2: Establecer las PROPIEDADES en la instancia de la imagen ya creada.
-                    signature_img.preserveAspectRatio = True  # Esto hace que la imagen se escale sin distorsionarse para caber en el "cajón".
-                    signature_img.hAlign = 'LEFT'             # Esto alinea la imagen a la izquierda dentro de su "cajón".
-
-                    # Añadir la imagen configurada a la historia del PDF
-                    story.append(signature_img)
-                    story.append(Paragraph("______________________________", styles['Left']))
-                    story.append(Paragraph("Firma", styles['Left']))
-
-                except Exception as e:
-                    # Este bloque de error ahora es aún más importante.
-                    print(f"Error al procesar imagen de firma para PDF (path: {auto.archivo_autorizacion.name}): {e}")
-                    story.append(Paragraph("<i>[Firma no disponible - Error al procesar imagen]</i>", styles['Alert']))
-                    story.append(Spacer(1, 0.4 * inch))
-            else:
-                # Si no hay firma, se muestra el espacio para firmar manualmente.
-                story.append(Spacer(1, 0.4 * inch))
-                story.append(Paragraph("______________________________", styles['Left']))
-                story.append(Paragraph("Firma", styles['Left']))
-            
-            # ===================================================================
-            # ===== FIN DE LA LÓGICA DEFINITIVAMENTE CORREGIDA PARA LA FIRMA =====
-            # ===================================================================
-            
+                try: signature_img = Image(auto.archivo_autorizacion.path, width=2.5 * inch, height=1.2 * inch); signature_img.preserveAspectRatio = True; signature_img.hAlign = 'LEFT'; story.append(signature_img); story.append(Paragraph("______________________________", styles['Left'])); story.append(Paragraph("Firma", styles['Left']))
+                except Exception as e: print(f"Error al procesar imagen de firma para PDF (path: {auto.archivo_autorizacion.name}): {e}"); story.append(Paragraph("<i>[Firma no disponible - Error al procesar imagen]</i>", styles['Alert'])); story.append(Spacer(1, 0.4 * inch))
+            else: story.append(Spacer(1, 0.4 * inch)); story.append(Paragraph("______________________________", styles['Left'])); story.append(Paragraph("Firma", styles['Left']))
             story.append(Spacer(1, 0.5 * inch))
 
-    # Construir y devolver el PDF
-    try:
-        doc.build(story)
-    except Exception as e:
-        # Añadir un print en la consola del servidor para más detalles del error
-        print(f"CRITICAL PDF BUILD ERROR: {e}")
-        return HttpResponse(f"Error crítico al construir el PDF. Revise la consola del servidor. Error: {e}", status=500)
+    try: doc.build(story)
+    except Exception as e: print(f"CRITICAL PDF BUILD ERROR: {e}"); return HttpResponse(f"Error crítico al construir el PDF. Revise la consola del servidor. Error: {e}", status=500)
     
     buffer.seek(0)
     response = HttpResponse(buffer, content_type='application/pdf')

@@ -268,179 +268,176 @@
                                     </tr>
                                 </thead>
                                 <!-- Reemplaza el <tbody> completo en gestion_pacientes.html -->
-                                <tbody>
-                                    {% for item in pacientes_list %}
-                                        {% if item.pareja_id %}  {# Es un objeto Pareja #}
-                                            {% with p1=item.proposito_id_1 p2=item.proposito_id_2 %}
-                                            <tr class="pareja-row-combined"
-                                                data-type="couple"
-                                                data-proposito1-id="{{ p1.proposito_id }}"
-                                                data-proposito2-id="{{ p2.proposito_id }}"
-                                                data-nombre1="{{ p1.nombres }} {{ p1.apellidos }}"
-                                                data-nombre2="{{ p2.nombres }} {{ p2.apellidos }}"
-                                                data-identificacion1="{{ p1.identificacion }}"
-                                                data-identificacion2="{{ p2.identificacion }}"
-                                                data-foto-url1="{% if p1.foto %}{{ p1.foto.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}"
-                                                data-foto-url2="{% if p2.foto %}{{ p2.foto.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}"
-                                                data-avatar-fallback1="{{ p1.nombres|first|upper }}{{ p1.apellidos|first|upper }}"
-                                                data-avatar-fallback2="{{ p2.nombres|first|upper }}{{ p2.apellidos|first|upper }}"
-                                                data-edad1="{{ p1.edad|default_if_none:'N/A' }}"
-                                                data-edad2="{{ p2.edad|default_if_none:'N/A' }}"
-                                                data-telefono1="{{ p1.telefono|default_if_none:'N/A' }}"
-                                                data-telefono2="{{ p2.telefono|default_if_none:'N/A' }}"
-                                                data-email1="{{ p1.email|default_if_none:'N/A' }}"
-                                                data-email2="{{ p2.email|default_if_none:'N/A' }}"
-                                                data-direccion1="{{ p1.direccion|default_if_none:'N/A' }}"
-                                                data-direccion2="{{ p2.direccion|default_if_none:'N/A' }}"
-                                                data-genetista="{{ p1.historia.genetista.user.get_full_name|default:'N/A' }}"
-                                                data-estado-display1="{{ p1.get_estado_display }}"
-                                                data-estado-display2="{{ p2.get_estado_display }}"
-                                                data-estado-slug1="{{ p1.estado }}"
-                                                data-estado-slug2="{{ p2.estado }}"
-                                                data-ultima-visita="{{ p1.historia.fecha_ingreso|date:'Y-m-d' }}">
-                                                <td class="inactivate-checkbox-cell" style="display: none;">
-                                                    <input type="checkbox" class="paciente-checkbox" value="{{ p1.proposito_id }}">
-                                                    <input type="checkbox" class="paciente-checkbox" value="{{ p2.proposito_id }}">
-                                                </td>
-                                                <td>
-                                                    <div class="patient-info-stacked">
-                                                        <div class="patient-info">
-                                                            <div class="patient-avatar">
-                                                                {% if p1.foto %}<img src="{{ p1.foto.url }}" alt="Avatar" class="avatar-img">{% else %}<span class="avatar-fallback">{{ p1.nombres|first|upper }}{{ p1.apellidos|first|upper }}</span>{% endif %}
+                                    <tbody>
+                                        {% for item in pacientes_list %}
+                                            {% if item.pareja_id %}  {# Es un objeto Pareja #}
+                                                {% with p1=item.proposito_id_1 p2=item.proposito_id_2 %}
+                                                <tr class="pareja-row-combined"
+                                                    data-type="couple"
+                                                    data-proposito1-id="{{ p1.proposito_id }}"
+                                                    data-proposito2-id="{{ p2.proposito_id }}"
+                                                    data-nombre1="{{ p1.nombres }} {{ p1.apellidos }}"
+                                                    data-nombre2="{{ p2.nombres }} {{ p2.apellidos }}"
+                                                    data-identificacion1="{{ p1.identificacion }}"
+                                                    data-identificacion2="{{ p2.identificacion }}"
+                                                    data-foto-url1="{% if p1.foto %}{{ p1.foto.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}"
+                                                    data-foto-url2="{% if p2.foto %}{{ p2.foto.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}"
+                                                    data-avatar-fallback1="{{ p1.nombres|first|upper }}{{ p1.apellidos|first|upper }}"
+                                                    data-avatar-fallback2="{{ p2.nombres|first|upper }}{{ p2.apellidos|first|upper }}"
+                                                    data-edad1="{{ p1.edad_display }}"
+                                                    data-edad2="{{ p2.edad_display }}"
+                                                    data-telefono1="{{ p1.telefono|default_if_none:'N/A' }}"
+                                                    data-telefono2="{{ p2.telefono|default_if_none:'N/A' }}"
+                                                    data-email1="{{ p1.email|default_if_none:'N/A' }}"
+                                                    data-email2="{{ p2.email|default_if_none:'N/A' }}"
+                                                    data-direccion1="{{ p1.direccion|default_if_none:'N/A' }}"
+                                                    data-direccion2="{{ p2.direccion|default_if_none:'N/A' }}"
+                                                    data-genetista="{{ p1.historia.genetista.user.get_full_name|default:'N/A' }}"
+                                                    data-estado-display1="{{ p1.get_estado_display }}"
+                                                    data-estado-display2="{{ p2.get_estado_display }}"
+                                                    data-estado-slug1="{{ p1.estado }}"
+                                                    data-estado-slug2="{{ p2.estado }}"
+                                                    data-ultima-visita="{{ p1.historia.fecha_ingreso|date:'Y-m-d' }}">
+                                                    <td class="inactivate-checkbox-cell" style="display: none;">
+                                                        <input type="checkbox" class="paciente-checkbox" value="{{ p1.proposito_id }}">
+                                                        <input type="checkbox" class="paciente-checkbox" value="{{ p2.proposito_id }}">
+                                                    </td>
+                                                    <td>
+                                                        <div class="patient-info-stacked">
+                                                            <div class="patient-info">
+                                                                <div class="patient-avatar">
+                                                                    {% if p1.foto %}<img src="{{ p1.foto.url }}" alt="Avatar" class="avatar-img">{% else %}<span class="avatar-fallback">{{ p1.nombres|first|upper }}{{ p1.apellidos|first|upper }}</span>{% endif %}
+                                                                </div>
+                                                                <div class="patient-details">
+                                                                    <div class="patient-name">{{ p1.nombres }} {{ p1.apellidos }}</div>
+                                                                    <div class="patient-id">ID: {{ p1.identificacion }}</div>
+                                                                </div>
                                                             </div>
-                                                            <div class="patient-details">
-                                                                <div class="patient-name">{{ p1.nombres }} {{ p1.apellidos }}</div>
-                                                                <div class="patient-id">ID: {{ p1.identificacion }}</div>
+                                                            <div class="patient-info">
+                                                                <div class="patient-avatar">
+                                                                    {% if p2.foto %}<img src="{{ p2.foto.url }}" alt="Avatar" class="avatar-img">{% else %}<span class="avatar-fallback">{{ p2.nombres|first|upper }}{{ p2.apellidos|first|upper }}</span>{% endif %}
+                                                                </div>
+                                                                <div class="patient-details">
+                                                                    <div class="patient-name">{{ p2.nombres }} {{ p2.apellidos }}</div>
+                                                                    <div class="patient-id">ID: {{ p2.identificacion }}</div>
+                                                                </div>
                                                             </div>
                                                         </div>
-                                                        <div class="patient-info">
-                                                            <div class="patient-avatar">
-                                                                {% if p2.foto %}<img src="{{ p2.foto.url }}" alt="Avatar" class="avatar-img">{% else %}<span class="avatar-fallback">{{ p2.nombres|first|upper }}{{ p2.apellidos|first|upper }}</span>{% endif %}
-                                                            </div>
-                                                            <div class="patient-details">
-                                                                <div class="patient-name">{{ p2.nombres }} {{ p2.apellidos }}</div>
-                                                                <div class="patient-id">ID: {{ p2.identificacion }}</div>
-                                                            </div>
+                                                    </td>
+                                                    <td class="hide-on-mobile" data-label="Edad">
+                                                        <div>{{ p1.edad_display }}</div>
+                                                        <div>{{ p2.edad_display }}</div>
+                                                    </td>
+                                                    <td class="hide-on-tablet" data-label="Contacto">
+                                                        <div class="contact-info">
+                                                            {% if p1.telefono %}<div class="contact-item"><i class="fas fa-phone contact-icon"></i>{{ p1.telefono }} ({{ p1.nombres|truncatechars:10 }})</div>{% endif %}
+                                                            {% if p1.email %}<div class="contact-item muted"><i class="fas fa-envelope contact-icon"></i>{{ p1.email }}</div>{% endif %}
                                                         </div>
-                                                    </div>
-                                                </td>
-                                                <!-- ===== CAMBIO 1: Visualización de Edad por separado ===== -->
-                                                <td class="hide-on-mobile" data-label="Edad">
-                                                    <div>{{ p1.edad|default_if_none:"N/A" }} años</div>
-                                                    <div>{{ p2.edad|default_if_none:"N/A" }} años</div>
-                                                </td>
-                                                <!-- ===== CAMBIO 2: Visualización de Contactos para ambos ===== -->
-                                                <td class="hide-on-tablet" data-label="Contacto">
-                                                    <div class="contact-info">
-                                                        {% if p1.telefono %}<div class="contact-item"><i class="fas fa-phone contact-icon"></i>{{ p1.telefono }} ({{ p1.nombres|truncatechars:10 }})</div>{% endif %}
-                                                        {% if p1.email %}<div class="contact-item muted"><i class="fas fa-envelope contact-icon"></i>{{ p1.email }}</div>{% endif %}
-                                                    </div>
-                                                    {% if p1.telefono or p1.email %}<hr style="margin: 0.5rem 0; border-color: #eee;">{% endif %}
-                                                    <div class="contact-info">
-                                                        {% if p2.telefono %}<div class="contact-item"><i class="fas fa-phone contact-icon"></i>{{ p2.telefono }} ({{ p2.nombres|truncatechars:10 }})</div>{% endif %}
-                                                        {% if p2.email %}<div class="contact-item muted"><i class="fas fa-envelope contact-icon"></i>{{ p2.email }}</div>{% endif %}
-                                                    </div>
-                                                </td>
-                                                <td class="hide-on-tablet" data-label="Genetista">{{ p1.historia.genetista.user.get_full_name|default:"N/A" }}</td>
-                                                <td class="hide-on-mobile" data-label="Ultima Visita">{{ p1.historia.fecha_ingreso|date:"Y-m-d" }}</td>
-                                                <!-- ===== CAMBIO 3: Lógica para mostrar estado único o doble ===== -->
-                                                <td data-label="Estado">
-                                                    {% if p1.estado == p2.estado %}
-                                                        <span class="badge badge-{{ p1.estado|slugify }}">{{ p1.get_estado_display }}</span>
-                                                    {% else %}
-                                                        <span class="badge badge-{{ p1.estado|slugify }}">{{ p1.get_estado_display }}</span><br>
-                                                        <span class="badge badge-{{ p2.estado|slugify }}">{{ p2.get_estado_display }}</span>
-                                                    {% endif %}
-                                                </td>
-                                                <td class="hide-on-mobile" data-label="Historia ID">
-                                                    <div class="history-badges">
-                                                        <span class="badge">HC {{ p1.historia.numero_historia }}</span>
-                                                        {% if item.plan_estudio_pendiente_count > 0 %}
-                                                            <span class="badge badge-danger">{{ item.plan_estudio_pendiente_count }} pendiente{{ item.plan_estudio_pendiente_count|pluralize }}</span>
+                                                        {% if p1.telefono or p1.email %}<hr style="margin: 0.5rem 0; border-color: #eee;">{% endif %}
+                                                        <div class="contact-info">
+                                                            {% if p2.telefono %}<div class="contact-item"><i class="fas fa-phone contact-icon"></i>{{ p2.telefono }} ({{ p2.nombres|truncatechars:10 }})</div>{% endif %}
+                                                            {% if p2.email %}<div class="contact-item muted"><i class="fas fa-envelope contact-icon"></i>{{ p2.email }}</div>{% endif %}
+                                                        </div>
+                                                    </td>
+                                                    <td class="hide-on-tablet" data-label="Genetista">{{ p1.historia.genetista.user.get_full_name|default:"N/A" }}</td>
+                                                    <td class="hide-on-mobile" data-label="Ultima Visita">{{ p1.historia.fecha_ingreso|date:"Y-m-d" }}</td>
+                                                    <td data-label="Estado">
+                                                        {% if p1.estado == p2.estado %}
+                                                            <span class="badge badge-{{ p1.estado|slugify }}">{{ p1.get_estado_display }}</span>
+                                                        {% else %}
+                                                            <span class="badge badge-{{ p1.estado|slugify }}">{{ p1.get_estado_display }}</span><br>
+                                                            <span class="badge badge-{{ p2.estado|slugify }}">{{ p2.get_estado_display }}</span>
                                                         {% endif %}
-                                                    </div>
-                                                </td>
-                                                <td data-label="Acciones">
-                                                    <div class="action-buttons">
-                                                        <button type="button" class="btn-ver"><i class="fas fa-eye"></i></button>
-                                                        {% if p1.estado != 'inactivo' or p2.estado != 'inactivo' %}
-                                                        <a href="{% url 'pareja_crear' historia_id=p1.historia.historia_id %}?from_gestion=true" class="btn-editar">
-                                                            <i class="fas fa-edit"></i>
-                                                        </a>
-                                                        {% endif %}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            {% endwith %}
-                                        {% else %} {# Es un objeto Proposito individual #}
-                                            {% with proposito=item %}
-                                            <tr data-type="single"
-                                                data-proposito-id="{{ proposito.proposito_id }}"
-                                                data-nombre="{{ proposito.nombres }} {{ proposito.apellidos }}"
-                                                data-identificacion="{{ proposito.identificacion }}"
-                                                data-foto-url="{% if proposito.foto %}{{ proposito.foto.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}"
-                                                data-avatar-fallback="{{ proposito.nombres|first|upper }}{{ proposito.apellidos|first|upper }}"
-                                                data-edad="{{ proposito.edad|default_if_none:'N/A' }}"
-                                                data-telefono="{{ proposito.telefono|default_if_none:'N/A' }}"
-                                                data-email="{{ proposito.email|default_if_none:'N/A' }}"
-                                                data-direccion="{{ proposito.direccion|default_if_none:'N/A' }}"
-                                                data-genetista="{{ proposito.historia.genetista.user.get_full_name|default:'N/A' }}"
-                                                data-estado-display="{{ proposito.get_estado_display }}"
-                                                data-estado-slug="{{ proposito.estado|slugify }}"
-                                                data-ultima-visita="{{ proposito.historia.fecha_ingreso|date:'Y-m-d' }}">
-                                                <td class="inactivate-checkbox-cell" style="display: none;">
-                                                    <input type="checkbox" class="paciente-checkbox" value="{{ proposito.proposito_id }}">
-                                                </td>
-                                                <td>
-                                                    <div class="patient-info">
-                                                        <div class="patient-avatar">
-                                                            {% if proposito.foto %}<img src="{{ proposito.foto.url }}" alt="Avatar" class="avatar-img">{% else %}<span class="avatar-fallback">{{ proposito.nombres|first|upper }}{{ proposito.apellidos|first|upper }}</span>{% endif %}
+                                                    </td>
+                                                    <td class="hide-on-mobile" data-label="Historia ID">
+                                                        <div class="history-badges">
+                                                            <span class="badge">HC {{ p1.historia.numero_historia }}</span>
+                                                            {% if item.plan_estudio_pendiente_count > 0 %}
+                                                                <span class="badge badge-danger">{{ item.plan_estudio_pendiente_count }} pendiente{{ item.plan_estudio_pendiente_count|pluralize }}</span>
+                                                            {% endif %}
                                                         </div>
-                                                        <div class="patient-details">
-                                                            <div class="patient-name">{{ proposito.nombres }} {{ proposito.apellidos }}</div>
-                                                            <div class="patient-id">ID: {{ proposito.identificacion }}</div>
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                                <td class="hide-on-mobile" data-label="Edad">{{ proposito.edad|default_if_none:"N/A" }} años</td>
-                                                <td class="hide-on-tablet" data-label="Contacto">
-                                                    <div class="contact-info">
-                                                        {% if proposito.telefono %}<div class="contact-item"><i class="fas fa-phone contact-icon"></i>{{ proposito.telefono }}</div>{% endif %}
-                                                        {% if proposito.email %}<div class="contact-item muted"><i class="fas fa-envelope contact-icon"></i>{{ proposito.email }}</div>{% endif %}
-                                                    </div>
-                                                </td>
-                                                <td class="hide-on-tablet" data-label="Genetista">{{ proposito.historia.genetista.user.get_full_name|default:"N/A" }}</td>
-                                                <td class="hide-on-mobile" data-label="Ultima Visita">{{ proposito.historia.fecha_ingreso|date:"Y-m-d" }}</td>
-                                                <td data-label="Estado"><span class="badge badge-{{ proposito.estado|slugify }}">{{ proposito.get_estado_display }}</span></td>
-                                                <td class="hide-on-mobile" data-label="Historia ID">
-                                                    <div class="history-badges">
-                                                        <span class="badge">HC {{ proposito.historia.numero_historia }}</span>
-                                                        {% if proposito.plan_estudio_pendiente_count > 0 %}
-                                                            <span class="badge badge-danger">{{ proposito.plan_estudio_pendiente_count }} pendiente{{ proposito.plan_estudio_pendiente_count|pluralize }}</span>
-                                                        {% endif %}
-                                                    </div>
-                                                </td>
-                                                <td data-label="Acciones">
-                                                    <div class="action-buttons">
-                                                        {% if proposito.estado != 'inactivo' %}
+                                                    </td>
+                                                    <td data-label="Acciones">
+                                                        <div class="action-buttons">
                                                             <button type="button" class="btn-ver"><i class="fas fa-eye"></i></button>
-                                                            <a href="{% url 'paciente_crear' historia_id=proposito.historia.historia_id %}?from_gestion=true" class="btn-editar">
+                                                            {% if p1.estado != 'inactivo' or p2.estado != 'inactivo' %}
+                                                            <a href="{% url 'pareja_crear' historia_id=p1.historia.historia_id %}?from_gestion=true" class="btn-editar">
                                                                 <i class="fas fa-edit"></i>
                                                             </a>
-                                                        {% else %}
-                                                            <span class="badge badge-inactivo" style="padding: 8px 12px; font-weight: bold;">Inactivo</span>
-                                                        {% endif %}
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                            {% endwith %}
-                                        {% endif %}
-                                    {% empty %}
-                                    <tr>
-                                        <td colspan="9" style="text-align: center; padding: 20px;">No se encontraron pacientes que coincidan con los filtros.</td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
+                                                            {% endif %}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {% endwith %}
+                                            {% else %} {# Es un objeto Proposito individual #}
+                                                {% with proposito=item %}
+                                                <tr data-type="single"
+                                                    data-proposito-id="{{ proposito.proposito_id }}"
+                                                    data-nombre="{{ proposito.nombres }} {{ proposito.apellidos }}"
+                                                    data-identificacion="{{ proposito.identificacion }}"
+                                                    data-foto-url="{% if proposito.foto %}{{ proposito.foto.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}"
+                                                    data-avatar-fallback="{{ proposito.nombres|first|upper }}{{ proposito.apellidos|first|upper }}"
+                                                    data-edad="{{ proposito.edad_display }}"
+                                                    data-telefono="{{ proposito.telefono|default_if_none:'N/A' }}"
+                                                    data-email="{{ proposito.email|default_if_none:'N/A' }}"
+                                                    data-direccion="{{ proposito.direccion|default_if_none:'N/A' }}"
+                                                    data-genetista="{{ proposito.historia.genetista.user.get_full_name|default:'N/A' }}"
+                                                    data-estado-display="{{ proposito.get_estado_display }}"
+                                                    data-estado-slug="{{ proposito.estado|slugify }}"
+                                                    data-ultima-visita="{{ proposito.historia.fecha_ingreso|date:'Y-m-d' }}">
+                                                    <td class="inactivate-checkbox-cell" style="display: none;">
+                                                        <input type="checkbox" class="paciente-checkbox" value="{{ proposito.proposito_id }}">
+                                                    </td>
+                                                    <td>
+                                                        <div class="patient-info">
+                                                            <div class="patient-avatar">
+                                                                {% if proposito.foto %}<img src="{{ proposito.foto.url }}" alt="Avatar" class="avatar-img">{% else %}<span class="avatar-fallback">{{ proposito.nombres|first|upper }}{{ proposito.apellidos|first|upper }}</span>{% endif %}
+                                                            </div>
+                                                            <div class="patient-details">
+                                                                <div class="patient-name">{{ proposito.nombres }} {{ proposito.apellidos }}</div>
+                                                                <div class="patient-id">ID: {{ proposito.identificacion }}</div>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                    <td class="hide-on-mobile" data-label="Edad">{{ proposito.edad_display }}</td>
+                                                    <td class="hide-on-tablet" data-label="Contacto">
+                                                        <div class="contact-info">
+                                                            {% if proposito.telefono %}<div class="contact-item"><i class="fas fa-phone contact-icon"></i>{{ proposito.telefono }}</div>{% endif %}
+                                                            {% if proposito.email %}<div class="contact-item muted"><i class="fas fa-envelope contact-icon"></i>{{ proposito.email }}</div>{% endif %}
+                                                        </div>
+                                                    </td>
+                                                    <td class="hide-on-tablet" data-label="Genetista">{{ proposito.historia.genetista.user.get_full_name|default:"N/A" }}</td>
+                                                    <td class="hide-on-mobile" data-label="Ultima Visita">{{ proposito.historia.fecha_ingreso|date:"Y-m-d" }}</td>
+                                                    <td data-label="Estado"><span class="badge badge-{{ proposito.estado|slugify }}">{{ proposito.get_estado_display }}</span></td>
+                                                    <td class="hide-on-mobile" data-label="Historia ID">
+                                                        <div class="history-badges">
+                                                            <span class="badge">HC {{ proposito.historia.numero_historia }}</span>
+                                                            {% if proposito.plan_estudio_pendiente_count > 0 %}
+                                                                <span class="badge badge-danger">{{ proposito.plan_estudio_pendiente_count }} pendiente{{ proposito.plan_estudio_pendiente_count|pluralize }}</span>
+                                                            {% endif %}
+                                                        </div>
+                                                    </td>
+                                                    <td data-label="Acciones">
+                                                        <div class="action-buttons">
+                                                            {% if proposito.estado != 'inactivo' %}
+                                                                <button type="button" class="btn-ver"><i class="fas fa-eye"></i></button>
+                                                                <a href="{% url 'paciente_crear' historia_id=proposito.historia.historia_id %}?from_gestion=true" class="btn-editar">
+                                                                    <i class="fas fa-edit"></i>
+                                                                </a>
+                                                            {% else %}
+                                                                <span class="badge badge-inactivo" style="padding: 8px 12px; font-weight: bold;">Inactivo</span>
+                                                            {% endif %}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {% endwith %}
+                                            {% endif %}
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="9" style="text-align: center; padding: 20px;">No se encontraron pacientes que coincidan con los filtros.</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
                             </table>
                         </div>   
                     </div>
@@ -723,7 +720,7 @@
                             // Poblar datos Cónyuge 1
                             document.getElementById('couple-name1').textContent = row.dataset.nombre1;
                             document.getElementById('couple-id1').textContent = `ID: ${row.dataset.identificacion1}`;
-                            document.getElementById('couple-edad1').textContent = `Edad: ${row.dataset.edad1} años`;
+                            document.getElementById('couple-edad1').textContent = `Edad: ${row.dataset.edad1}`;
                             document.getElementById('couple-telefono1').textContent = row.dataset.telefono1;
                             document.getElementById('couple-email1').textContent = row.dataset.email1;
                             document.getElementById('couple-direccion1').textContent = row.dataset.direccion1;
@@ -731,7 +728,7 @@
                             // Poblar datos Cónyuge 2
                             document.getElementById('couple-name2').textContent = row.dataset.nombre2;
                             document.getElementById('couple-id2').textContent = `ID: ${row.dataset.identificacion2}`;
-                            document.getElementById('couple-edad2').textContent = `Edad: ${row.dataset.edad2} años`;
+                            document.getElementById('couple-edad2').textContent = `Edad: ${row.dataset.edad2}`;
                             document.getElementById('couple-telefono2').textContent = row.dataset.telefono2;
                             document.getElementById('couple-email2').textContent = row.dataset.email2;
                             document.getElementById('couple-direccion2').textContent = row.dataset.direccion2;
@@ -740,30 +737,27 @@
                             document.getElementById('couple-info-genetista').textContent = row.dataset.genetista;
                             document.getElementById('couple-info-ultima-visita').textContent = row.dataset.ultimaVisita;
                             
-                            // ===== INICIO DE LA LÓGICA MODIFICADA PARA ESTADO =====
                             const slug1 = row.dataset.estadoSlug1;
                             const slug2 = row.dataset.estadoSlug2;
                             
                             let finalSlug, finalDisplay;
-
-                            // Prioridad: Inactivo > En Seguimiento > Cerrado
+    
                             if (slug1 === 'inactivo' || slug2 === 'inactivo') {
                                 finalSlug = 'inactivo';
                                 finalDisplay = 'Inactivo';
                             } else if (slug1 === 'en_seguimiento' || slug2 === 'en_seguimiento') {
                                 finalSlug = 'en_seguimiento';
                                 finalDisplay = 'En Seguimiento';
-                            } else { // Ambos deben ser 'cerrado'
+                            } else {
                                 finalSlug = 'cerrado';
                                 finalDisplay = 'Cerrado';
                             }
-
+    
                             const estadoBadge = document.getElementById('couple-info-estado');
                             estadoBadge.textContent = finalDisplay;
                             estadoBadge.className = 'badge badge-' + finalSlug;
-                            // ===== FIN DE LA LÓGICA MODIFICADA PARA ESTADO =====
                             
-                            propositoIdForAjax = row.dataset.proposito1Id; // Usamos el ID del primer miembro para la consulta AJAX
+                            propositoIdForAjax = row.dataset.proposito1Id;
     
                         } else { // type === 'single'
                             singleView.style.display = 'block';
@@ -780,7 +774,7 @@
                             } else {
                                 avatarFallback.textContent = row.dataset.avatarFallback; avatarImg.style.display = 'none'; avatarFallback.style.display = 'flex';
                             }
-                            document.getElementById('modal-info-edad').textContent = 'Edad: ' + row.dataset.edad + ' años';
+                            document.getElementById('modal-info-edad').textContent = 'Edad: ' + row.dataset.edad;
                             document.getElementById('modal-info-telefono').textContent = row.dataset.telefono;
                             document.getElementById('modal-info-email').textContent = row.dataset.email;
                             document.getElementById('modal-info-direccion').textContent = row.dataset.direccion;
@@ -813,8 +807,6 @@
                 });
             });
     
-            // El resto de la función loadHistoriaClinica y las demás funciones permanecen sin cambios
-            // Copiamos la versión más actualizada de la pregunta original para asegurar que todo funcione
             function loadHistoriaClinica(propositoId) {
                 historyListContainer.innerHTML = '<div class="spinner"></div>';
                 
@@ -827,13 +819,11 @@
                 const finalEdit = document.getElementById('diagnostico-final-edit');
                 const finalAddBtn = document.getElementById('btn-add-diagnostico-final');
     
-                // ===== INICIO DE CÓDIGO AÑADIDO =====
                 const motivoConsultaElem = document.getElementById('modal-motivo-consulta');
                 const enfermedadActualElem = document.getElementById('modal-enfermedad-actual');
                 motivoConsultaElem.textContent = 'Cargando...';
                 enfermedadActualElem.textContent = 'Cargando...';
-                // ===== FIN DE CÓDIGO AÑADIDO =====
-
+    
                 presuntivosList.innerHTML = '';
                 finalView.style.display = 'none';
                 finalEdit.style.display = 'none';
@@ -845,11 +835,9 @@
                     .then(data => {
                         historyListContainer.innerHTML = '';
                         
-                        // ===== INICIO DE CÓDIGO AÑADIDO =====
                         motivoConsultaElem.textContent = data.motivo_consulta || 'Motivo no registrado.';
                         enfermedadActualElem.textContent = data.enfermedad_actual || 'Sin descripción de la enfermedad actual.';
-                        // ===== FIN DE CÓDIGO AÑADIDO =====
-
+    
                         if (data.evaluacion_id) {
                             const urlNuevaConsulta = `/evaluacion/${data.evaluacion_id}/nueva-consulta/`;
                             nuevaConsultaBtn.href = urlNuevaConsulta;
@@ -897,10 +885,8 @@
                         console.error('Error fetching historia clinica:', error);
                         historyListContainer.innerHTML = '<p style="text-align:center; color: red;">Error al cargar el historial.</p>';
                         presuntivosList.innerHTML = '<p style="text-align:center; color: red;">Error al cargar los diagnósticos.</p>';
-                        // ===== INICIO DE CÓDIGO AÑADIDO =====
                         motivoConsultaElem.textContent = 'Error al cargar datos.';
                         enfermedadActualElem.textContent = 'Error al cargar datos.';
-                        // ===== FIN DE CÓDIGO AÑADIDO =====
                     });
             }
             function createPlanEstudioCard(plan) {
