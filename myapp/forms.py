@@ -171,7 +171,7 @@ class PadresPropositoForm(forms.Form):
         id_prefijo = data.get(f'{prefix}_identificacion_prefijo')
         id_numero = data.get(f'{prefix}_identificacion_numero', '').strip()
         if not id_numero.isdigit(): self.add_error(f'{prefix}_identificacion_numero', "La identificación solo debe contener números.")
-        elif len(id_numero) > 11: self.add_error(f'{prefix}_identificacion_numero', "La identificación no puede tener más de 11 dígitos.")
+        elif not (7 <= len(id_numero) <= 11): self.add_error(f'{prefix}_identificacion_numero', "La identificación debe tener entre 7 y 11 dígitos.")
         
         full_id = f"{id_prefijo}-{id_numero}" if id_prefijo and id_numero else None
         data[f'{prefix}_identificacion'] = full_id
@@ -288,7 +288,7 @@ class PropositosForm(ModelForm):
         id_prefijo = cleaned_data.get('identificacion_prefijo')
         id_numero = cleaned_data.get('identificacion_numero', '').strip()
         if not id_numero.isdigit(): self.add_error('identificacion_numero', "La identificación solo debe contener números.")
-        elif len(id_numero) > 11: self.add_error('identificacion_numero', "La identificación no puede tener más de 11 dígitos.")
+        elif not (7 <= len(id_numero) <= 11): self.add_error('identificacion_numero', "La identificación debe tener entre 7 y 11 dígitos.")
         
         if id_prefijo and id_numero:
             full_id = f"{id_prefijo}-{id_numero}"
@@ -317,7 +317,7 @@ class PropositosForm(ModelForm):
         else:
             self.add_error('grupo_rh_combinado', 'Debe seleccionar un grupo sanguíneo y factor RH.')
         return cleaned_data
-
+    
     def clean_fecha_nacimiento(self):
         fecha = self.cleaned_data.get('fecha_nacimiento')
         if fecha and fecha > timezone.now().date():
@@ -400,7 +400,7 @@ class ParejaPropositosForm(forms.Form):
         id_prefijo = cleaned_data.get(f'identificacion_prefijo_{suffix}')
         id_numero = cleaned_data.get(f'identificacion_numero_{suffix}', '').strip()
         if not id_numero: self.add_error(f'identificacion_numero_{suffix}', "Este campo es obligatorio.")
-        elif not id_numero.isdigit() or len(id_numero) > 11: self.add_error(f'identificacion_numero_{suffix}', "Debe ser un número de hasta 11 dígitos.")
+        elif not id_numero.isdigit() or not (7 <= len(id_numero) <= 11): self.add_error(f'identificacion_numero_{suffix}', "Debe ser un número de 7 a 11 dígitos.")
         else: cleaned_data[f'identificacion_{suffix}'] = f"{id_prefijo}-{id_numero}"
         
         tel_prefijo = cleaned_data.get(f'telefono_prefijo_{suffix}')
@@ -519,8 +519,14 @@ class AntecedentesDesarrolloNeonatalForm(forms.Form):
 
     def clean_fur(self):
         fecha = self.cleaned_data.get('fur')
-        if fecha and fecha > timezone.now().date():
-            raise forms.ValidationError("La FUR no puede ser una fecha futura.")
+        if fecha:
+            today = timezone.now().date()
+            if fecha > today:
+                raise forms.ValidationError("La FUR no puede ser una fecha futura.")
+
+            current_year = today.year
+            if fecha.year not in [current_year, current_year - 1]:
+                raise forms.ValidationError(f"La fecha debe ser del año actual ({current_year}) o del año anterior ({current_year - 1}).")
         return fecha
 
     def clean_edad_gestacional(self):
@@ -969,8 +975,14 @@ class PlanEstudioEditForm(forms.ModelForm):
             self.fields['archivos_a_eliminar'].label_from_instance = lambda obj: obj.get_display_name()
     def clean_fecha_visita(self):
         fecha = self.cleaned_data.get('fecha_visita')
-        if fecha and fecha < timezone.now().date():
-            raise forms.ValidationError("La fecha de próxima visita no puede ser en el pasado.")
+        if fecha:
+            today = timezone.now().date()
+            if fecha < today:
+                raise forms.ValidationError("La fecha de próxima visita no puede ser en el pasado.")
+            
+            current_year = today.year
+            if fecha.year not in [current_year, current_year + 1]:
+                raise forms.ValidationError(f"La fecha debe ser del año actual ({current_year}) o del siguiente ({current_year + 1}).")
         return fecha
 
     def save(self, commit=True):
@@ -1004,8 +1016,14 @@ class PlanEstudioForm(forms.ModelForm):
         }
     def clean_fecha_visita(self):
         fecha = self.cleaned_data.get('fecha_visita')
-        if fecha and fecha < timezone.now().date():
-            raise forms.ValidationError("La fecha de próxima visita no puede ser en el pasado.")
+        if fecha:
+            today = timezone.now().date()
+            if fecha < today:
+                raise forms.ValidationError("La fecha de próxima visita no puede ser en el pasado.")
+            
+            current_year = today.year
+            if fecha.year not in [current_year, current_year + 1]:
+                raise forms.ValidationError(f"La fecha debe ser del año actual ({current_year}) o del siguiente ({current_year + 1}).")
         return fecha
 
 
