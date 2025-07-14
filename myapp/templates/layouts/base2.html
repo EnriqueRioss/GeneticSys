@@ -1,3 +1,5 @@
+--- START OF FILE base2.html ---
+
 {% extends 'layouts/base.html' %}
 {% load static %}
 {% load workflow_tags %}
@@ -79,8 +81,32 @@
     <!-- === REUSABLE AJAX FORM HANDLING SCRIPT ========================== -->
     <!-- ================================================================= -->
     <script src="{% static 'js/global_form_handler.js' %}"></script>
-    <!-- ===== FIN DE CAMBIOS ===== -->
-        
+    
+    <!-- ===== INICIO DEL CÓDIGO A AÑADIR ===== -->
+    <script>
+    // Este script previene el envío de formularios con la tecla Enter en los campos de input.
+    document.addEventListener('keydown', function(event) {
+        // Comprobamos si la tecla presionada es "Enter"
+        if (event.key === 'Enter') {
+            // Obtenemos el elemento que originó el evento (donde el cursor estaba)
+            const target = event.target;
+
+            // Verificamos si el elemento es un <input> pero NO es un botón de tipo submit, reset o button.
+            // Esto evita que la lógica se aplique a los botones, donde sí queremos que "Enter" funcione.
+            // También excluye <textarea>, donde "Enter" debe crear una nueva línea.
+            if (target.tagName.toLowerCase() === 'input' && 
+                target.type !== 'submit' && 
+                target.type !== 'reset' && 
+                target.type !== 'button') 
+            {
+                // Si se cumplen las condiciones, prevenimos la acción por defecto (enviar el formulario).
+                event.preventDefault();
+            }
+        }
+    });
+    </script>
+    <!-- ===== FIN DEL CÓDIGO A AÑADIR ===== -->
+
     <script>
         // Este script se mantiene para manejar los mensajes emergentes de Django
         document.addEventListener('DOMContentLoaded', function() {

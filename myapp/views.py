@@ -1020,29 +1020,25 @@ def crear_antecedentes_personales(request, historia_id, tipo, objeto_id):
     else:
         messages.error(request, 'Tipo de objeto no válido.')
         return redirect('index')
-    
 
-# --- INICIO: LÓGICA DE CONTEXTO PARA EL STEPPER ---
     current_node_name = 'antecedentes_personales'
     workflow = request.session.get('historia_workflow', [])
     try:
         current_step_index = workflow.index(current_node_name) + 1
     except (ValueError, TypeError):
-        current_step_index = 5 # Fallback razonable
-    
+        current_step_index = 5
+
     context = {
-        'form': None, 
-        'historia': historia, 
-        'tipo': tipo, 
-        'objeto': proposito_obj or pareja_obj, 
-        'context_object_name': context_object_name, 
+        'form': None,
+        'historia': historia,
+        'tipo': tipo,
+        'objeto': proposito_obj or pareja_obj,
+        'context_object_name': context_object_name,
         'editing': editing,
         'current_node': current_node_name,
         'current_step_index': current_step_index,
         'ALL_STEPS': ALL_STEPS
     }
-# --- FIN: LÓGICA DE CONTEXTO ---
-
 
     if request.method == 'POST':
         form = AntecedentesDesarrolloNeonatalForm(request.POST)
@@ -1052,9 +1048,6 @@ def crear_antecedentes_personales(request, historia_id, tipo, objeto_id):
                 target_pareja = pareja_obj if tipo == 'pareja' else None
                 form.save(proposito=target_proposito, pareja=target_pareja)
                 request.session.pop('form_data', None)
-
-                # MODIFICADO: Lógica para "Guardar Borrador"
-                # --- INICIO: LÓGICA DE REDIRECCIÓN DINÁMICA ---
 
                 if 'save_draft' in request.POST:
                     request.session.pop('historia_en_progreso_id', None)
@@ -1068,13 +1061,10 @@ def crear_antecedentes_personales(request, historia_id, tipo, objeto_id):
                     next_node_name = workflow[current_step_index] if current_step_index < len(workflow) else None
                     if next_node_name:
                         next_view_name = ALL_STEPS[next_node_name]['view_name']
-                        # El siguiente paso necesita los mismos kwargs
                         next_kwargs = {'historia_id': historia.historia_id, 'tipo': tipo, 'objeto_id': objeto_id}
                         redirect_url = reverse(next_view_name, kwargs=next_kwargs)
                     else:
                         redirect_url = reverse('index')
-                # --- FIN: LÓGICA DE REDIRECCIÓN DINÁMICA ---
-
                 
                 if is_ajax:
                     return JsonResponse({'success': True, 'redirect_url': redirect_url})
@@ -1096,18 +1086,34 @@ def crear_antecedentes_personales(request, historia_id, tipo, objeto_id):
         if form_data:
             form = AntecedentesDesarrolloNeonatalForm(form_data)
         else:
+            # ===== INICIO DE LA CORRECCIÓN =====
             initial_data = {}
             if editing:
-                # Tu lógica para poblar initial_data está bien
-                target = proposito_obj if tipo == 'proposito' else pareja_obj
-                # ...
                 messages.info(request, f"Editando antecedentes para {context_object_name}.")
-            form = AntecedentesDesarrolloNeonatalForm(initial=initial_data or None)
+                
+                # 1. Definimos el filtro una sola vez para reutilizarlo.
+                q_filter = Q(proposito=proposito_obj) if tipo == 'proposito' else Q(pareja=pareja_obj)
+
+                # 2. Buscamos las instancias de los tres modelos relacionados.
+                ap_instance = AntecedentesPersonales.objects.filter(q_filter).first()
+                dp_instance = DesarrolloPsicomotor.objects.filter(q_filter).first()
+                pn_instance = PeriodoNeonatal.objects.filter(q_filter).first()
+
+                # 3. Poblamos el diccionario 'initial_data' con los datos de cada instancia si existen.
+                # model_to_dict convierte un objeto de modelo en un diccionario.
+                if ap_instance:
+                    initial_data.update(model_to_dict(ap_instance))
+                if dp_instance:
+                    initial_data.update(model_to_dict(dp_instance))
+                if pn_instance:
+                    initial_data.update(model_to_dict(pn_instance))
+            
+            # 4. Instanciamos el formulario pasándole el diccionario 'initial_data' ya poblado.
+            form = AntecedentesDesarrolloNeonatalForm(initial=initial_data)
+            # ===== FIN DE LA CORRECCIÓN =====
 
     context['form'] = form
     return render(request, 'antecedentes_personales.html', context)
-
-
 
 @login_required
 @genetista_or_admin_required
