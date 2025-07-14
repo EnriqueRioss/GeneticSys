@@ -1259,35 +1259,32 @@ def crear_examen_fisico(request, proposito_id):
     editing = bool(examen_existente)
     is_ajax = request.headers.get('x-requested-with') == 'XMLHttpRequest'
     
-    # ===== LÓGICA SIMPLIFICADA PARA 'OTRO PROPÓSITO' =====
+    # Lógica para encontrar si hay otro miembro de la pareja con examen pendiente
     pareja = None
-    otro_proposito_pendiente = None # Esta variable contendrá el OBJETO COMPLETO o None
+    otro_proposito_pendiente = None 
 
     pareja_id = request.GET.get('pareja_id') or request.POST.get('pareja_id')
     if pareja_id:
         pareja = get_object_or_404(Parejas.objects.select_related('proposito_id_1', 'proposito_id_2'), pk=pareja_id)
-        # Obtenemos el otro propósito de la pareja
         otro_proposito_obj = pareja.proposito_id_2 if proposito.pk == pareja.proposito_id_1.pk else pareja.proposito_id_1
         
-        # Si existe y no tiene examen, lo guardamos en nuestra variable
         if otro_proposito_obj and not ExamenFisico.objects.filter(proposito=otro_proposito_obj).exists():
              otro_proposito_pendiente = otro_proposito_obj
-    # =========================================================
 
-    # --- Lógica de contexto del Stepper (sin cambios) ---
+    # Lógica de contexto del Stepper
     current_node_name = 'examen_fisico'
     workflow = request.session.get('historia_workflow', [])
     try:
         current_step_index = workflow.index(current_node_name) + 1
     except (ValueError, TypeError):
-        current_step_index = 7
+        current_step_index = 7 # Fallback razonable
     
     context = {
         'form': None, 
         'proposito': proposito, 
         'editing': editing,
         'pareja': pareja, 
-        'otro_proposito_pendiente': otro_proposito_pendiente, # <-- Ahora pasamos el objeto completo
+        'otro_proposito_pendiente': otro_proposito_pendiente,
         'current_node': current_node_name,
         'current_step_index': current_step_index,
         'ALL_STEPS': ALL_STEPS
@@ -1302,20 +1299,18 @@ def crear_examen_fisico(request, proposito_id):
 
             redirect_url = None
             if 'save_draft' in request.POST:
-                # ... lógica de borrador ...
+                request.session.pop('historia_en_progreso_id', None)
+                request.session.pop('historia_workflow', None)
+                messages.success(request, f"Borrador del examen físico para {proposito.nombres} guardado.")
                 redirect_url = reverse('ver_historias')
             else:
                 action_verb = "actualizado" if examen_existente else "guardado"
                 messages.success(request, f"Examen físico para {proposito.nombres} {action_verb}.")
                 
-                # ===== LÓGICA DE REDIRECCIÓN CORREGIDA =====
-                # Comprobamos si se presionó el botón y si el OBJETO `otro_proposito_pendiente` existe
+                # Lógica de redirección basada en el botón presionado
                 if 'save_and_go_to_other' in request.POST and otro_proposito_pendiente:
-                    # Usamos el objeto completo para el mensaje
                     messages.info(request, f"Ahora puede completar el examen para {otro_proposito_pendiente.nombres}.")
-                    # Y usamos su ID para la URL
                     redirect_url = reverse('examen_fisico_crear_editar', kwargs={'proposito_id': otro_proposito_pendiente.proposito_id}) + f"?pareja_id={pareja.pareja_id}"
-                # =========================================
                 else:
                     # Redirección normal al siguiente paso del workflow
                     next_node_name = workflow[current_step_index] if current_step_index < len(workflow) else None
@@ -1326,14 +1321,23 @@ def crear_examen_fisico(request, proposito_id):
                         next_kwargs = {'historia_id': proposito.historia.historia_id, 'tipo': context_tipo, 'objeto_id': context_objeto_id}
                         redirect_url = reverse(next_view_name, kwargs=next_kwargs)
                     else:
+                        # Si no hay siguiente paso, redirige a la finalización o al índice
                         redirect_url = reverse('index')
             
-            if is_ajax: return JsonResponse({'success': True, 'redirect_url': redirect_url})
+            if is_ajax:
+                return JsonResponse({'success': True, 'redirect_url': redirect_url})
             return redirect(redirect_url)
         else:
-            # ... tu lógica de error ...
+            # ===== INICIO DE LA CORRECCIÓN =====
+            # Si la petición es AJAX y el formulario es inválido, devolvemos los errores como JSON.
+            if is_ajax:
+                return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+            
+            # Si no es AJAX, continuamos con el comportamiento normal: mostrar mensajes y renderizar la página.
+            messages.error(request, f"No se pudo guardar el examen físico. Por favor, corrija los errores.")
             context['form'] = form
             return render(request, 'examen_fisico.html', context)
+            # ===== FIN DE LA CORRECCIÓN =====
         
     else: # Lógica GET
         form = ExamenFisicoForm(instance=examen_existente)

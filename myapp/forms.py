@@ -697,6 +697,7 @@ class AntecedentesPreconcepcionalesForm(forms.ModelForm):
 
         # 2. Le dices a Django QUÉ campos del modelo usar
         fields = [
+            'consanguinidad', # <-- AÑADIR ESTA LÍNEA
             'antecedentes_padre',
             'antecedentes_madre',
             'estado_salud_padre',
@@ -753,28 +754,57 @@ class AntecedentesPreconcepcionalesForm(forms.ModelForm):
 
 
 class ExamenFisicoForm(ModelForm):
+    # --- INICIO DE LA MODIFICACIÓN ---
+
+    # 1. Redefinimos los campos para anular las restricciones del modelo y traducir errores.
+    # Esto elimina el conflicto de "max_digits".
+    decimal_field_kwargs = {
+        'required': False,
+        'max_digits': 7,  # Un valor generoso para evitar conflictos (ej: 9999.99)
+        'decimal_places': 2,
+        'widget': forms.NumberInput(attrs={'step': '0.01'}),
+        'error_messages': {
+            'invalid': 'Por favor, ingrese un número válido.',
+            'max_digits': 'El número no puede tener más de %(max)s dígitos en total.',
+            'max_decimal_places': 'El número no puede tener más de %(max)s decimales.',
+            'max_whole_digits': 'El número no puede tener más de %(max)s dígitos enteros (antes del punto decimal).'
+        }
+    }
+    integer_field_kwargs = {
+        'required': False,
+        'widget': forms.NumberInput(attrs={'step': '1'}),
+        'error_messages': {
+            'invalid': 'Por favor, ingrese un número entero válido.',
+        }
+    }
+
+    # Campos Decimales
+    peso = forms.DecimalField(label="Peso (kg)", **decimal_field_kwargs)
+    talla = forms.DecimalField(label="Talla (cm)", **decimal_field_kwargs)
+    circunferencia_cefalica = forms.DecimalField(label="Circunferencia Cefálica (cm)", **decimal_field_kwargs)
+    medida_abrazada = forms.DecimalField(label="Brazada (cm)", **decimal_field_kwargs)
+    ct = forms.DecimalField(label="CT (cm)", **decimal_field_kwargs)
+    distancia_intermamilar = forms.DecimalField(label="Distancia Intermamilar (cm)", **decimal_field_kwargs)
+    segmento_superior = forms.DecimalField(label="Segmento Superior (cm)", **decimal_field_kwargs)
+    segmento_inferior = forms.DecimalField(label="Segmento Inferior (cm)", **decimal_field_kwargs)
+    ss_si = forms.DecimalField(label="SS/SI", **decimal_field_kwargs)
+    pabellones_auriculares = forms.DecimalField(label="Pabellones Auriculares (cm)", **decimal_field_kwargs)
+    distancia_interc_interna = forms.DecimalField(label="Distancia Interc. Interna (cm)", **decimal_field_kwargs)
+    distancia_interc_externa = forms.DecimalField(label="Distancia Interc. Externa (cm)", **decimal_field_kwargs)
+    distancia_interpupilar = forms.DecimalField(label="Distancia Interpupilar (cm)", **decimal_field_kwargs)
+    longitud_mano_derecha = forms.DecimalField(label="Longitud Mano Derecha (cm)", **decimal_field_kwargs)
+    longitud_mano_izquierda = forms.DecimalField(label="Longitud Mano Izquierda (cm)", **decimal_field_kwargs)
+
+    # Campos Enteros
+    tension_arterial_sistolica = forms.IntegerField(label="Tensión Arterial Sistólica", **integer_field_kwargs)
+    tension_arterial_diastolica = forms.IntegerField(label="Tensión Arterial Diastólica", **integer_field_kwargs)
+    
     class Meta:
         model = ExamenFisico
         fields = '__all__'
-        exclude = ['examen_id', 'fecha_examen', 'proposito'] # Exclude examen_id too if it's AutoField
+        exclude = ['examen_id', 'fecha_examen', 'proposito']
+        # Los widgets se definen ahora en los campos de arriba, así que podemos simplificar esta sección.
         widgets = {
-            'medida_abrazada': forms.NumberInput(attrs={'step': '0.01'}),
-            'segmento_inferior': forms.NumberInput(attrs={'step': '0.01'}),
-            'segmento_superior': forms.NumberInput(attrs={'step': '0.01'}),
-            'circunferencia_cefalica': forms.NumberInput(attrs={'step': '0.01'}),
-            'talla': forms.NumberInput(attrs={'step': '0.01'}),
-            'distancia_intermamilar': forms.NumberInput(attrs={'step': '0.01'}),
-            'distancia_interc_interna': forms.NumberInput(attrs={'step': '0.01'}),
-            'distancia_interpupilar': forms.NumberInput(attrs={'step': '0.01'}),
-            'longitud_mano_derecha': forms.NumberInput(attrs={'step': '0.01'}),
-            'longitud_mano_izquierda': forms.NumberInput(attrs={'step': '0.01'}),
-            'peso': forms.NumberInput(attrs={'step': '0.01'}),
-            'ss_si': forms.NumberInput(attrs={'step': '0.01'}),
-            'distancia_interc_externa': forms.NumberInput(attrs={'step': '0.01'}),
-            'ct': forms.NumberInput(attrs={'step': '0.01'}),
-            'pabellones_auriculares': forms.NumberInput(attrs={'step': '0.01'}),
-            'tension_arterial_sistolica': forms.NumberInput(attrs={'step': '1'}),
-            'tension_arterial_diastolica': forms.NumberInput(attrs={'step': '1'}),
             'observaciones_cabeza': forms.Textarea(attrs={'rows': 1}),
             'observaciones_cuello': forms.Textarea(attrs={'rows': 1}),
             'observaciones_torax': forms.Textarea(attrs={'rows': 1}),
@@ -789,39 +819,69 @@ class ExamenFisicoForm(ModelForm):
             'observaciones_pliegues': forms.Textarea(attrs={'rows': 1}),
         }
 
-    def _clean_positive_decimal(self, field_name, max_val=None, min_val=0):
+    # 2. Función de ayuda mejorada para validar rangos con mensajes claros.
+    def _clean_range(self, field_name, min_val, max_val, unit=""):
         value = self.cleaned_data.get(field_name)
         if value is not None:
             if value < min_val:
-                raise forms.ValidationError(f"El valor debe ser mayor o igual a {min_val}.")
-            if max_val and value > max_val:
-                raise forms.ValidationError(f"El valor no debe exceder {max_val}.")
+                raise forms.ValidationError(f"El valor debe ser {min_val}{unit} o mayor.")
+            if max_val is not None and value > max_val:
+                raise forms.ValidationError(f"El valor no puede exceder los {max_val}{unit}.")
         return value
 
-    def clean_peso(self): return self._clean_positive_decimal('peso', min_val=0.5, max_val=150)
-    def clean_talla(self): return self._clean_positive_decimal('talla', min_val=35, max_val=250)
-    def clean_circunferencia_cefalica(self): return self._clean_positive_decimal('circunferencia_cefalica', min_val=22, max_val=60)
-    def clean_medida_abrazada(self): return self._clean_positive_decimal('medida_abrazada', min_val=40, max_val=200)
-    def clean_ct(self): return self._clean_positive_decimal('ct', min_val=15, max_val=150)
-    def clean_distancia_intermamilar(self): return self._clean_positive_decimal('distancia_intermamilar', min_val=3, max_val=30)
-    def clean_segmento_superior(self): return self._clean_positive_decimal('segmento_superior', min_val=20, max_val=100)
-    def clean_segmento_inferior(self): return self._clean_positive_decimal('segmento_inferior', min_val=0, max_val=100)
-    def clean_pabellones_auriculares(self): return self._clean_positive_decimal('pabellones_auriculares', min_val=1, max_val=7)
-    def clean_distancia_interc_interna(self): return self._clean_positive_decimal('distancia_interc_interna', min_val=1, max_val=4)
-    def clean_distancia_interc_externa(self): return self._clean_positive_decimal('distancia_interc_externa', min_val=3, max_val=12)
-    def clean_longitud_mano_derecha(self): return self._clean_positive_decimal('longitud_mano_derecha', min_val=3, max_val=20)
-    def clean_longitud_mano_izquierda(self): return self._clean_positive_decimal('longitud_mano_izquierda', min_val=3, max_val=20)
-    
-    # Se mantienen las validaciones existentes no modificadas
-    def clean_tension_arterial_sistolica(self): return self._clean_positive_decimal('tension_arterial_sistolica', 300, min_val=10)
-    def clean_tension_arterial_diastolica(self): return self._clean_positive_decimal('tension_arterial_diastolica', 200, min_val=10)
+    # 3. Aplicamos las validaciones de rango especificadas.
+    def clean_peso(self):
+        return self._clean_range('peso', min_val=0.5, max_val=150, unit="kg")
+        
+    def clean_talla(self):
+        return self._clean_range('talla', min_val=35, max_val=250, unit="cm")
+        
+    def clean_circunferencia_cefalica(self):
+        return self._clean_range('circunferencia_cefalica', min_val=22, max_val=60, unit="cm")
+        
+    def clean_medida_abrazada(self):
+        return self._clean_range('medida_abrazada', min_val=40, max_val=200, unit="cm")
+        
+    def clean_ct(self):
+        return self._clean_range('ct', min_val=15, max_val=150, unit="cm")
+        
+    def clean_distancia_intermamilar(self):
+        return self._clean_range('distancia_intermamilar', min_val=3, max_val=30, unit="cm")
+        
+    def clean_segmento_superior(self):
+        return self._clean_range('segmento_superior', min_val=20, max_val=100, unit="cm")
+        
+    def clean_segmento_inferior(self):
+        return self._clean_range('segmento_inferior', min_val=0, max_val=100, unit="cm")
+        
+    def clean_pabellones_auriculares(self):
+        return self._clean_range('pabellones_auriculares', min_val=1, max_val=7, unit="cm")
 
+    def clean_distancia_interc_interna(self):
+        return self._clean_range('distancia_interc_interna', min_val=1, max_val=4, unit="cm")
+        
+    def clean_distancia_interc_externa(self):
+        return self._clean_range('distancia_interc_externa', min_val=3, max_val=12, unit="cm")
+        
+    def clean_longitud_mano_derecha(self):
+        return self._clean_range('longitud_mano_derecha', min_val=3, max_val=20, unit="cm")
+        
+    def clean_longitud_mano_izquierda(self):
+        return self._clean_range('longitud_mano_izquierda', min_val=3, max_val=20, unit="cm")
+    
+    def clean_tension_arterial_sistolica(self):
+        return self._clean_range('tension_arterial_sistolica', min_val=10, max_val=300, unit=" mmHg")
+        
+    def clean_tension_arterial_diastolica(self):
+        return self._clean_range('tension_arterial_diastolica', min_val=10, max_val=200, unit=" mmHg")
+
+    # El método save no necesita cambios.
     def save(self, commit=True):
         examenfisico = super().save(commit=False)
 
         if hasattr(self, 'proposito_instance') and self.proposito_instance:
             examenfisico.proposito = self.proposito_instance
-        elif not examenfisico.proposito_id and not (self.instance and self.instance.proposito_id): # check instance too
+        elif not examenfisico.proposito_id and not (self.instance and self.instance.proposito_id):
              raise ValueError("El propósito debe estar asignado para guardar el Examen Físico.")
 
         if commit:
@@ -858,7 +918,7 @@ class EvaluacionGeneticaForm(forms.ModelForm):
         
         # (Opcional pero recomendado) Añadimos un label más descriptivo con un asterisco.
         self.fields['signos_clinicos'].label = "Signos Clínicos Relevantes *"
-        
+
 class DiagnosticoPresuntivoForm(forms.ModelForm):
     class Meta:
         model = DiagnosticoPresuntivo
