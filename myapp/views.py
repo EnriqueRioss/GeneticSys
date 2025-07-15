@@ -2480,7 +2480,7 @@ def export_report_data(request, export_format):
         buffer = BytesIO()
         doc = SimpleDocTemplate(buffer, pagesize=landscape(letter), rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=18)
         elements, styles = [], getSampleStyleSheet()
-        elements.append(Paragraph(f"Reporte de {dict(form.fields['report_type'].choices).get(report_type)}", styles['h1']))
+        elements.append(Paragraph(f" {dict(form.fields['report_type'].choices).get(report_type)}", styles['h1']))
         elements.append(Spacer(1, 0.2*72))
         if not headers:
             headers = ["Error"]; results = [["Tipo de reporte no válido o sin datos."]]
